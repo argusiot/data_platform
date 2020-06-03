@@ -9,11 +9,11 @@
 import argparse
 import matplotlib
 matplotlib.use('Agg')
-
 import matplotlib.pyplot as plt
-from metric_query import get_data_set
-import sys
 import numpy as np
+import sys
+from metric_query import get_data_set
+from collections import OrderedDict
 
 # These values come from:
 # https://docs.google.com/document/d/1gE8gTbTKHgaSs3BjsOmuH920oyZDiPX0nw-zpAyvgsw/edit#
@@ -21,12 +21,22 @@ import numpy as np
 #    data set name -> [time window]
 #  The box plot file name is derived from the data set name by replacing space
 #  with underscore.
-test_time_windows = { \
-  "NCD power supply noise" : [1590266436000, 1590531327000],
-  "NCD power supply 12 mA" : [1590535460459, 1590795803317],
-  "NCD power supply 4 mA" : [1590797194095, 1591054653037],
-  "NCD power supply 20 mA" : [],
-}
+test_time_windows = OrderedDict()
+# NCD powered at 12bit resolution
+test_time_windows["NCD pwr 12bit-noise"] = [1590266436000, 1590531327000]
+test_time_windows["NCD pwr 12bits-12 mA"] = [1590535460459, 1590795803317]
+test_time_windows["NCD pwr 12bit-4 mA"] = [1590797194095, 1591054653037]
+test_time_windows["NCD pwr 12bit-20 mA"] = [1591056403836, 1591160867313]
+# Meanwell powered at 12bit resolution
+test_time_windows["Meanwell pwr 12bit-noise"] = []
+test_time_windows["Meanwell pwr 12bit-4 mA"] = []
+test_time_windows["Meanwell pwr 12bit-12 mA"] = []
+test_time_windows["Meanwell pwr 12bit-20 mA"] = []
+# Meanwell powered at 16bit resolution
+test_time_windows["Meanwell pwr 16bit-noise"] = []
+test_time_windows["Meanwell pwr 16bit-4 mA"] = []
+test_time_windows["Meanwell pwr 16bit-12 mA"] = []
+test_time_windows["Meanwell pwr 16bit-20 mA"] = []
 
 ''' Leaving it here it so it can be enabled for a quick test of the logic !!
 test_time_windows = { \
@@ -81,8 +91,8 @@ for time_window_id, window_range in test_time_windows.items():
     # Calculate statistics for the data received and store in the stats result.
     np_stats_calculator = np.array([sorted_data_values])
     statistics_results.append( \
-      (time_window_id, len(sorted_data_values), sorted_data_values[0], \
-       sorted_data_values[len(sorted_data_values) - 1], 
+      (time_window_id, metric_id, len(sorted_data_values), \
+       sorted_data_values[0], sorted_data_values[len(sorted_data_values) - 1], \
        np.mean(np_stats_calculator), np.std(np_stats_calculator), \
        (100.0 * np.std(np_stats_calculator)) / np.mean(np_stats_calculator)))
 
@@ -98,8 +108,11 @@ for time_window_id, window_range in test_time_windows.items():
 
 print("See boxplots generated here: %s\n" % args.output_dir)
 
-print("\tLabel\t\t\tDataPts\t\tMin\t\tMax\t\tMean\t\tStdDev\t\t%ageDev")
+header_row = "%-25s %25s %15s %8s %8s %8s %8s %8s" % \
+            ("Label", "Metric", "DataPt", "Min", "Max", "Mean", "StdDev", \
+             "percentDev")
+print(header_row)
 for result in statistics_results:
-  label, dp_count, min_val, max_val, mean, stddev, percent_dev = result
-  print("%s\t\t%d\t\t%d\t\t%d\t\t%0.1f\t\t%.02f\t\t%.02f" % \
-        (label, dp_count, min_val, max_val, mean, stddev, percent_dev))
+  label, metric, dp_count, min_val, max_val, mean, stddev, percent_dev = result
+  print("%-25s %25s %15d %8d %8d %8.1f %8.02f %8.02f" % \
+        (label, metric, dp_count, min_val, max_val, mean, stddev, percent_dev))
