@@ -1,4 +1,4 @@
-Processing Label ' NCD power supply noise ' --  Time window: (1590266436000, 1590531327000)
+Processing Label ' NCD pwr 12bit-noise ' --  Time window: (1590266436000, 1590531327000)
 http://34.221.154.248:4242/api/query?start=1590266436000&end=1590531327000&m=none:machine.sensor.raw_melt_temperature{machine_name=65mm_extruder}
 http://34.221.154.248:4242/api/query?start=1590266436000&end=1590531327000&m=none:machine.sensor.raw_melt_pressure{machine_name=65mm_extruder}
 http://34.221.154.248:4242/api/query?start=1590266436000&end=1590531327000&m=none:machine.sensor.raw_screw_speed{machine_name=65mm_extruder}
@@ -9,7 +9,7 @@ http://34.221.154.248:4242/api/query?start=1590266436000&end=1590531327000&m=non
 http://34.221.154.248:4242/api/query?start=1590266436000&end=1590531327000&m=none:machine.sensor.raw_wire_output_diameter{machine_name=65mm_extruder}
 
 
-Processing Label ' NCD power supply 12 mA ' --  Time window: (1590535460459, 1590795803317)
+Processing Label ' NCD pwr 12bits-12 mA ' --  Time window: (1590535460459, 1590795803317)
 http://34.221.154.248:4242/api/query?start=1590535460459&end=1590795803317&m=none:machine.sensor.raw_melt_temperature{machine_name=65mm_extruder}
 http://34.221.154.248:4242/api/query?start=1590535460459&end=1590795803317&m=none:machine.sensor.raw_melt_pressure{machine_name=65mm_extruder}
 http://34.221.154.248:4242/api/query?start=1590535460459&end=1590795803317&m=none:machine.sensor.raw_screw_speed{machine_name=65mm_extruder}
@@ -20,9 +20,7 @@ http://34.221.154.248:4242/api/query?start=1590535460459&end=1590795803317&m=non
 http://34.221.154.248:4242/api/query?start=1590535460459&end=1590795803317&m=none:machine.sensor.raw_wire_output_diameter{machine_name=65mm_extruder}
 
 
-Processing Label ' NCD power supply 20 mA ' --  Skipping
-
-Processing Label ' NCD power supply 4 mA ' --  Time window: (1590797194095, 1591054653037)
+Processing Label ' NCD pwr 12bit-4 mA ' --  Time window: (1590797194095, 1591054653037)
 http://34.221.154.248:4242/api/query?start=1590797194095&end=1591054653037&m=none:machine.sensor.raw_melt_temperature{machine_name=65mm_extruder}
 http://34.221.154.248:4242/api/query?start=1590797194095&end=1591054653037&m=none:machine.sensor.raw_melt_pressure{machine_name=65mm_extruder}
 http://34.221.154.248:4242/api/query?start=1590797194095&end=1591054653037&m=none:machine.sensor.raw_screw_speed{machine_name=65mm_extruder}
@@ -33,30 +31,65 @@ http://34.221.154.248:4242/api/query?start=1590797194095&end=1591054653037&m=non
 http://34.221.154.248:4242/api/query?start=1590797194095&end=1591054653037&m=none:machine.sensor.raw_wire_output_diameter{machine_name=65mm_extruder}
 
 
+Processing Label ' NCD pwr 12bit-20 mA ' --  Time window: (1591056403836, 1591160867313)
+http://34.221.154.248:4242/api/query?start=1591056403836&end=1591160867313&m=none:machine.sensor.raw_melt_temperature{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1591056403836&end=1591160867313&m=none:machine.sensor.raw_melt_pressure{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1591056403836&end=1591160867313&m=none:machine.sensor.raw_screw_speed{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1591056403836&end=1591160867313&m=none:machine.sensor.raw_line_speed{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1591056403836&end=1591160867313&m=none:machine.sensor.raw_barrel_temperature_1{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1591056403836&end=1591160867313&m=none:machine.sensor.raw_barrel_temperature_2{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1591056403836&end=1591160867313&m=none:machine.sensor.raw_machine_powerOn_state{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1591056403836&end=1591160867313&m=none:machine.sensor.raw_wire_output_diameter{machine_name=65mm_extruder}
+
+
+Processing Label ' Meanwell pwr 12bit-noise ' --  Skipping
+
+Processing Label ' Meanwell pwr 12bit-4 mA ' --  Skipping
+
+Processing Label ' Meanwell pwr 12bit-12 mA ' --  Skipping
+
+Processing Label ' Meanwell pwr 12bit-20 mA ' --  Skipping
+
+Processing Label ' Meanwell pwr 16bit-noise ' --  Skipping
+
+Processing Label ' Meanwell pwr 16bit-4 mA ' --  Skipping
+
+Processing Label ' Meanwell pwr 16bit-12 mA ' --  Skipping
+
+Processing Label ' Meanwell pwr 16bit-20 mA ' --  Skipping
+
 See boxplots generated here: /vagrant/boxplots/
 
-	Label			DataPts		Min		Max		Mean		StdDev		%ageDev
-NCD power supply noise		30031		10		16		12.7		1.45		11.44
-NCD power supply noise		30031		27		64		42.5		8.81		20.75
-NCD power supply noise		30030		20		45		30.6		6.32		20.65
-NCD power supply noise		30030		3		3		3.0		0.00		0.00
-NCD power supply noise		30030		14		31		21.4		3.95		18.46
-NCD power supply noise		30030		16		27		20.9		2.63		12.59
-NCD power supply noise		30029		3		3		3.0		0.00		0.00
-NCD power supply noise		30029		2		3		3.0		0.01		0.19
-NCD power supply 12 mA		29503		1091		1123		1107.9		6.23		0.56
-NCD power supply 12 mA		29503		1122		1187		1151.4		11.62		1.01
-NCD power supply 12 mA		29503		1109		1160		1133.2		8.96		0.79
-NCD power supply 12 mA		29503		1056		1088		1074.7		6.23		0.58
-NCD power supply 12 mA		29503		1106		1142		1121.7		7.13		0.64
-NCD power supply 12 mA		29503		1097		1128		1110.3		6.26		0.56
-NCD power supply 12 mA		29503		1062		1089		1076.3		6.04		0.56
-NCD power supply 12 mA		29503		1051		1084		1068.7		6.73		0.63
-NCD power supply 4 mA		29669		359		387		373.8		6.13		1.64
-NCD power supply 4 mA		29669		379		432		401.3		7.89		1.97
-NCD power supply 4 mA		29669		370		413		389.5		7.03		1.81
-NCD power supply 4 mA		29669		333		363		350.8		6.07		1.73
-NCD power supply 4 mA		29669		370		400		382.1		5.96		1.56
-NCD power supply 4 mA		29669		366		393		376.7		5.66		1.50
-NCD power supply 4 mA		29669		338		363		351.5		5.65		1.61
-NCD power supply 4 mA		29669		327		356		343.4		5.91		1.72
+Label                                        Metric          DataPt      Min      Max     Mean   StdDev percentDev
+NCD pwr 12bit-noise            raw_melt_temperature           30031       10       16     12.7     1.45    11.44
+NCD pwr 12bit-noise               raw_melt_pressure           30031       27       64     42.5     8.81    20.75
+NCD pwr 12bit-noise                 raw_screw_speed           30030       20       45     30.6     6.32    20.65
+NCD pwr 12bit-noise                  raw_line_speed           30030        3        3      3.0     0.00     0.00
+NCD pwr 12bit-noise        raw_barrel_temperature_1           30030       14       31     21.4     3.95    18.46
+NCD pwr 12bit-noise        raw_barrel_temperature_2           30030       16       27     20.9     2.63    12.59
+NCD pwr 12bit-noise       raw_machine_powerOn_state           30029        3        3      3.0     0.00     0.00
+NCD pwr 12bit-noise        raw_wire_output_diameter           30029        2        3      3.0     0.01     0.19
+NCD pwr 12bits-12 mA           raw_melt_temperature           29503     1091     1123   1107.9     6.23     0.56
+NCD pwr 12bits-12 mA              raw_melt_pressure           29503     1122     1187   1151.4    11.62     1.01
+NCD pwr 12bits-12 mA                raw_screw_speed           29503     1109     1160   1133.2     8.96     0.79
+NCD pwr 12bits-12 mA                 raw_line_speed           29503     1056     1088   1074.7     6.23     0.58
+NCD pwr 12bits-12 mA       raw_barrel_temperature_1           29503     1106     1142   1121.7     7.13     0.64
+NCD pwr 12bits-12 mA       raw_barrel_temperature_2           29503     1097     1128   1110.3     6.26     0.56
+NCD pwr 12bits-12 mA      raw_machine_powerOn_state           29503     1062     1089   1076.3     6.04     0.56
+NCD pwr 12bits-12 mA       raw_wire_output_diameter           29503     1051     1084   1068.7     6.73     0.63
+NCD pwr 12bit-4 mA             raw_melt_temperature           29669      359      387    373.8     6.13     1.64
+NCD pwr 12bit-4 mA                raw_melt_pressure           29669      379      432    401.3     7.89     1.97
+NCD pwr 12bit-4 mA                  raw_screw_speed           29669      370      413    389.5     7.03     1.81
+NCD pwr 12bit-4 mA                   raw_line_speed           29669      333      363    350.8     6.07     1.73
+NCD pwr 12bit-4 mA         raw_barrel_temperature_1           29669      370      400    382.1     5.96     1.56
+NCD pwr 12bit-4 mA         raw_barrel_temperature_2           29669      366      393    376.7     5.66     1.50
+NCD pwr 12bit-4 mA        raw_machine_powerOn_state           29669      338      363    351.5     5.65     1.61
+NCD pwr 12bit-4 mA         raw_wire_output_diameter           29669      327      356    343.4     5.91     1.72
+NCD pwr 12bit-20 mA            raw_melt_temperature           11969     1824     1861   1842.1     6.51     0.35
+NCD pwr 12bit-20 mA               raw_melt_pressure           11969     1868     1956   1908.4    17.97     0.94
+NCD pwr 12bit-20 mA                 raw_screw_speed           11969     1849     1917   1880.6    12.55     0.67
+NCD pwr 12bit-20 mA                  raw_line_speed           11969     1780     1815   1799.8     6.41     0.36
+NCD pwr 12bit-20 mA        raw_barrel_temperature_1           11969     1844     1890   1864.0     8.93     0.48
+NCD pwr 12bit-20 mA        raw_barrel_temperature_2           11969     1832     1868   1847.6     7.47     0.40
+NCD pwr 12bit-20 mA       raw_machine_powerOn_state           11968     1787     1817   1802.4     6.46     0.36
+NCD pwr 12bit-20 mA        raw_wire_output_diameter           11968     1778     1814   1797.1     7.37     0.41
