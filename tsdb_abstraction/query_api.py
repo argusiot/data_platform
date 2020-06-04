@@ -171,7 +171,8 @@ Class QueryApi(object):
       A dictionary of tags and values to identify a specific timeseries. No wild
       carding for value is permitted. 
   '''
-  def populate_timeseries_data(metric_name, tag_value_pairs, start_time, end_time):
+  def populate_timeseries_data(metric_name, tag_value_pairs, rate_or_actual,
+                               start_time, end_time):
     pass
 
   
