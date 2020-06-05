@@ -35,13 +35,13 @@ test_data_src = OrderedDict()
 label_format="Label format: <power_src> <ADC board> <sampling resolution> <input_signal>"
 # NCD powered at 12bit resolution
 test_data_src["NCD B1 12bit noise"] = ([1590266436000, 1590531327000], "65mm_extruder")
-test_data_src["NCD B1 12bits 12mA"] = ([1590535460459, 1590795803317], "65mm_extruder")
+test_data_src["NCD B1 12bit 12mA"] = ([1590535460459, 1590795803317], "65mm_extruder")
 test_data_src["NCD B1 12bit 4mA"] = ([1590797194095, 1591054653037], "65mm_extruder")
 test_data_src["NCD B1 12bit 20mA"] = ([1591056123708, 1591195347829], "65mm_extruder")
 # Meanwell powered at 12bit resolution
 test_data_src["Meanwell B2 12bit noise"] = ([1590776274005, 1591121874005], "90mm_extruder")
 test_data_src["Meanwell TBD 12bit 4mA"] = ([], "90mm_extruder")
-test_data_src["Meanwell TBD 12bit 12mA"] = ([], "90mm_extruder")
+test_data_src["Meanwell B1 12bit 12mA"] = ([1591253982240, 1591310984083], "65mm_extruder")
 test_data_src["Meanwell TBD 12bit 20mA"] = ([], "90mm_extruder")
 # Meanwell powered at 16bit resolution
 test_data_src["Meanwell TBD 16bit noise"] = ([], "")
@@ -52,7 +52,7 @@ test_data_src["Meanwell TBD 16bit 20mA"] = ([], "")
 ''' Leaving it here it so it can be enabled for a quick test of the logic.
     NOT TO BE USED FOR ACTUAL DATA RUN  !!
 test_data_src["NCD B1 12bit noise"] = (["2m-ago", "1m-ago"], "65mm_extruder")
-test_data_src["NCD B1 12bits 12mA"] = (["2m-ago", "1m-ago"], "65mm_extruder")
+test_data_src["NCD B1 12bit 12mA"] = (["2m-ago", "1m-ago"], "65mm_extruder")
 test_data_src["NCD B1 12bit 4mA"] = (["2m-ago", "1m-ago"], "65mm_extruder")
 test_data_src["NCD B1 12bit 20mA"] = (["2m-ago", "1m-ago"], "65mm_extruder")
 '''
