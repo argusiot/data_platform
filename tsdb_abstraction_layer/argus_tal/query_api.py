@@ -1,20 +1,18 @@
 '''
-  API for Argus Data Platform queries. 
+  API for Argus Data Platform queries.
 
   This API is to be used by applications that are developed for using the ADP.
-  
+
   Current status: Proposed API
   (Possible statuses: Reviewed | Experimental Use | Accepted)
 '''
 
 from enum import Enum
 
-
 class TsdbPlatform(Enum):
   OPENTSDB = 1
   PROMETHEUS = 2
   METRICTANK = 3
-  
 
 '''
   Qualifies the timestamp parameter (key) being supplied. The API knows
@@ -24,7 +22,7 @@ class TsdbPlatform(Enum):
                   12345->10
                   12350->20
                   12365->30
-  
+
         ts_obj.get_datapoint(12350, EXACT_MATCH) returns 20
         ts_obj.get_datapoint(12351, EXACT_MATCH) returns None
 
@@ -60,7 +58,7 @@ class LookupParamQualifier(Enum):
   # If supplied timestamp is smaller (larger) than the smallest (largest) time
   # stamp in the data set i.e. nothing smaller (larger) is found (and we know
   # there's no exact match), then return the actual smallest (largest) element
-  # from the dataset. 
+  # from the dataset.
   NEAREST_SMALLER_WEAK = 4
   NEAREST_LARGER_WEAK = 5
 
@@ -111,7 +109,7 @@ class LookupParamQualifier(Enum):
        --------------------------------------------
        Given a 'timestamp' if you're not sure whether the datapoint exists in
        the timeseries object, use this:
-          
+
        (a) To get the datapoint at a time value just larger than 'timestamp':
        (new_ts, value) = ts_obj.get_datapoint(timestamp, NEAREST_LARGER)
        if value != None:
@@ -143,8 +141,8 @@ class LookupParamQualifier(Enum):
          (ts, value) = ts_obj.get_datapoint(timestamp, EXACT_MATCH)
 '''
 class TimeseriesData(object):
-  pass
-
+  def hello(self):
+    return "Hello from %s" % self.__class__.__name__
 
 '''
 1. Input:
@@ -179,13 +177,13 @@ Example:
 
       # Expect that the metric & filtering tags in the response to match input.
       assert((metric_id, filtering_tags) == ts_result_obj.get_identifier())
-      
+
       # Cool ...now we're ready to use ts_result_obj. See documentation above
       # TimeseriesData class to see usage idioms.
-      
+
     except <fill_in_later>:
       print("Query failed !")
-                         
+
   1) populate_timeseries_set usage (multiple timeseries in response):
      --------------------------------------------------------------
     # Create a list of metric IDs.
@@ -194,7 +192,7 @@ Example:
     metric_id_list.extend("machine.sensor.melt_temperature")
     metric_id_list.extend("machine.sensor.line_speed")
     metric_id_list.extend("machine.sensor.screw_speed")
-   
+
     # Filtering tags are same for all metrics.
     filetering_tags_list = []
     for idx in range(len(metric_id_list)):
@@ -205,9 +203,9 @@ Example:
                             DATA_VALUE,  # We want actual data in the response.
                             Timestamp(1590776274005),  # start time.
                             Timestamp(1591121874005))  # end time.
-                         
+
       ts_data = query.result_list()
-      
+
       # We expect to get 4 timeseries back.
       assert(len(ts_data) == 4)
 
@@ -216,12 +214,12 @@ Example:
       # Do I want to guarantee that results will be in same order as query ?
       # OR
       # Do I want the ability to pull the desired timeseries out of the result
-      # object.... in which case making the result object a dictionart makes 
+      # object.... in which case making the result object a dictionart makes
       # sense.
 
     except <fill_in_later>:
       print("Query failed !")
-                         
+
 '''
 class QueryQualifier(Enum):
   DATA_VALUE = 1
@@ -230,7 +228,7 @@ class QueryQualifier(Enum):
 '''
   Encapsulates the timestamp formats supported.
   Plan is to support only seconds or milliseconds.
-  At present only 'Seconds' is supported. 
+  At present only 'Seconds' is supported.
 '''
 class Timestamp(object):
   def __init__(timestamp, unit='Seconds'):
@@ -242,9 +240,11 @@ class Timestamp(object):
     return self.__timestamp
 
 class QueryApi(object):
-  def __init__(self, tsdb_platform=OPENTSDB):
+  def __init__(self, tsdb_platform=TsdbPlatform.OPENTSDB):
     self.__tsdb_platform = tsdb_platform
-  pass
+
+  def hello(self):
+    return "Hello from %s" % self.__class__.__name__
 
   '''
     This is a synchronous blocking call and will block till the supplied query
@@ -255,7 +255,7 @@ class QueryApi(object):
 
     tag_value_pair:
       A dictionary of tags and values to identify a specific timeseries. No wild
-      carding for value is permitted. 
+      carding for value is permitted.
   '''
   def populate_ts_data(metric_name, tag_value_pairs, query_qualifier,
                        start_time, end_time):

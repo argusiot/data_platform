@@ -1,0 +1,5 @@
+# This requirements file has been kept as is from the original samplemod.
+# Its really not being used right now.
+
+pytest
+sphinx  # Documentation
