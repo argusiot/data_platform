@@ -8,4 +8,4 @@ install:
 	python3 setup.py install
 
 uninstall:
-	pip3 uninstall sample
+	pip3 uninstall argus_tal
