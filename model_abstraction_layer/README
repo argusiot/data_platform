@@ -1,0 +1,9 @@
+
+To start using argus_tal Python package in this directory, please run:
+sudo make install_dependency
+
+To uninstall argus_tal:
+sudo make uninstall_dependency
+
+To delete this workspace (whenever you need to):
+sudo rm -rf <workspace>
