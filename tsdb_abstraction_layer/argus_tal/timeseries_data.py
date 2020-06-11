@@ -6,6 +6,7 @@
 '''
 
 from enum import Enum
+from collections import OrderedDict
 
 '''
   Qualifies the timestamp parameter (key) being supplied. The API knows
@@ -134,11 +135,20 @@ class LookupParamQualifier(Enum):
          (ts, value) = ts_obj.get_datapoint(timestamp, EXACT_MATCH)
 '''
 class TimeseriesData(object):
-  def __init__(self, metric_name, tag_value_pairs, json_response_data):
+  '''
+    metric_name: Name of metric id as a string.
+
+    filters: Additional tag values pairs to fully qualify the timeseries.
+
+    timestamp_to_value_dict: A dictionary of timestamps to data values.
+  '''
+  def __init__(self, metric_name, tag_value_pairs, timestamp_to_value_dict):
     self.__metric_id = metric_name
     self.__query_filters = tag_value_pairs
+    self.__ordered_ts_data = OrderedDict()
+    for ts, dp in timestamp_to_value_dict.items():
+      self.__ordered_ts_data[int(ts)] = dp
 
-    # WHAT ASSUMPTION DO WE MAKE ABOUT json_response_data ?
 
   def hello(self):
     return "Hello from %s" % self.__class__.__name__

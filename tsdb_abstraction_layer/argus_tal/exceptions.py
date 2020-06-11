@@ -27,3 +27,8 @@ class InvalidTimestampFormat(TsdbAbstractionLayerError):
   def __init__(self, err_str):
     super(TsdbAbstractionLayerError, self).__init__(type(self).__name__, \
                                                     err_str)
+
+class WildcardedTimeseriesId(TsdbAbstractionLayerError):
+  def __init__(self, err_str):
+    super(TsdbAbstractionLayerError, self).__init__(type(self).__name__, \
+                                                    err_str)

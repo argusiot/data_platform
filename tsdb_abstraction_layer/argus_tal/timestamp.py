@@ -1,5 +1,9 @@
 '''
-  Trivial class for encapsulating timestamp.
+  timestamp.py
+
+  Implements Timestamp class for encapsulating timestamp.
+
+  Mutability: This class is immutable.
 
   Internally, in the TAL codebase, the Timestamp class is only way to represent
   and pass around timestamp. Thus this class normalizes across multiple
@@ -24,6 +28,14 @@ class Timestamp(object):
 
     if self.__timestamp < 0:
       raise excp.NegativeTimestamp("Timestamp cannnot be %d" % self.__timestamp)
+
+  def __eq__(self, other):
+    if isinstance(other, Timestamp):
+        return self.value == other.value
+    return False
+
+  def __str__(self):
+    return str(self.value)
 
   @property
   def value(self):

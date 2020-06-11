@@ -8,13 +8,27 @@ import unittest
 
 class Timestamp_TestSuite(unittest.TestCase):
     """Test cases for class Timestamp"""
-    def test_trivial_integer_ts(self):
+    def test_integer_as_ts(self):
       ts = argus_tal.timestamp.Timestamp(123456789)
       self.assertEqual(ts.value, 123456789)
 
-    def test_epoch_time_string(self):
+    def test_string_as_ts(self):
       ts = argus_tal.timestamp.Timestamp('123456789')
       self.assertEqual(ts.value, 123456789)
+
+    def test_conversion_to_string(self):
+      ts = argus_tal.timestamp.Timestamp('123456789')
+      self.assertEqual(str(ts), "123456789")
+
+    def test_equality(self):
+      ts1 = argus_tal.timestamp.Timestamp('123456789')
+      ts2 = argus_tal.timestamp.Timestamp('123456789')
+      self.assertEqual(ts1, ts2)
+
+    def test_inequality(self):
+      ts1 = argus_tal.timestamp.Timestamp('123456789')
+      ts2 = argus_tal.timestamp.Timestamp('987654321')
+      self.assertNotEqual(ts1, ts2)
 
     def test_verbose_string_as_ts(self):
       try:

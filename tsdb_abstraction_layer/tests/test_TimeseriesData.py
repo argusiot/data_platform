@@ -14,7 +14,7 @@ class TimeseriesData_TestSuite(unittest.TestCase):
       host, port, metric, query_filters, qualifier, start, end = \
         hh.get_dummy_query_params()
 
-      api = tsd.TimeseriesData(metric, query_filters, None)
+      api = tsd.TimeseriesData(metric, query_filters, {"123456":"1"})
       self.assertEqual(api.hello(), "Hello from TimeseriesData")
 
 if __name__ == '__main__':
