@@ -1,0 +1,21 @@
+version: 2.1
+jobs:
+  build:
+    machine:
+      image: ubuntu-1604:201903-01
+    steps:
+      - checkout # check out the code in the project directory
+      - run:
+          name: "Install pytest and supporting packages"
+          command: |
+            pyenv global 3.7.0  # Pins the Python version. Needed because host
+                                # has multiple Python 3 versions installed.
+                                # Without version pinning, python3 invocation
+                                # below fails.
+            pip install --upgrade pip  # to ensure we're latest version of pip.
+            pip install -U pytest  # required to run pytest below
+      - run:
+          name: "Run all TSDB Abstraction Layer (TAL) tests"
+          command: |
+            cd tsdb_abstraction_layer
+            make test
