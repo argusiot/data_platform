@@ -134,5 +134,11 @@ class LookupParamQualifier(Enum):
          (ts, value) = ts_obj.get_datapoint(timestamp, EXACT_MATCH)
 '''
 class TimeseriesData(object):
+  def __init__(self, metric_name, tag_value_pairs, json_response_data):
+    self.__metric_id = metric_name
+    self.__query_filters = tag_value_pairs
+
+    # WHAT ASSUMPTION DO WE MAKE ABOUT json_response_data ?
+
   def hello(self):
     return "Hello from %s" % self.__class__.__name__

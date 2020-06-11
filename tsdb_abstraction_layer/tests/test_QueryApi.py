@@ -2,6 +2,7 @@
 
 from .context import argus_tal
 from argus_tal import query_api
+from . import helpers as hh
 
 import unittest
 
@@ -10,7 +11,11 @@ class QueryApi_TestSuite(unittest.TestCase):
     """Advanced test cases."""
 
     def test_query_api(self):
-      api = query_api.QueryApi()
+      host, port, metric, query_filters, qualifier, start, end = \
+        hh.get_dummy_query_params()
+
+      api = query_api.QueryApi(host, port, metric, query_filters, qualifier, \
+                               start, end)
       self.assertEqual(api.hello(), "Hello from QueryApi")
 
 

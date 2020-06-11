@@ -54,69 +54,57 @@ Example:
     except <fill_in_later>:
       print("Query failed !")
 
-  1) populate_timeseries_set usage (multiple timeseries in response):
-     --------------------------------------------------------------
-    # Create a list of metric IDs.
-    metric_id_list = []
-    metric_id_list.extend("machine.sensor.machine_powerOn_State")
-    metric_id_list.extend("machine.sensor.melt_temperature")
-    metric_id_list.extend("machine.sensor.line_speed")
-    metric_id_list.extend("machine.sensor.screw_speed")
-
-    # Filtering tags are same for all metrics.
-    filetering_tags_list = []
-    for idx in range(len(metric_id_list)):
-      filetering_tags_list.extend({'machine_name' : '65mm_extruder'})
-    try:
-      query.populate_ts_set(metric_id_list,
-                            filtering_tags_list,
-                            DATA_VALUE,  # We want actual data in the response.
-                            Timestamp(1590776274005),  # start time.
-                            Timestamp(1591121874005))  # end time.
-
-      ts_data = query.result_list()
-
-      # We expect to get 4 timeseries back.
-      assert(len(ts_data) == 4)
-
-      # Lets verify that the metrics and tags we received meet our expectation.
-      # FIXME .... RESUME HERE
-      # Do I want to guarantee that results will be in same order as query ?
-      # OR
-      # Do I want the ability to pull the desired timeseries out of the result
-      # object.... in which case making the result object a dictionart makes
-      # sense.
-
-    except <fill_in_later>:
-      print("Query failed !")
-
 '''
 class QueryQualifier(Enum):
   DATA_VALUE = 1
   RATE = 2
 
 class QueryApi(object):
-  def __init__(self, tsdb_platform=TsdbPlatform.OPENTSDB):
+  def __init__(self, http_host, http_port,  metric_name, tag_value_pairs, \
+               query_qualifier, start_time, end_time, \
+               tsdb_platform=TsdbPlatform.OPENTSDB):
     self.__tsdb_platform = tsdb_platform
+
+    # This will validate and raise an exception if any of the parameters are
+    # out of whack.
+    self.__validate_input_args(http_host, http_port, \
+        metric_name, tag_value_pairs, query_qualifier, start_time, end_time)
+
+    # All parameters are validated. We're ready to roll !
+    self.__http_host = http_host
+    self.__http_port = http_port
+    self.__metric_id = metric_name
+    self.__query_filters = tag_value_pairs
+    self.__qualifier = query_qualifier
+    self.__start_time = start_time
+    self.__end_time = end_time
+    self.__query_result = None
+
+  def __validate_input_args(self, http_host, http_port, \
+        metric_name, tag_value_pairs, query_qualifier, start_time, end_time):
+    # Validate each parameter.
+    # RESUME HERE !!!
+    pass
 
   def hello(self):
     return "Hello from %s" % self.__class__.__name__
 
   '''
-    This is a synchronous blocking call and will block till the supplied query
-    is validated, the HTTP request made and the response arrives.
+    This will trigger the HTTP call to the TSDB, parse the result. If the HTTP
+    fails, this call will return an error.
 
-    metric_name:
-      Fully qualified name of the metric e.g. machine.sensor.melt_temperature.
-
-    tag_value_pair:
-      A dictionary of tags and values to identify a specific timeseries. No wild
-      carding for value is permitted.
+    If the HTTP call succeeds, then the query result object can be accessed via
+    the get_result() method.
   '''
-  def populate_ts_data(metric_name, tag_value_pairs, query_qualifier,
-                       start_time, end_time):
+  def populate_ts_data(self):
+    # 1. Construct the URL
+    # 2. Make the HTTP call to the backend and get the data.
+    # 3. For success:
+    #     Parse the response.
+    #     Populate the result into TimeseriesData object.
+    #     Store the result in self.__query_result.
+    # 4. Do all the HTTP error handling.
     pass
 
-  def populate_ts_set(metric_id_list, tag_value_pair_list, query_qualifier,
-                      start_time, end_time):
-    pass
+  def get_result(self):
+    return self.__query_result
