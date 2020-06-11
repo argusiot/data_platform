@@ -2,7 +2,7 @@ init:
 	pip install -r requirements.txt
 
 test:
-	pytest tests
+	pytest -v tests
 
 install:
 	python3 setup.py install
