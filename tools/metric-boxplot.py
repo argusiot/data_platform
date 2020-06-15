@@ -33,21 +33,29 @@ from collections import OrderedDict
 '''
 test_data_src = OrderedDict()
 label_format="Label format: <power_src> <ADC board> <sampling resolution> <input_signal>"
+################# Board B1 ##################################
 # NCD powered at 12bit resolution
 test_data_src["NCD B1 12bit noise"] = ([1590266436000, 1590531327000], "65mm_extruder")
 test_data_src["NCD B1 12bit 12mA"] = ([1590535460459, 1590795803317], "65mm_extruder")
 test_data_src["NCD B1 12bit 4mA"] = ([1590797194095, 1591054653037], "65mm_extruder")
 test_data_src["NCD B1 12bit 20mA"] = ([1591056123708, 1591195347829], "65mm_extruder")
 # Meanwell powered at 12bit resolution
+test_data_src["Meanwell B1 12bit 12mA"] = ([1591254986805,1591598426805], "65mm_extruder")
+test_data_src["Meanwell B1 12bit 4mA"] = ([1591602433946, 1591856006905], "65mm_extruder")
+test_data_src["Meanwell B1 12bit 20mA"] = ([1591861880247, 1592105481236], "65mm_extruder")
+################# Board B2 ##################################
+# Meanwell powered B2 board
 test_data_src["Meanwell B2 12bit noise"] = ([1590776274005, 1591121874005], "90mm_extruder")
-test_data_src["Meanwell TBD 12bit 4mA"] = ([], "90mm_extruder")
-test_data_src["Meanwell B1 12bit 12mA"] = ([1591253982240, 1591310984083], "65mm_extruder")
-test_data_src["Meanwell TBD 12bit 20mA"] = ([], "90mm_extruder")
+test_data_src["NCD B2 12bit 12mA"] = ([1591840083264, 1592116101309], "90mm_extruder")
+################# Board B3 ##################################
+test_data_src["Meanwell B3 12bit 12mA"] = ([1592109864283,1592163203788], "65mm_extruder")
 # Meanwell powered at 16bit resolution
+'''
 test_data_src["Meanwell TBD 16bit noise"] = ([], "")
 test_data_src["Meanwell TBD 16bit 4mA"] = ([], "")
 test_data_src["Meanwell TBD 16bit 12mA"] = ([], "")
 test_data_src["Meanwell TBD 16bit 20mA"] = ([], "")
+'''
 
 ''' Leaving it here it so it can be enabled for a quick test of the logic.
     NOT TO BE USED FOR ACTUAL DATA RUN  !!
