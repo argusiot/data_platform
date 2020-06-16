@@ -190,24 +190,127 @@ class TimeseriesDataDict(object):
     '''O(N) operation + memory used to build list ...use with care !'''
     return self.__ts_keys_arr.tolist()
 
-  def __search_key(self, timestamp, lookup_qualifier):
-    # Helper method that:
-    # RESUME HERE <=====
-    pass
+  def __get_ts_array_index(self, timestamp, lookup_qualifier):
+    # With EXACT_MATCH out of the way, we do a binary search trying to get
+    # to the value closest to 'timestamp'. Then actual return value depends on
+    # the qualifier. Lets start by initializing low|mid|high indices.
+    low = 0
+    high = len(self.__ts_keys_arr) - 1
+    mid = 0
+
+    '''
+    case 1:
+    Do a quick check for tackling the case of timestamp being higher than the
+    highest possible value and qualifier being NEAREST_LARGER_WEAK.
+    Handling this here, simplifies logic later.
+           0     1  ...                                max
+          -------------------------------------------------
+         | TSi | TSj | ....                          | TSm |    (timestamp)
+          -------------------------------------------------
+          low                                         high
+          mid
+    '''
+    if timestamp > self.__ts_keys_arr[high] and \
+      lookup_qualifier == LookupQualifier.NEAREST_LARGER_WEAK:
+      return high
+
+    '''
+    case 2:
+    Similarly, do a quick check for tackling the case of timestamp being smaller
+    than the smallest possible value and qualifier being NEAREST_SMALLER_WEAK.
+    Handling this here, simplifies logic later.
+                       0     1  ...                                max
+                     -------------------------------------------------
+     (timestamp)    | TSi | TSj | ....                          | TSm |
+                     -------------------------------------------------
+                     low                                         high
+                     mid
+    '''
+    if timestamp < self.__ts_keys_arr[low] and \
+      lookup_qualifier == LookupQualifier.NEAREST_SMALLER_WEAK:
+      return low
+
+    # Now we do a binary search.
+    while low <= high:
+      mid = int((high + low)/2)
+      if timestamp > self.__ts_keys_arr[mid]:    # If timestamp is larger than
+        low = mid + 1                            # middle value, ignore left
+      elif timestamp < self.__ts_keys_arr[mid]:  # half. Othewise ignore right
+        high = mid - 1                           # half.
+      else:
+        return mid                               # We got an exact match.
+
+    '''
+    We have 3 cases now (for ease of referencing we continue numbering from 3).
+      case 3:
+           0     1  ...                                max
+          -------------------------------------------------
+         | TSi | TSj | ....                          | TSm |
+          -------------------------------------------------
+          low    mid
+          high
+
+      case 4:
+           0     1  ...                                max
+          --------------------------------------------------
+         |                                  ....| TSi | TSj |
+          --------------------------------------------------
+                                                  mid   low
+                                                        high
+      case 5:
+           0     1  ...                                max
+          --------------------------------------------------
+         |                 ...  | TSi | TSj | ...           |
+          --------------------------------------------------
+                                 high  low
+
+      Observe that for all 3 cases: TSi < timestamp < TSj
+      Said another way the requested timestamp falls between TSi and TSj.
+      Lets now build the logic needed to return appropriate TSi | TSj.
+    '''
+    if high == low:
+      if low == 0:  # case 1
+        if lookup_qualifier == LookupQualifier.NEAREST_LARGER_WEAK or \
+           lookup_qualifier == LookupQualifier.NEAREST_LARGER:
+          return mid
+        if lookup_qualifier == LookupQualifier.NEAREST_SMALLER_WEAK or \
+           lookup_qualifier == LookupQualifier.NEAREST_SMALLER:
+          return low
+      else:
+        assert(high == len(self.__ts_keys_arr))   # case 2
+        if lookup_qualifier == LookupQualifier.NEAREST_LARGER_WEAK or \
+           lookup_qualifier == LookupQualifier.NEAREST_LARGER:
+          return high
+        if lookup_qualifier == LookupQualifier.NEAREST_SMALLER_WEAK or \
+           lookup_qualifier == LookupQualifier.NEAREST_SMALLER:
+          return mid
+    else:
+      assert(low > high)
+      if lookup_qualifier == LookupQualifier.NEAREST_LARGER_WEAK or \
+         lookup_qualifier == LookupQualifier.NEAREST_LARGER:
+        return low
+      if lookup_qualifier == LookupQualifier.NEAREST_SMALLER_WEAK or \
+         lookup_qualifier == LookupQualifier.NEAREST_SMALLER:
+        return high
+
+    assert(False)  # We should never reach here.
 
   def get_key_slice(self, timestamp1, lookup_qualifier1,
                           timestamp2, lookup_qualifier2):
     '''Returns a slice of the key space ordered by timestamp. The slice is
        bounded by timestamp1 & timestamp2. The qualifiers determine exactly
        how to carve up the slice.'''
-    # RESUME once __search_key is done.
-    pass
+    key1 = self.__get_ts_array_index(timestamp1, lookup_qualifier1)
+    key2 = self.__get_ts_array_index(timestamp2, lookup_qualifier2)
+    return self.__ts_dps_dict.keys()[key1:key2]
 
   def get_iter_slice(self, timestamp1, lookup_qualifier1,
                            timestamp2, lookup_qualifier2):
     '''This is to assist efficient iteration over the object user standard
        Python iterators. See usage example #4 at the top of the class.'''
-    pass
+    key1 = self.__get_ts_array_index(timestamp1, lookup_qualifier1)
+    key2 = self.__get_ts_array_index(timestamp2, lookup_qualifier2)
+    return (key1, key2)
 
   def __iter__(self):
     self.__iter_idx = 0;
@@ -226,7 +329,18 @@ class TimeseriesDataDict(object):
     ''' Returns pair (timestamp, data_point) corresponding to the supplied
         timestamp depending upon lookup_qualifier. See documentation above
         LookupQualifier for details.'''
-    pass
+    # If qualifer is requesting EXACT_MATCH, we go directly to the dictionary.
+    # If the timestamp is found there, we're done !
+    value = None
+    if lookup_qualifier == LookupQualifier.EXACT_MATCH:
+      value = self.__ts_dps_dict.get(int(timestamp), None)
+      return timestamp, value
+
+    ts_idx = self.__get_ts_array_index(timestamp, lookup_qualifier)
+    if ts_idx != None:
+      timestamp = self.__ts_keys_arr[ts_idx]
+      value = self.__ts_dps_dict[timestamp]
+    return timestamp, value
 
   def get_min_key(self):
     return self.__ts_keys_arr[0]
