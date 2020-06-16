@@ -159,33 +159,55 @@ class TimeseriesData_TestSuite(unittest.TestCase):
           ts_dd.get_datapoint(oor_key, tsd.LookupQualifier.EXACT_MATCH)
         self.assertEqual((oor_key, None), (actual_ts, actual_val))
 
-
-    #####  RESUME HERE ########
-    #####  RESUME HERE ########
-    #####  RESUME HERE ########
-    #####  RESUME HERE ########
-    #####  RESUME HERE ########
-    '''
-    def test_lookup_test_lq_NEAREST_SMALLER_case5(self):
-      ts_dd = tsd.TimeseriesDataDict( \
-        tid.TimeseriesID(self.__metric, self.__ts_filters), self.__sorted_dps)
-      # non boundary element
-      test_ts = self.__sorted_dps.keys()[1]
-      actual_ts, actual_val = \
-        ts_dd.get_datapoint(test_ts + 5, tsd.LookupQualifier.NEAREST_SMALLER)
-      self.assertEqual((test_ts, self.__sorted_dps[test_ts]),
-                       (actual_ts, actual_val))
-
     def test_lookup_test_lq_NEAREST_SMALLER_case3(self):
       ts_dd = tsd.TimeseriesDataDict( \
         tid.TimeseriesID(self.__metric, self.__ts_filters), self.__sorted_dps)
-      # boundary element on the lower side
+      # Get the smallest key from test data and construct a lookup key
+      # that is between key[0] (smallest) and key[1]. The result should
+      # return key[0] as the actual_ts.
       test_ts, value = hh.get_smallest_key_and_its_value()
+      lookup_ts = test_ts + 5
       actual_ts, actual_val = \
-        ts_dd.get_datapoint(test_ts + 5, tsd.LookupQualifier.NEAREST_SMALLER)
+        ts_dd.get_datapoint(lookup_ts, tsd.LookupQualifier.NEAREST_SMALLER)
       self.assertEqual((test_ts, self.__sorted_dps[test_ts]),
                        (actual_ts, actual_val))
 
+    def test_lookup_test_lq_NEAREST_SMALLER_case3_but_key_has_exact_match(self):
+      ts_dd = tsd.TimeseriesDataDict( \
+        tid.TimeseriesID(self.__metric, self.__ts_filters), self.__sorted_dps)
+      # Get the smallest key from test data and construct a lookup key
+      # that is between key[0] (smallest) and key[1]. The result should
+      # return key[0] as the actual_ts.
+      test_ts, value = hh.get_smallest_key_and_its_value()
+      actual_ts, actual_val = \
+        ts_dd.get_datapoint(test_ts, tsd.LookupQualifier.NEAREST_SMALLER)
+      self.assertEqual((test_ts, self.__sorted_dps[test_ts]),
+                       (actual_ts, actual_val))
+
+    def test_lookup_test_lq_NEAREST_SMALLER_case5(self):
+      ts_dd = tsd.TimeseriesDataDict( \
+        tid.TimeseriesID(self.__metric, self.__ts_filters), self.__sorted_dps)
+      # Test for a non-boundary element. As before the lookup is constructed to
+      # be the non-boundary element + a small offset.
+      test_ts, value = hh.get_arbit_key_and_value()
+      lookup_ts = test_ts + 5
+      actual_ts, actual_val = \
+        ts_dd.get_datapoint(lookup_ts, tsd.LookupQualifier.NEAREST_SMALLER)
+
+      # observe: we match returned value against the original 'test_ts' AND NOT
+      #          the lookup_ts.
+      self.assertEqual((test_ts, value), (actual_ts, actual_val))
+
+    def test_lookup_test_lq_NEAREST_SMALLER_case5_but_key_has_exact_match(self):
+      ts_dd = tsd.TimeseriesDataDict( \
+        tid.TimeseriesID(self.__metric, self.__ts_filters), self.__sorted_dps)
+      # Test for a non-boundary element. As before the lookup is constructed to
+      # be the non-boundary element + a small offset.
+      test_ts, value = hh.get_arbit_key_and_value()
+      actual_ts, actual_val = \
+        ts_dd.get_datapoint(test_ts, tsd.LookupQualifier.NEAREST_SMALLER)
+
+    '''
     def test_lookup_test_lq_NEAREST_SMALLER_out_of_lower_bound(self):
       ts_dd = tsd.TimeseriesDataDict( \
         tid.TimeseriesID(self.__metric, self.__ts_filters), self.__sorted_dps)
@@ -196,6 +218,7 @@ class TimeseriesData_TestSuite(unittest.TestCase):
       self.assertEqual((test_ts, self.__sorted_dps[test_ts]),
                        (actual_ts, None))
 
+    '''
     def test_lookup_test_lq_NEAREST_LARGER(self):
       pass
 
@@ -204,7 +227,6 @@ class TimeseriesData_TestSuite(unittest.TestCase):
 
     def test_lookup_test_lq_NEAREST_LARGER_WEAK(self):
       pass
-    '''
     
 
 if __name__ == '__main__':

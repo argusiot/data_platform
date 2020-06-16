@@ -5,6 +5,7 @@
 from .context import argus_tal
 from argus_tal import query_api as qq
 from argus_tal import timestamp as ts
+import random
 
 def get_dummy_query_params():
   return "172.1.1.1", "4242", "some_metric", {"filer1":"value1"}, \
@@ -52,6 +53,9 @@ def get_largest_key_and_its_value():
 
 def get_arbit_key_and_value():
   sorted_test_data = get_sorted_datapoints()
-  keys = sorted_test_data.keys()
-  arbit_key = keys[1]   # this is a deterministic arbit non-boundary key.
-  return arbit_key, sorted_test_data[last_key]
+  # Generate a random number from the keys such that we exclude both the
+  # boundary elements.
+  arbit_key_idx = 2 # int(random.uniform(1, len(key_list) - 1))
+  key_list = list(sorted_test_data.keys())
+  return key_list[arbit_key_idx], \
+         sorted_test_data[key_list[arbit_key_idx]]
