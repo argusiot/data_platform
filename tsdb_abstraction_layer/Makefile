@@ -10,7 +10,7 @@ test:
 	pytest -v tests
 
 code_coverage:
-	coverage run -m --source=. pytest -v tests && \
+	coverage run -m --branch --source=. pytest -v tests && \
 	coverage report -m
 
 install:
