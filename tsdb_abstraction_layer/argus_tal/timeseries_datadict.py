@@ -145,7 +145,7 @@ class LookupQualifier(Enum):
           # return error.
 
         (idx1, idx2) = ts_obj.get_iter_slice(timestamp1, NEAREST_SMALLER_WEAK,
-                                            timestamp2, NEAREST_LARGER_WEAK)
+                                             timestamp2, NEAREST_LARGER_WEAK)
         for ii in itertools.islice(ts_obj, idx1, idx2):
           value = next(ii)
 

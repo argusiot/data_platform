@@ -4,7 +4,7 @@ from .context import argus_tal
 from argus_tal import timeseries_datadict as tsd
 from argus_tal import timeseries_id as tid
 from . import helpers as hh
-
+import itertools
 import unittest
 
 
@@ -135,9 +135,7 @@ class TsDataDict_Tests(unittest.TestCase):
     ###########################################################################
     # Iterator tests.
     ###########################################################################
-    def test_iterate_full_with_value_check(self):
-      ts_dd = tsd.TimeseriesDataDict( \
-        tid.TimeseriesID(self.__metric, self.__ts_filters), self.__sorted_dps)
+    def __verify_full_iteration(self, ts_dd):
       keys_returned = []
       for key, value in ts_dd:
         keys_returned.append(key)  # save key for later verification.
@@ -145,6 +143,21 @@ class TsDataDict_Tests(unittest.TestCase):
 
       # Verify that we got all the keys we expected AND in the right order.
       self.assertEqual(keys_returned, sorted(self.__sorted_dps.keys()))
+
+    def test_iterate_full_with_value_check(self):
+      ts_dd = tsd.TimeseriesDataDict( \
+        tid.TimeseriesID(self.__metric, self.__ts_filters), self.__sorted_dps)
+      self.__verify_full_iteration(ts_dd)
+
+    # By design, the iterate operation creates state in the object (i.e it has
+    # side effects). We want to ascertain that any side effects from prev
+    # iteration are cleaned up (i.e. iteration is idempotent).
+    def test_iterate_more_than_once(self):
+      ts_dd = tsd.TimeseriesDataDict( \
+        tid.TimeseriesID(self.__metric, self.__ts_filters), self.__sorted_dps)
+      self.__verify_full_iteration(ts_dd) # 1 of 3
+      self.__verify_full_iteration(ts_dd) # 2 of 3
+      self.__verify_full_iteration(ts_dd) # 3 of 3
 
     def test_iterate_empty_dps(self):
       ts_dd = tsd.TimeseriesDataDict( \
@@ -154,6 +167,9 @@ class TsDataDict_Tests(unittest.TestCase):
         keys_returned.append(key)  # save key for later verification.
       self.assertEqual(len(keys_returned), 0)
 
+    ###########################################################################
+    # Lookup qualifier tests
+    ###########################################################################
     '''
     Lookup qualifier test matrix:
     =============================
@@ -307,18 +323,34 @@ class TsDataDict_Tests(unittest.TestCase):
          ("iter 0 to k_Max", self.__k_0, tsd.LookupQualifier.EXACT_MATCH, \
                       self.__k_Max, tsd.LookupQualifier.EXACT_MATCH, \
                       self.__Min_dp_idx, self.__Max_dp_idx), \
-         ("iter 1 thru k_Max-1", self.__k_1, tsd.LookupQualifier.EXACT_MATCH, \
-                      self.__k_Max_minus_1, tsd.LookupQualifier.EXACT_MATCH, \
-                      self.__Min_dp_idx + 1, self.__Max_dp_idx - 1)
          #
          # RESUME ADDING TEST CASES HERE !
-         #
+         # FIXME: Extend helper to retrieve (key, value) sets for arbitrary
+         #        combination of keys.
+
+         #("iter 1 thru k_Max-1", self.__k_1, tsd.LookupQualifier.EXACT_MATCH, \
+         #             self.__k_Max_minus_1, tsd.LookupQualifier.EXACT_MATCH, \
+         #             self.__Min_dp_idx + 1, self.__Max_dp_idx - 1)
       ]
       for tda in sub_testcase_data:
         test_label, key1, lk_qual1, key2, lookup_qual2, res_idx1, res_idx2 = tda
         with self.subTest(msg=test_label):
           idx1, idx2 = ts_dd.get_iter_slice(key1, lk_qual1, key2, lookup_qual2)
+
+          # Verify that:
+          # 1) the ranges of start and end indices are as expected !
+          # 2) the keys between idx1 & idx2 match keys_returned
+          # 3) the values returned for each key between idx1 & idx2 match
+          #    expected value.
           self.assertEqual((idx1, idx2), (res_idx1, res_idx2))
+          keys_returned = []
+          # NOTICE HOW WE NEED idx2+1 below because of islice behaviour
+          for kk,vv in itertools.islice(ts_dd, idx1, idx2+1):
+            keys_returned.append(kk)
+            self.assertEqual(vv, self.__sorted_dps[kk])  # verify value.
+
+          # Verify key count and order
+          self.assertEqual(keys_returned, sorted(self.__sorted_dps.keys()))
 
 if __name__ == '__main__':
     unittest.main()
