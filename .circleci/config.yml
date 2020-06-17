@@ -19,8 +19,10 @@ jobs:
           name: "Run TSDB Abstraction Layer (TAL) tests and code coverage"
           command: |
             cd tsdb_abstraction_layer
-            make code_coverage
-            coverage html --directory=/tmp/htmlcov
+            make code_coverage   # Runs tests & generates code coverage data.
+            coverage html --directory=/tmp/htmlcov  # Generate an html report.
       - store_artifacts:
-            path: /tmp/htmlcov
+            # Copies the html report from /tmp/htmlcov to the artefacts location
+            # which can be accessed via a browser on the CircleCI dashboard.
+            path: /tmp/htmlcov     
             destination: htmlcov
