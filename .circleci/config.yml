@@ -14,8 +14,12 @@ jobs:
                                 # below fails.
             pip install --upgrade pip  # to ensure we're latest version of pip.
             pip install -U pytest  # required to run pytest below
+            pip install coverage # For code coverage
       - run:
-          name: "Run all TSDB Abstraction Layer (TAL) tests"
+          name: "Run TSDB Abstraction Layer (TAL) tests and code coverage"
           command: |
             cd tsdb_abstraction_layer
-            make test
+            make code_coverage
+            coverage html
+      - store_artifacts:
+            path: htmlcov

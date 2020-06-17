@@ -9,6 +9,10 @@ test:
 	# PYTHONHASHSEED=0 pytest -v tests
 	pytest -v tests
 
+code_coverage:
+	coverage run -m --source=. pytest -v tests && \
+	coverage report -m
+
 install:
 	python3 setup.py install
 
