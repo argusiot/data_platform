@@ -22,4 +22,4 @@ jobs:
             make code_coverage
             coverage html --directory=$HOME/htmlcov
       - store_artifacts:
-            path: $HOME/htmlcov
+            path: htmlcov
