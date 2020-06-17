@@ -39,6 +39,10 @@ class TsDataDict_Tests(unittest.TestCase):
       self.__k_Max_minus_1, self.__v_Max_minus_1 =  \
           self.__k_Max - hh.get_distance(), self.__v_Max - hh.get_distance()
 
+      # Iteration test matrix
+      self.__Min_dp_idx = 0
+      self.__Max_dp_idx = len(self.__sorted_dps) - 1
+
     def test_hello(self):
       ts_dd = tsd.TimeseriesDataDict( \
         tid.TimeseriesID(self.__metric, self.__ts_filters), self.__sorted_dps)
@@ -271,7 +275,6 @@ class TsDataDict_Tests(unittest.TestCase):
                                        tsd.LookupQualifier.NEAREST_SMALLER)
           self.assertEqual((kk, vv), (rv_expected_key, rv_expected_value), \
                            test_label)
-      pass
      
     def test_lookup_qualifer_test_matrix_NEAREST_SMALLER_WEAK_column(self):
       ts_dd = tsd.TimeseriesDataDict( \
@@ -295,7 +298,27 @@ class TsDataDict_Tests(unittest.TestCase):
                                        tsd.LookupQualifier.NEAREST_SMALLER_WEAK)
           self.assertEqual((kk, vv), (rv_expected_key, rv_expected_value), \
                            test_label)
-      pass
           
+    def test_iter_slice(self):
+      ts_dd = tsd.TimeseriesDataDict( \
+        tid.TimeseriesID(self.__metric, self.__ts_filters), self.__sorted_dps)
+      sub_testcase_data = [
+         # sub-test label , key1, lk_qual1, key2, lookup_qual2, idx1, idx2
+         ("iter 0 to k_Max", self.__k_0, tsd.LookupQualifier.EXACT_MATCH, \
+                      self.__k_Max, tsd.LookupQualifier.EXACT_MATCH, \
+                      self.__Min_dp_idx, self.__Max_dp_idx), \
+         ("iter 1 thru k_Max-1", self.__k_1, tsd.LookupQualifier.EXACT_MATCH, \
+                      self.__k_Max_minus_1, tsd.LookupQualifier.EXACT_MATCH, \
+                      self.__Min_dp_idx + 1, self.__Max_dp_idx - 1)
+         #
+         # RESUME ADDING TEST CASES HERE !
+         #
+      ]
+      for tda in sub_testcase_data:
+        test_label, key1, lk_qual1, key2, lookup_qual2, res_idx1, res_idx2 = tda
+        with self.subTest(msg=test_label):
+          idx1, idx2 = ts_dd.get_iter_slice(key1, lk_qual1, key2, lookup_qual2)
+          self.assertEqual((idx1, idx2), (res_idx1, res_idx2))
+
 if __name__ == '__main__':
     unittest.main()
