@@ -6,7 +6,7 @@ from argus_tal import exceptions as tal_err
 import unittest
 
 
-class Timestamp_TestSuite(unittest.TestCase):
+class Timestamp_Tests(unittest.TestCase):
     """Test cases for class Timestamp"""
     def test_integer_as_ts(self):
       ts = argus_tal.timestamp.Timestamp(123456789)

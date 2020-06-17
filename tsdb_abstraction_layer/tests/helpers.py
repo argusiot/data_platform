@@ -29,13 +29,17 @@ def __generate_test_dict(key_as_string):
 def get_sorted_datapoints():
   return __generate_test_dict(key_as_string=False)
 
+def get_distance():
+  return 10  # the distance between the keys and values in the test datapoints.
+
 def get_UNsorted_datapoints():
-  return {1234510: "10", \
-          1234560: "40",  \
-          1234530: "30", \
-          1234520: "60",  \
-          1234550: "50", \
-          1234540: "20", \
+  return {1234510: 10, \
+          1234560: 60, \
+          1234570: 70, \
+          1234530: 30, \
+          1234520: 20, \
+          1234550: 50, \
+          1234540: 40, \
          }
 
 def get_string_datapoints():

@@ -8,10 +8,10 @@ from . import helpers as hh
 import unittest
 
 
-class TimeseriesData_TestSuite(unittest.TestCase):
+class TsDataDict_Tests(unittest.TestCase):
     """Basic test cases."""
     def __init__(self, *args, **kwargs):
-      super(TimeseriesData_TestSuite, self).__init__(*args, **kwargs)
+      super(TsDataDict_Tests, self).__init__(*args, **kwargs)
       # Single place to initialize all the parameters needed for each test.
       self.__host, self.__port, self.__metric, self.__ts_filters, \
       self.__qualifier, self.__start, self.__end = hh.get_dummy_query_params()
@@ -19,6 +19,25 @@ class TimeseriesData_TestSuite(unittest.TestCase):
       self.__UNsorted_dps = hh.get_UNsorted_datapoints();
       self.__keys_as_str_dps = hh.get_string_datapoints();
       self.assertNotEqual(len(self.__sorted_dps), 0) # ensure non-empty testdata !
+
+      # See 'Lookup qualifier test matrix' below
+      self.__k_0, self.__v_0 = hh.get_smallest_key_and_its_value()
+      self.__k_Max, self.__v_Max = hh.get_largest_key_and_its_value() 
+      self.__k_lt_k_0 = int(self.__k_0/2)   # "key less than key 0"
+      self.__k_gt_k_Max = self.__k_Max * 2  # "key greater than key Max"
+      self.__k_Arb, self.__v_Arb = hh.get_arbit_key_and_value()
+      self.__k_betn_0_and_1 = self.__k_0 + 5
+      self.__k_betn_Max_minus_1_and_Max  = self.__k_Max - 5
+      self.__k_betn_i_and_j = self.__k_Arb + 5
+      self.__k_i, self.__v_i = self.__k_Arb, self.__v_Arb
+      self.__k_j, self.__v_j = self.__k_Arb + hh.get_distance(), \
+                               self.__v_Arb + hh.get_distance()
+      # We're slightly cheating here for __[kv]_1 computation by asuming that
+      # those values are always get_distance() apart from __[kv]_0. Its ok!
+      self.__k_1, self.__v_1 = self.__k_0 + hh.get_distance(), \
+                               self.__v_0 + hh.get_distance()
+      self.__k_Max_minus_1, self.__v_Max_minus_1 =  \
+          self.__k_Max - hh.get_distance(), self.__v_Max - hh.get_distance()
 
     def test_hello(self):
       ts_dd = tsd.TimeseriesDataDict( \
@@ -131,103 +150,152 @@ class TimeseriesData_TestSuite(unittest.TestCase):
         keys_returned.append(key)  # save key for later verification.
       self.assertEqual(len(keys_returned), 0)
 
-    ###########################################################################
-    # Lookup tests.
-    # For easy reference:
-    #   {1234560: "10", \
-    #    1234561: "20", \
-    #    1234562: "30", \
-    #    1234563: "40", \
-    #    1234564: "50", \
-    #    1234565: "60"  \
-    #   }
-    ###########################################################################
-    def test_lookup_test_lq_EXACT_MATCH_success(self):
-      ts_dd = tsd.TimeseriesDataDict( \
-        tid.TimeseriesID(self.__metric, self.__ts_filters), self.__sorted_dps)
-      for test_ts, test_val in self.__sorted_dps.items():
-        actual_ts, actual_val = \
-          ts_dd.get_datapoint(test_ts, tsd.LookupQualifier.EXACT_MATCH)
-        self.assertEqual((test_ts, test_val), (actual_ts, actual_val))
-
-    def test_lookup_test_lq_EXACT_MATCH_faliure(self):
-      ts_dd = tsd.TimeseriesDataDict( \
-        tid.TimeseriesID(self.__metric, self.__ts_filters), self.__sorted_dps)
-      for test_ts, test_val in self.__sorted_dps.items():
-        oor_key = test_ts*2   # generate a dummy out-of-range key from test_ts
-        actual_ts, actual_val = \
-          ts_dd.get_datapoint(oor_key, tsd.LookupQualifier.EXACT_MATCH)
-        self.assertEqual((oor_key, None), (actual_ts, actual_val))
-
-    def test_lookup_test_lq_NEAREST_SMALLER_case3(self):
-      ts_dd = tsd.TimeseriesDataDict( \
-        tid.TimeseriesID(self.__metric, self.__ts_filters), self.__sorted_dps)
-      # Get the smallest key from test data and construct a lookup key
-      # that is between key[0] (smallest) and key[1]. The result should
-      # return key[0] as the actual_ts.
-      test_ts, value = hh.get_smallest_key_and_its_value()
-      lookup_ts = test_ts + 5
-      actual_ts, actual_val = \
-        ts_dd.get_datapoint(lookup_ts, tsd.LookupQualifier.NEAREST_SMALLER)
-      self.assertEqual((test_ts, self.__sorted_dps[test_ts]),
-                       (actual_ts, actual_val))
-
-    def test_lookup_test_lq_NEAREST_SMALLER_case3_but_key_has_exact_match(self):
-      ts_dd = tsd.TimeseriesDataDict( \
-        tid.TimeseriesID(self.__metric, self.__ts_filters), self.__sorted_dps)
-      # Get the smallest key from test data and construct a lookup key
-      # that is between key[0] (smallest) and key[1]. The result should
-      # return key[0] as the actual_ts.
-      test_ts, value = hh.get_smallest_key_and_its_value()
-      actual_ts, actual_val = \
-        ts_dd.get_datapoint(test_ts, tsd.LookupQualifier.NEAREST_SMALLER)
-      self.assertEqual((test_ts, self.__sorted_dps[test_ts]),
-                       (actual_ts, actual_val))
-
-    def test_lookup_test_lq_NEAREST_SMALLER_case5(self):
-      ts_dd = tsd.TimeseriesDataDict( \
-        tid.TimeseriesID(self.__metric, self.__ts_filters), self.__sorted_dps)
-      # Test for a non-boundary element. As before the lookup is constructed to
-      # be the non-boundary element + a small offset.
-      test_ts, value = hh.get_arbit_key_and_value()
-      lookup_ts = test_ts + 5
-      actual_ts, actual_val = \
-        ts_dd.get_datapoint(lookup_ts, tsd.LookupQualifier.NEAREST_SMALLER)
-
-      # observe: we match returned value against the original 'test_ts' AND NOT
-      #          the lookup_ts.
-      self.assertEqual((test_ts, value), (actual_ts, actual_val))
-
-    def test_lookup_test_lq_NEAREST_SMALLER_case5_but_key_has_exact_match(self):
-      ts_dd = tsd.TimeseriesDataDict( \
-        tid.TimeseriesID(self.__metric, self.__ts_filters), self.__sorted_dps)
-      # Test for a non-boundary element. As before the lookup is constructed to
-      # be the non-boundary element + a small offset.
-      test_ts, value = hh.get_arbit_key_and_value()
-      actual_ts, actual_val = \
-        ts_dd.get_datapoint(test_ts, tsd.LookupQualifier.NEAREST_SMALLER)
-
     '''
-    def test_lookup_test_lq_NEAREST_SMALLER_out_of_lower_bound(self):
+    Lookup qualifier test matrix:
+    =============================
+
+    The tests assume that keys in the timeseries data dictionary are unique and
+    totally orderded such that:
+        k_0 < k_1 < k_2 < ....... < k_Max-1 < k_Max
+        Corresponding values would be: v[k_0], v[k_1], ...v[k_Max]
+
+     For ease of readability in the table below we use following:
+       smallest key = k_0
+       largest key = k_Max
+       arbitrary non-boundary key = k_Arb 
+
+     Sr    Supplied                Lookup qualifier and value returned
+     No     key                E_M      N_LG      N_LG_W    N_SM     N_SM_W
+     1. less than k_0         None     v[k_0]    v[k_0]    None       v[k_0]
+     2. gt than k_Max         None     None      v[k_Max]  v[k_Max]   v[k_Max]
+     4. equals k_0            v[k_0]   v[k_0]    v[k_0]    v[k_0]     v[k_0]
+     5. equals k_Max          v[k_Max] v[k_Max]  v[k_Max]  v[k_Max]   v[k_Max]
+     6. equals k_Arb          v[k_Arb] v[k_Arb]  v[k_Arb]  v[k_Arb]   v[k_Arb]
+     7. betn k_0 and k_1      None     v[k_1]    v[k_1]    v[k_0]     v[k_0]
+     8. betn k_Max-1 & k_Max  None     v[k_Max]  v[k_Max]  v[k_Max-1] v[k_Max-1]
+     9. betn k_i and k_j      None     v[k_j]    v[k_j]    v[k_i]     v[k_i]
+        (i < j &&
+         0 < i, j < Max)
+    '''
+
+    def test_lookup_qualifer_test_matrix_EXACT_MATCH_column(self):
       ts_dd = tsd.TimeseriesDataDict( \
         tid.TimeseriesID(self.__metric, self.__ts_filters), self.__sorted_dps)
-      # boundary element on the lower side
-      test_ts, value = hh.get_smallest_key_and_its_value()
-      actual_ts, actual_val = \
-        ts_dd.get_datapoint(test_ts - 5, tsd.LookupQualifier.NEAREST_SMALLER)
-      self.assertEqual((test_ts, self.__sorted_dps[test_ts]),
-                       (actual_ts, None))
-
-    '''
-    def test_lookup_test_lq_NEAREST_LARGER(self):
+      sub_testcase_data = [
+         # sub-test label , input key, expected key, expected value
+         ("lt than k_0",   self.__k_lt_k_0,   self.__k_lt_k_0,   None), \
+         ("gt than k_Max", self.__k_gt_k_Max, self.__k_gt_k_Max, None), \
+         ("equals k_0",    self.__k_0,        self.__k_0,        self.__v_0), \
+         ("equals k_Max",  self.__k_Max,      self.__k_Max,      self.__v_Max), \
+         ("equals k_Arb",  self.__k_Arb,      self.__k_Arb,      self.__v_Arb), \
+         ("betn k_0 and k_1", self.__k_betn_0_and_1, \
+                              self.__k_betn_0_and_1, None), \
+         ("betn k_Max-1 and k_Max", self.__k_betn_Max_minus_1_and_Max, \
+                                    self.__k_betn_Max_minus_1_and_Max, None), \
+         ("betn k_i and k_j", self.__k_betn_i_and_j, \
+                              self.__k_betn_i_and_j, None), \
+      ]
+      for testdata in sub_testcase_data:
+        test_label, input_key, rv_expected_key, rv_expected_value = testdata
+        with self.subTest(test_label=test_label):
+          kk, vv = ts_dd.get_datapoint(input_key, \
+                                       tsd.LookupQualifier.EXACT_MATCH)
+          self.assertEqual((kk, vv), (rv_expected_key, rv_expected_value), \
+                           test_label)
+          
+    def test_lookup_qualifer_test_matrix_NEAREST_LARGER_column(self):
+      ts_dd = tsd.TimeseriesDataDict( \
+        tid.TimeseriesID(self.__metric, self.__ts_filters), self.__sorted_dps)
+      sub_testcase_data = [
+         # sub-test label ,   input key,        expected key,     expected value
+         ("lt than k_0",      self.__k_lt_k_0,   self.__k_0,        self.__v_0), \
+         ("gt than k_Max",    self.__k_gt_k_Max, self.__k_gt_k_Max, None), \
+         ("equals k_0",       self.__k_0,        self.__k_0,        self.__v_0), \
+         ("equals k_Max",     self.__k_Max,      self.__k_Max,      self.__v_Max), \
+         ("equals k_Arb",     self.__k_Arb,      self.__k_Arb,      self.__v_Arb), \
+         ("betn k_0 and k_1", self.__k_betn_0_and_1, self.__k_1,    self.__v_1), \
+         ("betn k_Max-1 and k_Max", self.__k_betn_Max_minus_1_and_Max, \
+                                    self.__k_Max, self.__v_Max), \
+         ("betn k_i and k_j", self.__k_betn_i_and_j, self.__k_j,    self.__v_j), \
+      ]
+      for testdata in sub_testcase_data:
+        test_label, input_key, rv_expected_key, rv_expected_value = testdata
+        with self.subTest(msg=test_label):
+          kk, vv = ts_dd.get_datapoint(input_key, \
+                                       tsd.LookupQualifier.NEAREST_LARGER)
+          self.assertEqual((kk, vv), (rv_expected_key, rv_expected_value), \
+                           test_label)
+          
+    def test_lookup_qualifer_test_matrix_NEAREST_LARGER_WEAK_column(self):
+      ts_dd = tsd.TimeseriesDataDict( \
+        tid.TimeseriesID(self.__metric, self.__ts_filters), self.__sorted_dps)
+      sub_testcase_data = [
+         # sub-test label ,   input key,        expected key,    expected value
+         ("lt than k_0",      self.__k_lt_k_0,   self.__k_0,     self.__v_0), \
+         ("gt than k_Max",    self.__k_gt_k_Max, self.__k_Max,   self.__v_Max), \
+         ("equals k_0",       self.__k_0,        self.__k_0,     self.__v_0), \
+         ("equals k_Max",     self.__k_Max,      self.__k_Max,   self.__v_Max), \
+         ("equals k_Arb",     self.__k_Arb,      self.__k_Arb,   self.__v_Arb), \
+         ("betn k_0 and k_1", self.__k_betn_0_and_1, self.__k_1, self.__v_1), \
+         ("betn k_Max-1 and k_Max", self.__k_betn_Max_minus_1_and_Max, \
+                                    self.__k_Max, self.__v_Max), \
+         ("betn k_i and k_j", self.__k_betn_i_and_j, self.__k_j,    self.__v_j), \
+      ]
+      for testdata in sub_testcase_data:
+        test_label, input_key, rv_expected_key, rv_expected_value = testdata
+        with self.subTest(test_label=test_label):
+          kk, vv = ts_dd.get_datapoint(input_key, \
+                                       tsd.LookupQualifier.NEAREST_LARGER_WEAK)
+          self.assertEqual((kk, vv), (rv_expected_key, rv_expected_value), \
+                           test_label)
+          
+    def test_lookup_qualifer_test_matrix_NEAREST_SMALLER_column(self):
+      ts_dd = tsd.TimeseriesDataDict( \
+        tid.TimeseriesID(self.__metric, self.__ts_filters), self.__sorted_dps)
+      sub_testcase_data = [
+         # sub-test label ,   input key,        expected key,     expected value
+         ("lt than k_0",      self.__k_lt_k_0,   self.__k_lt_k_0,   None), \
+         ("gt than k_Max",    self.__k_gt_k_Max, self.__k_Max,      self.__v_Max), \
+         ("equals k_0",       self.__k_0,        self.__k_0,        self.__v_0), \
+         ("equals k_Max",     self.__k_Max,      self.__k_Max,      self.__v_Max), \
+         ("equals k_Arb",     self.__k_Arb,      self.__k_Arb,      self.__v_Arb), \
+         ("betn k_0 and k_1", self.__k_betn_0_and_1, self.__k_0,    self.__v_0), \
+         ("betn k_Max-1 and k_Max", self.__k_betn_Max_minus_1_and_Max, \
+                                    self.__k_Max_minus_1, self.__v_Max_minus_1), \
+         ("betn k_i and k_j", self.__k_betn_i_and_j, self.__k_i,    self.__v_i), \
+      ]
+      for testdata in sub_testcase_data:
+        test_label, input_key, rv_expected_key, rv_expected_value = testdata
+        with self.subTest(msg=test_label):
+          kk, vv = ts_dd.get_datapoint(input_key, \
+                                       tsd.LookupQualifier.NEAREST_SMALLER)
+          self.assertEqual((kk, vv), (rv_expected_key, rv_expected_value), \
+                           test_label)
       pass
-
-    def test_lookup_test_lq_NEAREST_SMALLER_WEAK(self):
+     
+    def test_lookup_qualifer_test_matrix_NEAREST_SMALLER_WEAK_column(self):
+      ts_dd = tsd.TimeseriesDataDict( \
+        tid.TimeseriesID(self.__metric, self.__ts_filters), self.__sorted_dps)
+      sub_testcase_data = [
+         # sub-test label ,   input key,        expected key,     expected value
+         ("lt than k_0",      self.__k_lt_k_0,   self.__k_0,        self.__v_0), \
+         ("gt than k_Max",    self.__k_gt_k_Max, self.__k_Max,      self.__v_Max), \
+         ("equals k_0",       self.__k_0,        self.__k_0,        self.__v_0), \
+         ("equals k_Max",     self.__k_Max,      self.__k_Max,      self.__v_Max), \
+         ("equals k_Arb",     self.__k_Arb,      self.__k_Arb,      self.__v_Arb), \
+         ("betn k_0 and k_1", self.__k_betn_0_and_1, self.__k_0,    self.__v_0), \
+         ("betn k_Max-1 and k_Max", self.__k_betn_Max_minus_1_and_Max, \
+                                    self.__k_Max_minus_1, self.__v_Max_minus_1), \
+         ("betn k_i and k_j", self.__k_betn_i_and_j, self.__k_i,    self.__v_i), \
+      ]
+      for testdata in sub_testcase_data:
+        test_label, input_key, rv_expected_key, rv_expected_value = testdata
+        with self.subTest(msg=test_label):
+          kk, vv = ts_dd.get_datapoint(input_key, \
+                                       tsd.LookupQualifier.NEAREST_SMALLER_WEAK)
+          self.assertEqual((kk, vv), (rv_expected_key, rv_expected_value), \
+                           test_label)
       pass
-
-    def test_lookup_test_lq_NEAREST_LARGER_WEAK(self):
-      pass
-    
-
+          
 if __name__ == '__main__':
     unittest.main()

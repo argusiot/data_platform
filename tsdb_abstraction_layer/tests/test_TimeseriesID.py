@@ -6,7 +6,7 @@ import json
 import unittest
 import hashlib
 
-class TimeseriesID_TestSuite(unittest.TestCase):
+class TimeseriesID_Tests(unittest.TestCase):
     """Test cases for class TimeseriesID"""
     def test_simple(self):
       # Input params (also used for verification of some output values).

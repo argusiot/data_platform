@@ -7,7 +7,7 @@ from . import helpers as hh
 import unittest
 
 
-class QueryApi_TestSuite(unittest.TestCase):
+class QueryApi_Tests(unittest.TestCase):
     """Advanced test cases."""
 
     def test_query_api(self):

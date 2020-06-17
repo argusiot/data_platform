@@ -190,45 +190,103 @@ class TimeseriesDataDict(object):
     '''O(N) operation + memory used to build list ...use with care !'''
     return self.__ts_keys_arr.tolist()
 
-  def __get_ts_array_index(self, timestamp, lookup_qualifier):
-    # With EXACT_MATCH out of the way, we do a binary search trying to get
-    # to the value closest to 'timestamp'. Then actual return value depends on
-    # the qualifier. Lets start by initializing low|mid|high indices.
-    low = 0
-    high = len(self.__ts_keys_arr) - 1
-    mid = 0
-
+  def __search_timestamp_index(self, timestamp, lookup_qualifier):
     '''
-    case 1:
-    Do a quick check for tackling the case of timestamp being higher than the
-    highest possible value and qualifier being NEAREST_LARGER_WEAK.
-    Handling this here, simplifies logic later.
+      !! KEEP THIS DOCUMENTATION, CODE AND SUPPORTING TEST CASES IN SYNC !!
+
+      Code below is organized into 5 cases. The first 2 cases are taken up
+      *before* the binary search is even done (i.e. binary search is avoided).
+      The remaining 3 cases are tackled using the results of the binary search.
+
+      We just call out the cases here in one place and then anntate the code
+      below with the case #.
+
+      !! KEEP THIS DOCUMENTATION, CODE AND SUPPORTING TEST CASES IN SYNC !!
+
+    case 1 (pre-binary search):
+    This is the case of timestamp being higher than the highest possible value
+    and qualifier being NEAREST_LARGER_WEAK. Tackling this as a seaprate case
+    simplifies the post-binary search logic.
            0     1  ...                                max
           -------------------------------------------------
          | TSi | TSj | ....                          | TSm |    (timestamp)
           -------------------------------------------------
           low                                         high
           mid
-    '''
-    if timestamp > self.__ts_keys_arr[high] and \
-      lookup_qualifier == LookupQualifier.NEAREST_LARGER_WEAK:
-      return high
 
-    '''
-    case 2:
-    Similarly, do a quick check for tackling the case of timestamp being smaller
+      !! KEEP THIS DOCUMENTATION, CODE AND SUPPORTING TEST CASES IN SYNC !!
+
+    case 2 (pre-binary search):
+    Similar to case 1, check for the case of timestamp being smaller
     than the smallest possible value and qualifier being NEAREST_SMALLER_WEAK.
-    Handling this here, simplifies logic later.
+    Handling this early, simplifies logic later.
                        0     1  ...                                max
                      -------------------------------------------------
      (timestamp)    | TSi | TSj | ....                          | TSm |
                      -------------------------------------------------
                      low                                         high
                      mid
+
+      !! KEEP THIS DOCUMENTATION, CODE AND SUPPORTING TEST CASES IN SYNC !!
+
+      Observation (for the 3 post-binary search cases below):
+      =======================================================
+      For all 3 cases below: TSi < timestamp < TSj.
+      Said another way the requested timestamp falls between TSi and TSj.
+
+      case 3 (post-binary search):
+           0     1  ...                                max
+          -------------------------------------------------
+         | TSi | TSj | ....                          | TSm |
+          -------------------------------------------------
+          low    mid
+          high
+
+      case 4 (post-binary search):
+           0     1  ...                                max
+          --------------------------------------------------
+         |                                  ....| TSi | TSj |
+          --------------------------------------------------
+                                                        mid   low
+                                                              high
+      case 5 (post-binary search):
+           0     1  ...                                max
+          --------------------------------------------------
+         |                 ...  | TSi | TSj | ...           |
+          --------------------------------------------------
+                                 high  low
+
+      !! KEEP THIS DOCUMENTATION, CODE AND SUPPORTING TEST CASES IN SYNC !!
+
+       case 6 (during binary search): 
+       During the binary search you can get an exact match. That gets naturally
+       handled in the binary search. Just calling it out for complete-ness sake.
     '''
-    if timestamp < self.__ts_keys_arr[low] and \
-      lookup_qualifier == LookupQualifier.NEAREST_SMALLER_WEAK:
-      return low
+    assert(lookup_qualifier != LookupQualifier.EXACT_MATCH)
+
+    # Prepare for doing a binary search of timestamp_param in self.__ts_keys_arr
+    low = 0
+    high = len(self.__ts_keys_arr) - 1
+    mid = 0
+
+    ######################### FIXME ##########################################
+    # Special casing for case 1 & case 2 are not needed.
+    # We should remove those and handle this in post-binary search logic.
+    ###################################################################
+    
+    # Case 1
+    if timestamp > self.__ts_keys_arr[high]:
+      if lookup_qualifier == LookupQualifier.NEAREST_LARGER_WEAK:
+        return high
+      elif lookup_qualifier == LookupQualifier.NEAREST_LARGER:
+        return None
+
+    # Case 2
+    if timestamp < self.__ts_keys_arr[low]:
+      if lookup_qualifier == LookupQualifier.NEAREST_SMALLER_WEAK:
+        return low
+      elif lookup_qualifier == LookupQualifier.NEAREST_SMALLER:
+        return None
 
     # Now we do a binary search.
     while low <= high:
@@ -238,60 +296,34 @@ class TimeseriesDataDict(object):
       elif timestamp < self.__ts_keys_arr[mid]:  # half. Othewise ignore right
         high = mid - 1                           # half.
       else:
-        return mid                               # We got an exact match.
+        return mid   # Case 6 - We got an exact match.
 
-    '''
-    We have 3 cases now (for ease of referencing we continue numbering from 3).
-      case 3:
-           0     1  ...                                max
-          -------------------------------------------------
-         | TSi | TSj | ....                          | TSm |
-          -------------------------------------------------
-          low    mid
-          high
-
-      case 4:
-           0     1  ...                                max
-          --------------------------------------------------
-         |                                  ....| TSi | TSj |
-          --------------------------------------------------
-                                                  mid   low
-                                                        high
-      case 5:
-           0     1  ...                                max
-          --------------------------------------------------
-         |                 ...  | TSi | TSj | ...           |
-          --------------------------------------------------
-                                 high  low
-
-      Observe that for all 3 cases: TSi < timestamp < TSj
-      Said another way the requested timestamp falls between TSi and TSj.
-      Lets now build the logic needed to return appropriate TSi | TSj.
-    '''
+    # Post binary search decision tree guided by lookup qualifier.
     if high == low:
-      if low == 0:  # case 1
+      # FIXME: This entire case 3 is likely not needed. Do a dry and figure it out !
+      if low == 0:  # case 3
         if lookup_qualifier == LookupQualifier.NEAREST_LARGER_WEAK or \
            lookup_qualifier == LookupQualifier.NEAREST_LARGER:
-          return mid
+          assert(False)
         if lookup_qualifier == LookupQualifier.NEAREST_SMALLER_WEAK or \
            lookup_qualifier == LookupQualifier.NEAREST_SMALLER:
-          return low
+          assert(False)
       else:
-        assert(high == len(self.__ts_keys_arr))   # case 2
+        assert(high == len(self.__ts_keys_arr))   # case 4
         if lookup_qualifier == LookupQualifier.NEAREST_LARGER_WEAK or \
            lookup_qualifier == LookupQualifier.NEAREST_LARGER:
-          return high
+          assert(False)
         if lookup_qualifier == LookupQualifier.NEAREST_SMALLER_WEAK or \
            lookup_qualifier == LookupQualifier.NEAREST_SMALLER:
-          return mid
-    else:
+          assert(False)
+    else:  # case 5
       assert(low > high)
       if lookup_qualifier == LookupQualifier.NEAREST_LARGER_WEAK or \
          lookup_qualifier == LookupQualifier.NEAREST_LARGER:
-        return low
+         return low
       if lookup_qualifier == LookupQualifier.NEAREST_SMALLER_WEAK or \
          lookup_qualifier == LookupQualifier.NEAREST_SMALLER:
-        return high
+         return high
 
     assert(False)  # We should never reach here.
 
@@ -300,16 +332,16 @@ class TimeseriesDataDict(object):
     '''Returns a slice of the key space ordered by timestamp. The slice is
        bounded by timestamp1 & timestamp2. The qualifiers determine exactly
        how to carve up the slice.'''
-    key1 = self.__get_ts_array_index(timestamp1, lookup_qualifier1)
-    key2 = self.__get_ts_array_index(timestamp2, lookup_qualifier2)
+    key1 = self.__search_timestamp_index(timestamp1, lookup_qualifier1)
+    key2 = self.__search_timestamp_index(timestamp2, lookup_qualifier2)
     return self.__ts_dps_dict.keys()[key1:key2]
 
   def get_iter_slice(self, timestamp1, lookup_qualifier1,
                            timestamp2, lookup_qualifier2):
     '''This is to assist efficient iteration over the object user standard
        Python iterators. See usage example #4 at the top of the class.'''
-    key1 = self.__get_ts_array_index(timestamp1, lookup_qualifier1)
-    key2 = self.__get_ts_array_index(timestamp2, lookup_qualifier2)
+    key1 = self.__search_timestamp_index(timestamp1, lookup_qualifier1)
+    key2 = self.__search_timestamp_index(timestamp2, lookup_qualifier2)
     return (key1, key2)
 
   def __iter__(self):
@@ -336,7 +368,7 @@ class TimeseriesDataDict(object):
       value = self.__ts_dps_dict.get(int(timestamp), None)
       return timestamp, value
 
-    ts_idx = self.__get_ts_array_index(timestamp, lookup_qualifier)
+    ts_idx = self.__search_timestamp_index(timestamp, lookup_qualifier)
     if ts_idx != None:
       timestamp = self.__ts_keys_arr[ts_idx]
       value = self.__ts_dps_dict[timestamp]
