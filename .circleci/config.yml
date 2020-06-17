@@ -20,6 +20,7 @@ jobs:
           command: |
             cd tsdb_abstraction_layer
             make code_coverage
-            coverage html --directory=$HOME/htmlcov
+            coverage html --directory=/tmp/htmlcov
       - store_artifacts:
-            path: htmlcov
+            path: /tmp/htmlcov
+            destination: htmlcov
