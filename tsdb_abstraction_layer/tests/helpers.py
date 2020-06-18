@@ -32,6 +32,15 @@ def get_sorted_datapoints():
 def get_distance():
   return 10  # the distance between the keys and values in the test datapoints.
 
+def get_datapoint_slice(start_idx, end_idx):
+  test_dps = get_UNsorted_datapoints()
+  key_list = list(sorted(test_dps.keys()))
+  requested_slice = key_list[start_idx:end_idx]
+  slice_of_dps = {}
+  for key in requested_slice:
+    slice_of_dps[key] = test_dps[key]
+  return slice_of_dps
+
 def get_UNsorted_datapoints():
   return {1234510: 10, \
           1234560: 60, \

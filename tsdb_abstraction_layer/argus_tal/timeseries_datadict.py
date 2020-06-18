@@ -59,31 +59,34 @@ class LookupQualifier(Enum):
 '''
   Stores timeseries data returned from a query.
 
-  Data is stored ordered by time.
+  Data is stored ordered by time.  This object supports the iterator protocol
+  which makes iterating over part or all of it very efficient and easy. See
+   "Usage Idioms" below on API usage. 
 
-  Accessor APIs:
+  API summary:
     get_timeseries_id():
       Returns the timeseries id object idenfities the timeseries i.e the object
       that encapsulates the following pair: (metric_id, tag_value_pair_dict)
 
-    get_keys()
-      Returns a reference to a list of all keys ordered by timestamp. Well
-      suited to use if you want to iterate over the entire time series.
-
-    get_key_slice(timestamp1, lookup_qualifier1, timestamp2, lookup_qualifier2)
-      Returns a slice of the key space ordered by timestamp. The slice is
-      bounded by timestamp1 & timestamp2. The qualifiers determine exactly how
-      to carve up the slice.
+    get_iter_slice(timestamp1, lookup_qualifier1, timestamp2, lookup_qualifier2)
+      Returns a pair of indices (start_idx, end_idx) that can be supplied to
+      islice() for iterating from start_idx to end_idx (excluded).
+      One islice() related quirk: 
+         By Pythonic design, iterating using islice happens over the range
+         [start_idx, end_idx). Notice that end_idx is open interval, as a result
+         we have to add 1 to the value returned by get_iter_slice() to the end
+         index when calling islice(). This is a little clunky. Need to come up
+         with a better answer and/or document it clearly to avoid API user
+         frustration.
 
     get_datapoint(timestamp, lookup_qualifier)
       Returns pair (timestamp, data_point) corresponding to the supplied
       timestamp depending upon lookup_qualifier. See documentation above
       LookupQualifier for details.
 
-    get_first_datapoint()
-    get_last_datapoint()
-      Returns pair (timestamp, data_point) corresponding to the first (last)
-      data point in the timeseries.
+    get_min_key() / get_max_key():
+      Returns the smallest / largest key value that can be used with
+      get_datapoint().
 
     is_empty()
       Returns True if timeseries is empty, False otherwise.
@@ -92,15 +95,14 @@ class LookupQualifier(Enum):
   ============
     1. Full timeseries iteration:
        --------------------------
-       To iterate in ascesnding order using keys from the object:
-       keys = ts_obj.get_keys()
-       for timestamp in keys:
-         (ts, value) = ts_obj.get_datapoint(timestamp, EXACT_MATCH)
-         # process value
-         # ...
+       1a) Idiomatic and efficient:
+       for timestamp, value in ts_obj:
+         ... process timestamp and value ..
 
-    2. Getting datapoint at an arbitrary timestamp:
-       --------------------------------------------
+       This works because TimeseriesDataDict supports the iterator protocol.
+
+    2. Searching and retrieving a datapoint for an arbitrary timestamp:
+       ---------------------------------------------------------------
        Given a 'timestamp' if you're not sure whether the datapoint exists in
        the timeseries object, use this:
 
@@ -121,37 +123,25 @@ class LookupQualifier(Enum):
          # than the first value, so lets . By changing to WEAK
          (new_ts, value) = ts_obj.get_last_datapoint()
 
-     3. Slice retrieval and processing :
-        --------------------------------
-        Given a pair of timestamps get a slice of timestamps. We dont want to
-        this *ever* fail thus keeping error handling simple.
-
-        if ts_obj.is_empty():
-          # return error.
-
-        time_slice = ts_obj.get_key_slice(timestamp1, NEAREST_SMALLER_WEAK,
-                                          timestamp2, NEAREST_LARGER_WEAK)
-        for timestamp in time_slice:
-         (ts, value) = ts_obj.get_datapoint(timestamp, EXACT_MATCH)
-
-      4. Slice iterator:
-         ---------------
+      3. Iterate over a slice of datapoints and use of *WEAK:
+         ---------------------------------------------------
         Given a pair of timestamps get a pair of indices corresponding to
-        the pair of timestamps. These indices will then be used wita
+        the pair of timestamps. These indices will then be used with
         itertools.islice(ts_data...) to iterate over the range. This eliminates
-        copying the keys into a list.
+        copying and is space efficient.
 
         if ts_obj.is_empty():
           # return error.
 
         (idx1, idx2) = ts_obj.get_iter_slice(timestamp1, NEAREST_SMALLER_WEAK,
                                              timestamp2, NEAREST_LARGER_WEAK)
-        for ii in itertools.islice(ts_obj, idx1, idx2):
-          value = next(ii)
+        for timestamp, value in itertools.islice(ts_obj, idx1, idx2):
+          ...process timestamp and value ...
 
         This is highly space efficient. Only downside here is that islice still
         walks through keys from 0 to idx1, thus slightly reducing efficiency.
         Thus it becomes a function of O(idx2) instead of O(idx2 - idx1).
+
 '''
 class TimeseriesDataDict(object):
   '''
@@ -180,15 +170,60 @@ class TimeseriesDataDict(object):
 
     self.__iter_idx = 0  # To support the iterator protocol.
 
-
   def get_timeseries_id(self):
     '''Returns the timeseries id object idenfities the timeseries i.e the
        object that encapsulates the pair: (metric_id, tag_value_pair_dict)'''
     return self.__ts_id_obj
 
-  def get_keys(self):
-    '''O(N) operation + memory used to build list ...use with care !'''
-    return self.__ts_keys_arr.tolist()
+  def get_iter_slice(self, timestamp1, lookup_qualifier1,
+                           timestamp2, lookup_qualifier2):
+    '''This is to assist efficient iteration over the object user standard
+       Python iterators. See usage example #3 at the top of the class.'''
+    key1 = self.__search_timestamp_index(timestamp1, lookup_qualifier1)
+    key2 = self.__search_timestamp_index(timestamp2, lookup_qualifier2)
+    return (key1, key2)
+
+  def get_datapoint(self, timestamp, lookup_qualifier):
+    ''' Returns pair (timestamp, data_point) corresponding to the supplied
+        timestamp depending upon lookup_qualifier. See documentation above
+        LookupQualifier for details.'''
+    # If qualifer is requesting EXACT_MATCH, we go directly to the dictionary.
+    # If the timestamp is found there, we're done !
+    value = None
+    if lookup_qualifier == LookupQualifier.EXACT_MATCH:
+      value = self.__ts_dps_dict.get(int(timestamp), None)
+      return timestamp, value
+
+    ts_idx = self.__search_timestamp_index(timestamp, lookup_qualifier)
+    if ts_idx != None:
+      timestamp = self.__ts_keys_arr[ts_idx]
+      value = self.__ts_dps_dict[timestamp]
+    return timestamp, value
+
+  def get_min_key(self):
+    return self.__ts_keys_arr[0]
+
+  def get_max_key(self):
+    return self.__ts_keys_arr[len(self.__ts_keys_arr) - 1]
+
+  def is_empty(self):
+    return len(self.__ts_dps_dict) == 0
+
+  #############################################################################
+  # Non-public methods start here.
+  #############################################################################
+  def __iter__(self):
+    self.__iter_idx = 0;
+    return self
+
+  def __next__(self):
+    prev_idx = self.__iter_idx  # save previous index.
+    self.__iter_idx = self.__iter_idx + 1
+    if self.__iter_idx > len(self.__ts_keys_arr):
+      raise StopIteration
+    key = self.__ts_keys_arr[prev_idx]
+    value = self.__ts_dps_dict[key]
+    return key, value
 
   def __search_timestamp_index(self, timestamp, lookup_qualifier):
     # Initialize housekeeping vars for doing binary search self.__ts_keys_arr.
@@ -265,61 +300,3 @@ class TimeseriesDataDict(object):
 
     assert(False)  # We should never reach here.
 
-  def get_key_slice(self, timestamp1, lookup_qualifier1,
-                          timestamp2, lookup_qualifier2):
-    '''Returns a slice of the key space ordered by timestamp. The slice is
-       bounded by timestamp1 & timestamp2. The qualifiers determine exactly
-       how to carve up the slice.'''
-    key1 = self.__search_timestamp_index(timestamp1, lookup_qualifier1)
-    key2 = self.__search_timestamp_index(timestamp2, lookup_qualifier2)
-    return self.__ts_dps_dict.keys()[key1:key2]
-
-  def get_iter_slice(self, timestamp1, lookup_qualifier1,
-                           timestamp2, lookup_qualifier2):
-    '''This is to assist efficient iteration over the object user standard
-       Python iterators. See usage example #4 at the top of the class.'''
-    key1 = self.__search_timestamp_index(timestamp1, lookup_qualifier1)
-    key2 = self.__search_timestamp_index(timestamp2, lookup_qualifier2)
-    return (key1, key2)
-
-  def __iter__(self):
-    self.__iter_idx = 0;
-    return self
-
-  def __next__(self):
-    prev_idx = self.__iter_idx  # save previous index.
-    self.__iter_idx = self.__iter_idx + 1
-    if self.__iter_idx > len(self.__ts_keys_arr):
-      raise StopIteration
-    key = self.__ts_keys_arr[prev_idx]
-    value = self.__ts_dps_dict[key]
-    return key, value
-
-  def get_datapoint(self, timestamp, lookup_qualifier):
-    ''' Returns pair (timestamp, data_point) corresponding to the supplied
-        timestamp depending upon lookup_qualifier. See documentation above
-        LookupQualifier for details.'''
-    # If qualifer is requesting EXACT_MATCH, we go directly to the dictionary.
-    # If the timestamp is found there, we're done !
-    value = None
-    if lookup_qualifier == LookupQualifier.EXACT_MATCH:
-      value = self.__ts_dps_dict.get(int(timestamp), None)
-      return timestamp, value
-
-    ts_idx = self.__search_timestamp_index(timestamp, lookup_qualifier)
-    if ts_idx != None:
-      timestamp = self.__ts_keys_arr[ts_idx]
-      value = self.__ts_dps_dict[timestamp]
-    return timestamp, value
-
-  def get_min_key(self):
-    return self.__ts_keys_arr[0]
-
-  def get_max_key(self):
-    return self.__ts_keys_arr[len(self.__ts_keys_arr) - 1]
-
-  def is_empty(self):
-    return len(self.__ts_dps_dict) == 0
-
-  def hello(self):
-    return "Hello from %s" % self.__class__.__name__

@@ -39,14 +39,10 @@ class TsDataDict_Tests(unittest.TestCase):
       self.__k_Max_minus_1, self.__v_Max_minus_1 =  \
           self.__k_Max - hh.get_distance(), self.__v_Max - hh.get_distance()
 
-      # Iteration test matrix
-      self.__Min_dp_idx = 0
-      self.__Max_dp_idx = len(self.__sorted_dps) - 1
-
-    def test_hello(self):
-      ts_dd = tsd.TimeseriesDataDict( \
-        tid.TimeseriesID(self.__metric, self.__ts_filters), self.__sorted_dps)
-      self.assertEqual(ts_dd.hello(), "Hello from TimeseriesDataDict")
+      # Setup indices (assuming keys are in sorted order)
+      self.__k_0_dp_idx = 0   # index corresponding to self.__k_0
+      self.__k_1_dp_idx = 1   # index corresponding to self.__k_1
+      self.__k_Max_dp_idx = len(self.__sorted_dps) - 1
 
     ###########################################################################
     # Get timeseries ID
@@ -71,7 +67,7 @@ class TsDataDict_Tests(unittest.TestCase):
       self.assertFalse(ts_dd.is_empty())
 
     ###########################################################################
-    # Triplets of {get_min_key(), get_max_key(), get_keys()} tests for sorted,
+    # Triplets of {get_min_key(), get_max_key()} tests for sorted,
     # unsorted and keys with strings (in input data).
     ###########################################################################
     def test_get_min_key_pre_sorted_dataset(self):
@@ -86,14 +82,6 @@ class TsDataDict_Tests(unittest.TestCase):
       expected_largest_key, value = hh.get_largest_key_and_its_value()
       self.assertEqual(ts_dd.get_max_key(), expected_largest_key)
 
-    def test_get_keys_pre_sorted_dataset(self):
-      ts_dd = tsd.TimeseriesDataDict( \
-        tid.TimeseriesID(self.__metric, self.__ts_filters), self.__sorted_dps)
-      # Observe: We *still* sort the __sorted_dps.keys() before comparison
-      # because the sorted order is only guaranteed by Python 3.6 and later.
-      # See helpers.py for additional info.
-      self.assertEqual(ts_dd.get_keys(), sorted(self.__sorted_dps.keys()))
-
     def test_get_min_key_UNsorted_dataset(self):
       ts_dd = tsd.TimeseriesDataDict( \
         tid.TimeseriesID(self.__metric, self.__ts_filters), self.__UNsorted_dps)
@@ -105,11 +93,6 @@ class TsDataDict_Tests(unittest.TestCase):
         tid.TimeseriesID(self.__metric, self.__ts_filters), self.__UNsorted_dps)
       expected_largest_key, value = hh.get_largest_key_and_its_value()
       self.assertEqual(ts_dd.get_max_key(), expected_largest_key)
-
-    def test_get_keys_UNsorted_dataset(self):
-      ts_dd = tsd.TimeseriesDataDict( \
-        tid.TimeseriesID(self.__metric, self.__ts_filters), self.__UNsorted_dps)
-      self.assertEqual(ts_dd.get_keys(), sorted(self.__UNsorted_dps.keys()))
 
     def test_get_min_key_dataset_with_string_keys(self):
       ts_dd = tsd.TimeseriesDataDict( \
@@ -125,13 +108,6 @@ class TsDataDict_Tests(unittest.TestCase):
       expected_largest_key, value = hh.get_largest_key_and_its_value()
       self.assertEqual(ts_dd.get_max_key(), expected_largest_key)
 
-    def test_get_keys_dataset_with_string_keys(self):
-      ts_dd = tsd.TimeseriesDataDict( \
-        tid.TimeseriesID(self.__metric, self.__ts_filters), \
-                         self.__keys_as_str_dps)
-      numeric_keys = [int(kk) for kk in self.__keys_as_str_dps.keys()]
-      self.assertEqual(ts_dd.get_keys(), sorted(numeric_keys))
-
     ###########################################################################
     # Iterator tests.
     ###########################################################################
@@ -144,7 +120,7 @@ class TsDataDict_Tests(unittest.TestCase):
       # Verify that we got all the keys we expected AND in the right order.
       self.assertEqual(keys_returned, sorted(self.__sorted_dps.keys()))
 
-    def test_iterate_full_with_value_check(self):
+    def test_iterator_full_with_value_check(self):
       ts_dd = tsd.TimeseriesDataDict( \
         tid.TimeseriesID(self.__metric, self.__ts_filters), self.__sorted_dps)
       self.__verify_full_iteration(ts_dd)
@@ -152,14 +128,14 @@ class TsDataDict_Tests(unittest.TestCase):
     # By design, the iterate operation creates state in the object (i.e it has
     # side effects). We want to ascertain that any side effects from prev
     # iteration are cleaned up (i.e. iteration is idempotent).
-    def test_iterate_more_than_once(self):
+    def test_iterator_repeated_iterations(self):
       ts_dd = tsd.TimeseriesDataDict( \
         tid.TimeseriesID(self.__metric, self.__ts_filters), self.__sorted_dps)
       self.__verify_full_iteration(ts_dd) # 1 of 3
       self.__verify_full_iteration(ts_dd) # 2 of 3
       self.__verify_full_iteration(ts_dd) # 3 of 3
 
-    def test_iterate_empty_dps(self):
+    def test_iterator_empty_dps(self):
       ts_dd = tsd.TimeseriesDataDict( \
         tid.TimeseriesID(self.__metric, self.__ts_filters), {})
       keys_returned = []
@@ -315,22 +291,38 @@ class TsDataDict_Tests(unittest.TestCase):
           self.assertEqual((kk, vv), (rv_expected_key, rv_expected_value), \
                            test_label)
           
-    def test_iter_slice(self):
+    '''
+      Note on itertools.islice() usage and testing:
+        test_iter_slice_both_bounds() supplies both start and stop to islice().
+        test_iter_slice_using_stop_only() supplies only stop to islice().
+
+      One islice() quirk:
+         By Pythonic design, iterating using islice happens over the range
+         [start_idx, end_idx). Notice that end_idx is open interval, as a result
+         we have to add 1 to the value returned by get_iter_slice() to the end
+         index when calling islice(). This is a little clunky. Need to come up
+         with a better way to solve this.
+    '''
+    def test_iter_slice_both_bounds(self):
       ts_dd = tsd.TimeseriesDataDict( \
         tid.TimeseriesID(self.__metric, self.__ts_filters), self.__sorted_dps)
       sub_testcase_data = [
          # sub-test label , key1, lk_qual1, key2, lookup_qual2, idx1, idx2
-         ("iter 0 to k_Max", self.__k_0, tsd.LookupQualifier.EXACT_MATCH, \
-                      self.__k_Max, tsd.LookupQualifier.EXACT_MATCH, \
-                      self.__Min_dp_idx, self.__Max_dp_idx), \
-         #
-         # RESUME ADDING TEST CASES HERE !
-         # FIXME: Extend helper to retrieve (key, value) sets for arbitrary
-         #        combination of keys.
-
-         #("iter 1 thru k_Max-1", self.__k_1, tsd.LookupQualifier.EXACT_MATCH, \
-         #             self.__k_Max_minus_1, tsd.LookupQualifier.EXACT_MATCH, \
-         #             self.__Min_dp_idx + 1, self.__Max_dp_idx - 1)
+         ("EXACT_MATCH:iter 0 to k_Max", \
+                 self.__k_0, tsd.LookupQualifier.EXACT_MATCH, \
+                 self.__k_Max, tsd.LookupQualifier.EXACT_MATCH, \
+                 self.__k_0_dp_idx, self.__k_Max_dp_idx), \
+         ("EXACT_MATCH:iter 1 thru k_Max-1", \
+                 self.__k_1, tsd.LookupQualifier.EXACT_MATCH, \
+                 self.__k_Max_minus_1, tsd.LookupQualifier.EXACT_MATCH, \
+                 self.__k_0_dp_idx + 1, self.__k_Max_dp_idx - 1), \
+         ("LARGER:iter 0 to k_Max", \
+                 self.__k_betn_0_and_1, tsd.LookupQualifier.NEAREST_LARGER, \
+                 self.__k_Max, tsd.LookupQualifier.EXACT_MATCH, \
+                 self.__k_1_dp_idx, self.__k_Max_dp_idx), \
+         ("iterate empty", self.__k_0/2, tsd.LookupQualifier.EXACT_MATCH, \
+                      self.__k_0/2, tsd.LookupQualifier.EXACT_MATCH, \
+                      None, None)
       ]
       for tda in sub_testcase_data:
         test_label, key1, lk_qual1, key2, lookup_qual2, res_idx1, res_idx2 = tda
@@ -342,15 +334,35 @@ class TsDataDict_Tests(unittest.TestCase):
           # 2) the keys between idx1 & idx2 match keys_returned
           # 3) the values returned for each key between idx1 & idx2 match
           #    expected value.
-          self.assertEqual((idx1, idx2), (res_idx1, res_idx2))
+          self.assertEqual((idx1, idx2), (res_idx1, res_idx2), test_label)
+          if (idx1, idx2,) == (None, None):
+            continue
+
+          # Using helper, get a slice of datapoints from start_idx to end_idx.
+          slice_of_dps = hh.get_datapoint_slice(idx1, idx2+1)
+
           keys_returned = []
           # NOTICE HOW WE NEED idx2+1 below because of islice behaviour
           for kk,vv in itertools.islice(ts_dd, idx1, idx2+1):
             keys_returned.append(kk)
-            self.assertEqual(vv, self.__sorted_dps[kk])  # verify value.
+            self.assertEqual(vv, slice_of_dps[kk], test_label)  # verify value.
 
           # Verify key count and order
-          self.assertEqual(keys_returned, sorted(self.__sorted_dps.keys()))
+          self.assertEqual(keys_returned, sorted(slice_of_dps.keys()), test_label)
+
+    def test_iter_slice_using_stop_only(self):
+      ts_dd = tsd.TimeseriesDataDict( \
+        tid.TimeseriesID(self.__metric, self.__ts_filters), self.__sorted_dps)
+      ignored, end_idx = ts_dd.get_iter_slice(   # retrive start index
+         self.__k_0, tsd.LookupQualifier.EXACT_MATCH, \
+         self.__k_Max, tsd.LookupQualifier.EXACT_MATCH)
+      keys_returned = []  # to verify count and order of keys returned.
+      # Now iterate ...NOTICE: we do not supply end to islice().
+      for kk,vv in itertools.islice(ts_dd, end_idx+1):
+        keys_returned.append(kk)
+        self.assertEqual(vv, self.__sorted_dps[kk])  # verify each value
+      # verify keys
+      self.assertEqual(keys_returned, sorted(self.__sorted_dps.keys()))
 
 if __name__ == '__main__':
     unittest.main()
