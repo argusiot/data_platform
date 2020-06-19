@@ -8,17 +8,16 @@
 '''
 
 from enum import Enum
-
-class TsdbPlatform(Enum):
-  OPENTSDB = 1
-  PROMETHEUS = 2
-  METRICTANK = 3
+import requests
+import json
+from . import query_urlgen as qurlgen
+from . import basic_types
 
 '''
 1. Input:
    1a) a FQ timeseries (metric_id + tags).
        No '*' permitted in request.
-   1b) qualifiers e.g. rate
+   1b) aggregators e.g. rate
    1c) Query sets aggregation by 'none'.
 2. Convert each timeseries from the response to into a collection of
    TimeseriesData objects.
@@ -55,33 +54,40 @@ Example:
       print("Query failed !")
 
 '''
-class QueryQualifier(Enum):
-  DATA_VALUE = 1
-  RATE = 2
-
 class QueryApi(object):
-  def __init__(self, http_host, http_port,  metric_name, tag_value_pairs, \
-               query_qualifier, start_time, end_time, \
-               tsdb_platform=TsdbPlatform.OPENTSDB):
+  def __init__(self, http_host, http_port, start_time, end_time, tsid_list, \
+               aggregator_type, flag_compute_rate=False, \
+               tsdb_platform=basic_types.Tsdb.OPENTSDB):
     self.__tsdb_platform = tsdb_platform
 
     # This will validate and raise an exception if any of the parameters are
     # out of whack.
-    self.__validate_input_args(http_host, http_port, \
-        metric_name, tag_value_pairs, query_qualifier, start_time, end_time)
+    self.__validate_input_args(http_host, http_port, tsid_list, \
+        aggregator_type, start_time, end_time)
 
     # All parameters are validated. We're ready to roll !
     self.__http_host = http_host
     self.__http_port = http_port
-    self.__metric_id = metric_name
-    self.__query_filters = tag_value_pairs
-    self.__qualifier = query_qualifier
+    self.__tsid_list = [ts for ts in tsid_list] # clone the list so we
+                                                # are not referencing to a
+                                                # caller supplied list.
+    self.__aggregator = aggregator_type
+    self.__flag_compute_rate = flag_compute_rate
     self.__start_time = start_time
     self.__end_time = end_time
-    self.__query_result = None
+    self.__url = qurlgen.url(self.__tsdb_platform, \
+            self.__http_host, self.__http_port, \
+            self.__start_time, self.__end_time, self.__aggregator, \
+            self.__tsid_list, flag_compute_rate=self.__flag_compute_rate)
+
+    # List of TimeseriesDataDict objects for each timeseries returned.
+    self.__tsdd_obj_list = []
+
+    # To store the HTTP response code (for ease of debuggability).
+    self.__http_response_code = 0
 
   def __validate_input_args(self, http_host, http_port, \
-        metric_name, tag_value_pairs, query_qualifier, start_time, end_time):
+        tsid_list, aggregator_type, start_time, end_time):
     # Validate each parameter.
     # RESUME HERE !!!
     pass
@@ -89,6 +95,26 @@ class QueryApi(object):
   def hello(self):
     return "Hello from %s" % self.__class__.__name__
 
+  def __parse_query_response(resp_data):
+
+    assert(self.__aggregator == basic_types.Aggregator.NONE)
+
+    # If the aggregator is "none" then we can be guaranteed that each element
+    # in resp_data is a timeseries object. Simplifies parsing !
+    tsdd_list = []
+    for unique_ts in resp_data:
+      assert(len(unique_ts['aggregateTags']) == 0)
+      timeseries_data_dict = TimeseriesDataDict( \
+          TimeseriesID(unique_ts['metric'], unique_ts['tags']), \
+          unique_ts['dps'])
+      tsdd_list.append(timeseries_data_dict)
+
+    # Its not improbable that we got a legit JSON response back BUT containing
+    # no timeseries data. That would still be an error !
+    if len(tsdd_list) == 0:
+      return tsdd_list, -3  # error
+    return tsdd_list, 0  # sucess
+                                      
   '''
     This will trigger the HTTP call to the TSDB, parse the result. If the HTTP
     fails, this call will return an error.
@@ -97,14 +123,22 @@ class QueryApi(object):
     the get_result() method.
   '''
   def populate_ts_data(self):
-    # 1. Construct the URL
-    # 2. Make the HTTP call to the backend and get the data.
-    # 3. For success:
-    #     Parse the response.
-    #     Populate the result into TimeseriesData object.
-    #     Store the result in self.__query_result.
-    # 4. Do all the HTTP error handling.
-    pass
+    error = 0
+    response = requests.get(self.__url)
+    self.__http_response_code = response.status_code
+    
+    # FIXME: Add handling of all HTPP error types.
+    if response.status_code < 200 or response.status_code > 299:
+      # log error.
+      return -1
 
-  def get_result(self):
-    return self.__query_result
+    try:
+      self.__tsdd_obj_list, error = self.__parse_query_response(resp.json())  
+    except ValueError:
+      # log error
+      return -2  # JSON response could not be decoded
+      
+    return error
+
+  def get_result_set(self):
+    return self.__tsdd_obj_list

@@ -5,11 +5,12 @@
 from .context import argus_tal
 from argus_tal import query_api as qq
 from argus_tal import timestamp as ts
+from argus_tal import basic_types as bt
 import random
 
 def get_dummy_query_params():
-  return "172.1.1.1", "4242", "some_metric", {"filer1":"value1"}, \
-          qq.QueryQualifier.DATA_VALUE, ts.Timestamp('10'), ts.Timestamp('20')
+  return "172.1.1.1", 4242, "some_metric", {"filer1":"value1"}, \
+          bt.Aggregator.NONE, ts.Timestamp('10'), ts.Timestamp('20')
 
 def __generate_test_dict(key_as_string):
   tmp_dict = get_UNsorted_datapoints()

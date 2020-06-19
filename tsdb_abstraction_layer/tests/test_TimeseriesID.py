@@ -24,9 +24,7 @@ class TimeseriesID_Tests(unittest.TestCase):
 
       # Now verify its fields.
       self.assertEqual(tsid.metric_id, metric_id)  # Metric id must match
-      returned_dict = json.loads(tsid.filters) # Convert tsid.filters to a dict
-      self.assertEqual(filters, returned_dict) # and verify it matches Filters.
-      print("%s %s" % (tsid.metric_id, tsid.filters))
+      self.assertEqual(filters, tsid.filters)
 
       # FIXME: Enable this assert, once we understand why PYTHONHASHSEED=0 is
       # being ignored on CircleCI !!

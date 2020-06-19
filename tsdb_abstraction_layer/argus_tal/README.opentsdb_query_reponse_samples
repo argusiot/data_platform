@@ -18,17 +18,17 @@
   Single metric queries:
   =====================
   Simple query example and location of "QUERY QUALIFIER" (or aggregator)
-  http://34.221.154.248:4242/api/query?start=2m-ago&end=1m-ago&m=XXXX:machine.sensor.raw_melt_temperature" | python -m json.tool
+  http://34.221.154.248:4242/api/query?start=2m-ago&end=1m-ago&m=<Q_QUAL>:machine.sensor.raw_melt_temperature" | python -m json.tool
 
-  Possible XXXX values:
-  case 1) XXXX = "sum" -- aggregates across all timeseries for given metric.
-  case 2) XXXX = "sum:rate" -- aggregates across all timeseries for given metric
+  Possible <Q_QUAL> values:
+  case 1) <Q_QUAL> = "sum" -- aggregates across all timeseries for given metric.
+  case 2) <Q_QUAL> = "sum:rate" -- aggregates across all timeseries for given metric
                                AND computes the rate for the aggregated
                                resulting timeseries.
-  case 3) XXXX = "none" -- disaggregates across all timeseries for given metric.
-  case 4) XXXX = "none:rate" -- disaggregates across all timeseries for given
+  case 3) <Q_QUAL> = "none" -- disaggregates across all timeseries for given metric.
+  case 4) <Q_QUAL> = "none:rate" -- disaggregates across all timeseries for given
                                 metric AND computes rate for each timeseries.
-  case 5) XXXX = other possible values ...count | min | max etc.
+  case 5) <Q_QUAL> = other possible values ...count | min | max etc.
 
   Examples response for each of the above cases:
   Case 1: sum

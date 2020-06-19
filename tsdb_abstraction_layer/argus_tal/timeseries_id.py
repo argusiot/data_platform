@@ -13,7 +13,6 @@
   FIXME: Need to figure out more sanity checks for TimeseriesID
 '''
 
-import json
 from . import exceptions as excp
 import hashlib
 
@@ -43,9 +42,7 @@ class TimeseriesID(object):
 
   @property
   def filters(self):
-    # We're only converting the dict into a string. Turns out using the json
-    # module is the most efficient and convenient for that.
-    return json.dumps(self.__tag_value_pairs)
+    return self.__tag_value_pairs
 
   @property
   def fqid(self):
