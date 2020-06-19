@@ -1,0 +1,393 @@
+            SCRATCH NOTES ON OPENTSDB QUERY FORMATS AND RESULTS
+            ====================================================
+
+  OpenTSBD supports URL based querying. A query URL can contain a single metric
+  or multiple metrics. Rest of the this document describes how single metric and
+  multi-metric queries are constructed and the corresponding response formats.
+
+  The number of timeseries returned in the response gets controlled by the 
+  "aggregator" or *Query Qualifiers* supplied. For multi-metric queries, each
+  metric supplied has a separate Query Qualifier.
+
+  This document is divided into 2 sections:
+  Section 1 -- Single metric queries
+  Section 2 -- Multi- metric queries.
+  Section 3 -- Use of query filters (Examples to be added).
+
+  =====================
+  Single metric queries:
+  =====================
+  Simple query example and location of "QUERY QUALIFIER" (or aggregator)
+  http://34.221.154.248:4242/api/query?start=2m-ago&end=1m-ago&m=XXXX:machine.sensor.raw_melt_temperature" | python -m json.tool
+
+  Possible XXXX values:
+  case 1) XXXX = "sum" -- aggregates across all timeseries for given metric.
+  case 2) XXXX = "sum:rate" -- aggregates across all timeseries for given metric
+                               AND computes the rate for the aggregated
+                               resulting timeseries.
+  case 3) XXXX = "none" -- disaggregates across all timeseries for given metric.
+  case 4) XXXX = "none:rate" -- disaggregates across all timeseries for given
+                                metric AND computes rate for each timeseries.
+  case 5) XXXX = other possible values ...count | min | max etc.
+
+  Examples response for each of the above cases:
+  Case 1: sum
+  =======
+  Query: "http://34.221.154.248:4242/api/query?start=2m-ago&end=1m-ago&m=sum:machine.sensor.raw_melt_temperature"
+                                                                         ^^^
+  Response:
+    [
+        {
+            "aggregateTags": [
+                "machine_name"   <=== This field is non-empty
+            ],
+            "dps": {
+                "1592527696": 1897,
+                "1592527698": 1921,
+                ....
+                "1592527754": 1921
+            },
+            "metric": "machine.sensor.raw_melt_temperature",
+            "tags": {
+                "expected_metric": "melt_temperature",
+                "port_num": "1"
+            }
+        }
+    ]
+
+  Case 2: sum:rate
+  ======
+  Query: "http://34.221.154.248:4242/api/query?start=2m-ago&end=1m-ago&m=sum:rate:machine.sensor.raw_melt_temperature"
+                                                                         ^^^^^^^^
+  Response:
+      {
+          "aggregateTags": [
+              "machine_name"
+          ],
+          "dps": {
+              "1592527717": -2.857142857142857,
+              "1592527718": 15.428571428571429,
+              ...
+              "1592527774": 9.285714285714286
+          },
+          "metric": "machine.sensor.raw_melt_temperature",
+          "tags": {
+              "expected_metric": "melt_temperature",
+              "port_num": "1"
+          }
+      }
+  ]
+
+  Case 3: none
+  ======
+  Query: "http://34.221.154.248:4242/api/query?start=2m-ago&end=1m-ago&m=none:machine.sensor.raw_melt_temperature"
+                                                                         ^^^^
+  Response: Observe that aggregateTags is empty and you get 2 timeseries back !
+  [
+      {
+          "aggregateTags": [],  <==== empty
+          "dps": {
+              "1592530632": 3,
+              ...
+              "1592530682": 3
+          },
+          "metric": "machine.sensor.raw_melt_temperature",
+          "tags": {
+              "expected_metric": "melt_temperature",
+              "machine_name": "90mm_extruder",
+              "port_num": "1"
+          }
+      },
+      {
+          "aggregateTags": [],   <=== empty
+          "dps": {
+              "1592530628": 1816,
+              ...
+              "1592530682": 1826
+          },
+          "metric": "machine.sensor.raw_melt_temperature",
+          "tags": {
+              "expected_metric": "melt_temperature",
+              "machine_name": "65mm_extruder",
+              "port_num": "1"
+          }
+      }
+  ]
+
+  Case 4: none:rate
+  http://34.221.154.248:4242/api/query?start=2m-ago&end=1m-ago&m=none:rate:machine.sensor.raw_melt_temperature
+                                                                 ^^^^^^^^^
+  Response:
+  [
+      {
+          "aggregateTags": [],
+          "dps": {
+              "1592531405": 0.0,
+              "1592531415": 0.0,
+              "1592531424": 0.0,
+              "1592531437": 0.0,
+              "1592531449": 0.0,
+              "1592531460": 0.0
+          },
+          "metric": "machine.sensor.raw_melt_temperature",
+          "tags": {
+              "expected_metric": "melt_temperature",
+              "machine_name": "90mm_extruder",
+              "port_num": "1"
+          }
+      },
+      {
+          "aggregateTags": [],
+          "dps": {
+              "1592531413": 1.0909090909090908,
+              "1592531422": 2.111111111111111,
+              "1592531430": -15.25,
+              "1592531442": 10.25,
+              "1592531454": -11.166666666666666
+          },
+          "metric": "machine.sensor.raw_melt_temperature",
+          "tags": {
+              "expected_metric": "melt_temperature",
+              "machine_name": "65mm_extruder",
+              "port_num": "1"
+          }
+      }
+  ]
+
+
+  =====================
+  Multi-metric queries:
+  =====================
+  Example 1: Get aggregated response for all
+  ------------------------------------------
+  http://34.221.154.248:4242/api/query?start=2m-ago&end=1m-ago&m=sum:machine.sensor.raw_melt_temperature&m=sum:machine.sensor.raw_melt_pressure&m=sum:machine.sensor.raw_screw_speed&m=sum:machine.sensor.raw_line_speed&m=sum:machine.sensor.raw_barrel_temperature_1&m=sum:machine.sensor.raw_barrel_temperature_2&m=sum:machine.sensor.raw_machine_powerOn_state&m=sum:machine.sensor.raw_wire_output_diameter
+  Response:  Contains 8 timeseries (1 per metric) aggregated by machine_name.
+  [
+      {
+          "aggregateTags": [
+              "machine_name"    <==== notice, this is non-empty !
+          ],
+          "dps": {
+              "1592531544": 1878,
+              "1592531550": 1907,
+              "1592531555": 1903,
+              "1592531563": 1896,
+              "1592531565": 1900,
+              "1592531573": 1920,
+              "1592531574": 1919,
+              "1592531582": 1906,
+              "1592531583": 1907,
+              "1592531592": 1922,
+              "1592531595": 1897,
+              "1592531602": 1836
+          },
+          "metric": "machine.sensor.raw_melt_temperature",
+          "tags": {
+              "expected_metric": "melt_temperature",
+              "port_num": "1"
+          }
+      },
+      {
+          "aggregateTags": [
+              "machine_name"    <==== notice, this is non-empty !
+          ],
+          "dps": {
+              "1592531545": 1728,
+              "1592531551": 1794,
+              "1592531555": 1758,
+              "1592531565": 1668,
+              "1592531574": 1805,
+              "1592531575": 1792,
+              "1592531583": 1684,
+              "1592531593": 1770,
+              "1592531595": 1772,
+              "1592531603": 1782
+          },
+          "metric": "machine.sensor.raw_melt_pressure",
+          "tags": {
+              "expected_metric": "melt_pressure",
+              "port_num": "2"
+          }
+      },
+      {
+          "aggregateTags": [
+              "machine_name"    <==== notice, this is non-empty !
+          ],
+          "dps": {
+              "1592531545": 1806,
+              "1592531555": 1898,
+              "1592531557": 1897,
+              "1592531565": 1894,
+              "1592531566": 1895,
+              "1592531575": 1888,
+              "1592531583": 1751,
+              "1592531595": 1887
+          },
+          "metric": "machine.sensor.raw_screw_speed",
+          "tags": {
+              "expected_metric": "screw_speed",
+              "port_num": "3"
+          }
+      },
+      {
+          "aggregateTags": [
+              "machine_name"    <==== notice, this is non-empty !
+          ],
+          "dps": {
+              "1592531545": 1742,
+              "1592531555": 1770,
+              "1592531557": 1789,
+              "1592531566": 1875,
+              "1592531575": 1765,
+              "1592531583": 1874,
+              "1592531584": 1863,
+              "1592531595": 1731,
+              "1592531596": 1739
+          },
+          "metric": "machine.sensor.raw_line_speed",
+          "tags": {
+              "expected_metric": "line_speed",
+              "port_num": "4"
+          }
+      },
+      {
+          "aggregateTags": [
+              "machine_name"    <==== notice, this is non-empty !
+          ],
+          "dps": {
+              "1592531544": 1764,
+              "1592531546": 1757,
+              "1592531556": 1718,
+              "1592531557": 1725,
+              "1592531566": 1789,
+              "1592531575": 1746,
+              "1592531576": 1746,
+              "1592531584": 1753,
+              "1592531595": 1738,
+              "1592531596": 1736
+          },
+          "metric": "machine.sensor.raw_barrel_temperature_1",
+          "tags": {
+              "expected_metric": "barrel_temperature_1",
+              "port_num": "5"
+          }
+      },
+      {
+          "aggregateTags": [
+              "machine_name"    <==== notice, this is non-empty !
+          ],
+          "dps": {
+              "1592531544": 1848,
+              "1592531546": 1840,
+              "1592531557": 1790,
+              "1592531566": 1895,
+              "1592531567": 1887,
+              "1592531576": 1812,
+              "1592531584": 1823,
+              "1592531596": 1919
+          },
+          "metric": "machine.sensor.raw_barrel_temperature_2",
+          "tags": {
+              "expected_metric": "barrel_temperature_2",
+              "port_num": "6"
+          }
+      },
+      {
+          "aggregateTags": [
+              "machine_name"    <==== notice, this is non-empty !
+          ],
+          "dps": {
+              "1592531545": 1803,
+              "1592531547": 1804,
+              "1592531557": 1814,
+              "1592531559": 1838,
+              "1592531566": 1922,
+              "1592531567": 1909,
+              "1592531576": 1792,
+              "1592531584": 1845,
+              "1592531585": 1845,
+              "1592531596": 1834
+          },
+          "metric": "machine.sensor.raw_machine_powerOn_state",
+          "tags": {
+              "expected_metric": "machine_powerOn_state",
+              "port_num": "7"
+          }
+      },
+      {
+          "aggregateTags": [
+              "machine_name"    <==== notice, this is non-empty !
+          ],
+          "dps": {
+              "1592531545": 1901,
+              "1592531549": 1903,
+              "1592531557": 1907,
+              "1592531560": 1888,
+              "1592531567": 1843,
+              "1592531568": 1840,
+              "1592531576": 1809,
+              "1592531577": 1809,
+              "1592531585": 1814,
+              "1592531588": 1836,
+              "1592531596": 1895,
+              "1592531601": 1896
+          },
+          "metric": "machine.sensor.raw_wire_output_diameter",
+          "tags": {
+              "expected_metric": "wire_output_diameter",
+              "port_num": "8"
+          }
+      }
+  ]
+
+
+
+  Example 2: Get aggregated response 1 metric and disaggregated for 1 other:
+  --------------------------------------------------------------------------
+  http://34.221.154.248:4242/api/query?start=2m-ago&end=1m-ago&m=sum:machine.sensor.raw_melt_temperature&m=none:machine.sensor.raw_melt_pressure
+  [
+      {
+          "aggregateTags": [
+              "machine_name"    <==== notice, this is non-empty !
+          ],
+          "dps": {
+              "1592531880": 1942,
+              ...
+              "1592531934": 1954
+          },
+          "metric": "machine.sensor.raw_melt_temperature",
+          "tags": {
+              "expected_metric": "melt_temperature",
+              "port_num": "1"
+          }
+      },
+      {
+          "aggregateTags": [],  <==== notice, this is EMPTY !
+          "dps": {
+              "1592531881": 3,
+              ...
+              "1592531934": 3
+          },
+          "metric": "machine.sensor.raw_melt_pressure",
+          "tags": {
+              "expected_metric": "melt_pressure",
+              "machine_name": "90mm_extruder",
+              "port_num": "2"
+          }
+      },
+      {
+          "aggregateTags": [],  <==== notice, this is EMPTY !
+          "dps": {
+              "1592531880": 1792,
+              ...
+              "1592531934": 1774
+          },
+          "metric": "machine.sensor.raw_melt_pressure",
+          "tags": {
+              "expected_metric": "melt_pressure",
+              "machine_name": "65mm_extruder",
+              "port_num": "2"
+          }
+      }
+  ]
+
