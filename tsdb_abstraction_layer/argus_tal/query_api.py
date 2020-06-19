@@ -12,6 +12,8 @@ import requests
 import json
 from . import query_urlgen as qurlgen
 from . import basic_types
+from . import timeseries_datadict as tsdd
+from . import timeseries_id as ts_id
 
 '''
 1. Input:
@@ -85,36 +87,10 @@ class QueryApi(object):
 
     # To store the HTTP response code (for ease of debuggability).
     self.__http_response_code = 0
-
-  def __validate_input_args(self, http_host, http_port, \
-        tsid_list, aggregator_type, start_time, end_time):
-    # Validate each parameter.
-    # RESUME HERE !!!
-    pass
-
-  def hello(self):
-    return "Hello from %s" % self.__class__.__name__
-
-  def __parse_query_response(resp_data):
-
-    assert(self.__aggregator == basic_types.Aggregator.NONE)
-
-    # If the aggregator is "none" then we can be guaranteed that each element
-    # in resp_data is a timeseries object. Simplifies parsing !
-    tsdd_list = []
-    for unique_ts in resp_data:
-      assert(len(unique_ts['aggregateTags']) == 0)
-      timeseries_data_dict = TimeseriesDataDict( \
-          TimeseriesID(unique_ts['metric'], unique_ts['tags']), \
-          unique_ts['dps'])
-      tsdd_list.append(timeseries_data_dict)
-
-    # Its not improbable that we got a legit JSON response back BUT containing
-    # no timeseries data. That would still be an error !
-    if len(tsdd_list) == 0:
-      return tsdd_list, -3  # error
-    return tsdd_list, 0  # sucess
                                       
+    # Expected tags in the response received (per timeseries)
+    self.__tags_expected_in_response = ["aggregateTags", "dps", \
+                                        "metric", "tags"]
   '''
     This will trigger the HTTP call to the TSDB, parse the result. If the HTTP
     fails, this call will return an error.
@@ -130,10 +106,11 @@ class QueryApi(object):
     # FIXME: Add handling of all HTPP error types.
     if response.status_code < 200 or response.status_code > 299:
       # log error.
+      self.__http_response_code = response.status_code
       return -1
 
     try:
-      self.__tsdd_obj_list, error = self.__parse_query_response(resp.json())  
+      self.__tsdd_obj_list, error = self.__parse_query_response(response.json())
     except ValueError:
       # log error
       return -2  # JSON response could not be decoded
@@ -142,3 +119,47 @@ class QueryApi(object):
 
   def get_result_set(self):
     return self.__tsdd_obj_list
+
+  @property
+  def http_status_code(self):
+    return self.__http_response_code
+
+  #############################################################################
+  # Helper methods start here.
+  #############################################################################
+  def __validate_input_args(self, http_host, http_port, \
+        tsid_list, aggregator_type, start_time, end_time):
+    # Validate each parameter.
+    # RESUME HERE !!!
+    pass
+
+  def hello(self):
+    return "Hello from %s" % self.__class__.__name__
+
+  def __all_tags_found(self, expected_tags, response_data):
+    for tag in expected_tags:
+      if None == response_data.get(tag, None):
+        return False
+    return True
+
+  def __parse_query_response(self, resp_data):
+    assert(self.__aggregator == basic_types.Aggregator.NONE)
+
+    # If the aggregator is "none" then we can be guaranteed that each element
+    # in resp_data is a timeseries object. Simplifies parsing !
+    tsdd_list = []
+    for unique_ts in resp_data:
+      if not self.__all_tags_found(self.__tags_expected_in_response, unique_ts):
+        return tsdd_list, -2  # FIXME: This should become an exception
+
+      assert(len(unique_ts['aggregateTags']) == 0)
+      timeseries_data_dict = tsdd.TimeseriesDataDict( \
+          ts_id.TimeseriesID(unique_ts['metric'], unique_ts['tags']), \
+          unique_ts['dps'])
+      tsdd_list.append(timeseries_data_dict)
+
+    # Its not improbable that we got a legit JSON response back BUT containing
+    # no timeseries data. That would still be an error !
+    if len(tsdd_list) == 0:
+      return tsdd_list, -3  # error
+    return tsdd_list, 0  # sucess

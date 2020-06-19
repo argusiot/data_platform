@@ -9,8 +9,54 @@ from argus_tal import basic_types as bt
 import random
 
 def get_dummy_query_params():
-  return "172.1.1.1", 4242, "some_metric", {"filer1":"value1"}, \
-          bt.Aggregator.NONE, ts.Timestamp('10'), ts.Timestamp('20')
+  return "172.1.1.1", 4242, "some_metric", {"filter1":"value1"}, \
+          bt.Aggregator.NONE, ts.Timestamp('1234510'), ts.Timestamp('1234570')
+
+def get_url_for_dummy_query_params():
+  return "http://172.1.1.1:4242/api/query?start=1234510&end=1234570" \
+      "&m=none:some_metric{filter1=value1}" \
+
+def get_url_for_truncated_json_response():
+  return "http://172.1.1.1:4242/api/query?start=1234510&end=1234570" \
+      "&m=none:truncated_json_metric{filter1=value1}" \
+
+def get_truncated_json_response():
+  # Problems:
+  #  1) Typo with aggregateTags
+  #  2) missing metric field
+  return [{ \
+            "aggreTags": [], \
+            "dps": { \
+              1234510: 10, \
+              1234560: 60, \
+              1234570: 70, \
+              1234530: 30, \
+              1234520: 20, \
+              1234550: 50, \
+              1234540: 40, \
+            }, \
+            "tags": { \
+                "filter1": "value1" \
+            } \
+        }]
+
+def get_good_json_response():
+  return [{ \
+            "aggregateTags": [], \
+            "dps": { \
+              1234510: 10, \
+              1234560: 60, \
+              1234570: 70, \
+              1234530: 30, \
+              1234520: 20, \
+              1234550: 50, \
+              1234540: 40, \
+            }, \
+            "metric": "some_metric", \
+            "tags": { \
+                "filter1": "value1" \
+            } \
+        }]
 
 def __generate_test_dict(key_as_string):
   tmp_dict = get_UNsorted_datapoints()
