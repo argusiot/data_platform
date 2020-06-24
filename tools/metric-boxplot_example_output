@@ -1,59 +1,19 @@
-Processing Label ' NCD B1 12bit noise ' --  Time window: (1590266436000, 1590531327000)
-http://34.221.154.248:4242/api/query?start=1590266436000&end=1590531327000&m=none:machine.sensor.raw_melt_temperature{machine_name=65mm_extruder}
-http://34.221.154.248:4242/api/query?start=1590266436000&end=1590531327000&m=none:machine.sensor.raw_melt_pressure{machine_name=65mm_extruder}
-http://34.221.154.248:4242/api/query?start=1590266436000&end=1590531327000&m=none:machine.sensor.raw_screw_speed{machine_name=65mm_extruder}
-http://34.221.154.248:4242/api/query?start=1590266436000&end=1590531327000&m=none:machine.sensor.raw_line_speed{machine_name=65mm_extruder}
-http://34.221.154.248:4242/api/query?start=1590266436000&end=1590531327000&m=none:machine.sensor.raw_barrel_temperature_1{machine_name=65mm_extruder}
-http://34.221.154.248:4242/api/query?start=1590266436000&end=1590531327000&m=none:machine.sensor.raw_barrel_temperature_2{machine_name=65mm_extruder}
-http://34.221.154.248:4242/api/query?start=1590266436000&end=1590531327000&m=none:machine.sensor.raw_machine_powerOn_state{machine_name=65mm_extruder}
-http://34.221.154.248:4242/api/query?start=1590266436000&end=1590531327000&m=none:machine.sensor.raw_wire_output_diameter{machine_name=65mm_extruder}
-
-
-Processing Label ' NCD B1 12bit 12mA ' --  Time window: (1590535460459, 1590795803317)
-http://34.221.154.248:4242/api/query?start=1590535460459&end=1590795803317&m=none:machine.sensor.raw_melt_temperature{machine_name=65mm_extruder}
-http://34.221.154.248:4242/api/query?start=1590535460459&end=1590795803317&m=none:machine.sensor.raw_melt_pressure{machine_name=65mm_extruder}
-http://34.221.154.248:4242/api/query?start=1590535460459&end=1590795803317&m=none:machine.sensor.raw_screw_speed{machine_name=65mm_extruder}
-http://34.221.154.248:4242/api/query?start=1590535460459&end=1590795803317&m=none:machine.sensor.raw_line_speed{machine_name=65mm_extruder}
-http://34.221.154.248:4242/api/query?start=1590535460459&end=1590795803317&m=none:machine.sensor.raw_barrel_temperature_1{machine_name=65mm_extruder}
-http://34.221.154.248:4242/api/query?start=1590535460459&end=1590795803317&m=none:machine.sensor.raw_barrel_temperature_2{machine_name=65mm_extruder}
-http://34.221.154.248:4242/api/query?start=1590535460459&end=1590795803317&m=none:machine.sensor.raw_machine_powerOn_state{machine_name=65mm_extruder}
-http://34.221.154.248:4242/api/query?start=1590535460459&end=1590795803317&m=none:machine.sensor.raw_wire_output_diameter{machine_name=65mm_extruder}
-
-
-Processing Label ' NCD B1 12bit 4mA ' --  Time window: (1590797194095, 1591054653037)
-http://34.221.154.248:4242/api/query?start=1590797194095&end=1591054653037&m=none:machine.sensor.raw_melt_temperature{machine_name=65mm_extruder}
-http://34.221.154.248:4242/api/query?start=1590797194095&end=1591054653037&m=none:machine.sensor.raw_melt_pressure{machine_name=65mm_extruder}
-http://34.221.154.248:4242/api/query?start=1590797194095&end=1591054653037&m=none:machine.sensor.raw_screw_speed{machine_name=65mm_extruder}
-http://34.221.154.248:4242/api/query?start=1590797194095&end=1591054653037&m=none:machine.sensor.raw_line_speed{machine_name=65mm_extruder}
-http://34.221.154.248:4242/api/query?start=1590797194095&end=1591054653037&m=none:machine.sensor.raw_barrel_temperature_1{machine_name=65mm_extruder}
-http://34.221.154.248:4242/api/query?start=1590797194095&end=1591054653037&m=none:machine.sensor.raw_barrel_temperature_2{machine_name=65mm_extruder}
-http://34.221.154.248:4242/api/query?start=1590797194095&end=1591054653037&m=none:machine.sensor.raw_machine_powerOn_state{machine_name=65mm_extruder}
-http://34.221.154.248:4242/api/query?start=1590797194095&end=1591054653037&m=none:machine.sensor.raw_wire_output_diameter{machine_name=65mm_extruder}
-
-
-Processing Label ' NCD B1 12bit 20mA ' --  Time window: (1591056123708, 1591195347829)
-http://34.221.154.248:4242/api/query?start=1591056123708&end=1591195347829&m=none:machine.sensor.raw_melt_temperature{machine_name=65mm_extruder}
-http://34.221.154.248:4242/api/query?start=1591056123708&end=1591195347829&m=none:machine.sensor.raw_melt_pressure{machine_name=65mm_extruder}
-http://34.221.154.248:4242/api/query?start=1591056123708&end=1591195347829&m=none:machine.sensor.raw_screw_speed{machine_name=65mm_extruder}
-http://34.221.154.248:4242/api/query?start=1591056123708&end=1591195347829&m=none:machine.sensor.raw_line_speed{machine_name=65mm_extruder}
-http://34.221.154.248:4242/api/query?start=1591056123708&end=1591195347829&m=none:machine.sensor.raw_barrel_temperature_1{machine_name=65mm_extruder}
-http://34.221.154.248:4242/api/query?start=1591056123708&end=1591195347829&m=none:machine.sensor.raw_barrel_temperature_2{machine_name=65mm_extruder}
-http://34.221.154.248:4242/api/query?start=1591056123708&end=1591195347829&m=none:machine.sensor.raw_machine_powerOn_state{machine_name=65mm_extruder}
-http://34.221.154.248:4242/api/query?start=1591056123708&end=1591195347829&m=none:machine.sensor.raw_wire_output_diameter{machine_name=65mm_extruder}
-
-
-Processing Label ' Meanwell B1 12bit 12mA ' --  Time window: (1591254986805, 1591598426805)
-http://34.221.154.248:4242/api/query?start=1591254986805&end=1591598426805&m=none:machine.sensor.raw_melt_temperature{machine_name=65mm_extruder}
-http://34.221.154.248:4242/api/query?start=1591254986805&end=1591598426805&m=none:machine.sensor.raw_melt_pressure{machine_name=65mm_extruder}
-http://34.221.154.248:4242/api/query?start=1591254986805&end=1591598426805&m=none:machine.sensor.raw_screw_speed{machine_name=65mm_extruder}
-http://34.221.154.248:4242/api/query?start=1591254986805&end=1591598426805&m=none:machine.sensor.raw_line_speed{machine_name=65mm_extruder}
-http://34.221.154.248:4242/api/query?start=1591254986805&end=1591598426805&m=none:machine.sensor.raw_barrel_temperature_1{machine_name=65mm_extruder}
-http://34.221.154.248:4242/api/query?start=1591254986805&end=1591598426805&m=none:machine.sensor.raw_barrel_temperature_2{machine_name=65mm_extruder}
-http://34.221.154.248:4242/api/query?start=1591254986805&end=1591598426805&m=none:machine.sensor.raw_machine_powerOn_state{machine_name=65mm_extruder}
-http://34.221.154.248:4242/api/query?start=1591254986805&end=1591598426805&m=none:machine.sensor.raw_wire_output_diameter{machine_name=65mm_extruder}
-
-
-Processing Label ' Meanwell B1 12bit 4mA ' --  Time window: (1591602433946, 1591856006905)
+Skipping B1 Meanwell 12bit noise ...incomplete information !
+Skipping B2 Meanwell 12bit 4mA ...incomplete information !
+Skipping B2 Meanwell 12bit 20mA ...incomplete information !
+Skipping B3 Meanwell 12bit noise ...incomplete information !
+Skipping B3 NCD 12bit noise ...incomplete information !
+Skipping B3 NCD 12bit 20mA ...incomplete information !
+Skipping B4 Meanwell 12bit noise ...incomplete information !
+Skipping B4 Meanwell 12bit 4mA ...incomplete information !
+Skipping B4 Meanwell 12bit 12mA ...incomplete information !
+Skipping B4 Meanwell 12bit 20mA ...incomplete information !
+Skipping B4 NCD 12bit noise ...incomplete information !
+Skipping B4 NCD 12bit 4mA ...incomplete information !
+Skipping B4 NCD 12bit 12mA ...incomplete information !
+Skipping B4 NCD 12bit 20mA ...incomplete information !
+Processing Label - B1 Meanwell 12bit 4mA 
+Time window: (1591602433946, 1591856006905)
 http://34.221.154.248:4242/api/query?start=1591602433946&end=1591856006905&m=none:machine.sensor.raw_melt_temperature{machine_name=65mm_extruder}
 http://34.221.154.248:4242/api/query?start=1591602433946&end=1591856006905&m=none:machine.sensor.raw_melt_pressure{machine_name=65mm_extruder}
 http://34.221.154.248:4242/api/query?start=1591602433946&end=1591856006905&m=none:machine.sensor.raw_screw_speed{machine_name=65mm_extruder}
@@ -64,7 +24,20 @@ http://34.221.154.248:4242/api/query?start=1591602433946&end=1591856006905&m=non
 http://34.221.154.248:4242/api/query?start=1591602433946&end=1591856006905&m=none:machine.sensor.raw_wire_output_diameter{machine_name=65mm_extruder}
 
 
-Processing Label ' Meanwell B1 12bit 20mA ' --  Time window: (1591861880247, 1592105481236)
+Processing Label - B1 Meanwell 12bit 12mA 
+Time window: (1591254986805, 1591598426805)
+http://34.221.154.248:4242/api/query?start=1591254986805&end=1591598426805&m=none:machine.sensor.raw_melt_temperature{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1591254986805&end=1591598426805&m=none:machine.sensor.raw_melt_pressure{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1591254986805&end=1591598426805&m=none:machine.sensor.raw_screw_speed{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1591254986805&end=1591598426805&m=none:machine.sensor.raw_line_speed{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1591254986805&end=1591598426805&m=none:machine.sensor.raw_barrel_temperature_1{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1591254986805&end=1591598426805&m=none:machine.sensor.raw_barrel_temperature_2{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1591254986805&end=1591598426805&m=none:machine.sensor.raw_machine_powerOn_state{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1591254986805&end=1591598426805&m=none:machine.sensor.raw_wire_output_diameter{machine_name=65mm_extruder}
+
+
+Processing Label - B1 Meanwell 12bit 20mA 
+Time window: (1591861880247, 1592105481236)
 http://34.221.154.248:4242/api/query?start=1591861880247&end=1592105481236&m=none:machine.sensor.raw_melt_temperature{machine_name=65mm_extruder}
 http://34.221.154.248:4242/api/query?start=1591861880247&end=1592105481236&m=none:machine.sensor.raw_melt_pressure{machine_name=65mm_extruder}
 http://34.221.154.248:4242/api/query?start=1591861880247&end=1592105481236&m=none:machine.sensor.raw_screw_speed{machine_name=65mm_extruder}
@@ -75,7 +48,56 @@ http://34.221.154.248:4242/api/query?start=1591861880247&end=1592105481236&m=non
 http://34.221.154.248:4242/api/query?start=1591861880247&end=1592105481236&m=none:machine.sensor.raw_wire_output_diameter{machine_name=65mm_extruder}
 
 
-Processing Label ' Meanwell B2 12bit noise ' --  Time window: (1590776274005, 1591121874005)
+Processing Label - B1 NCD 12bit noise 
+Time window: (1590266436000, 1590531327000)
+http://34.221.154.248:4242/api/query?start=1590266436000&end=1590531327000&m=none:machine.sensor.raw_melt_temperature{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1590266436000&end=1590531327000&m=none:machine.sensor.raw_melt_pressure{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1590266436000&end=1590531327000&m=none:machine.sensor.raw_screw_speed{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1590266436000&end=1590531327000&m=none:machine.sensor.raw_line_speed{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1590266436000&end=1590531327000&m=none:machine.sensor.raw_barrel_temperature_1{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1590266436000&end=1590531327000&m=none:machine.sensor.raw_barrel_temperature_2{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1590266436000&end=1590531327000&m=none:machine.sensor.raw_machine_powerOn_state{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1590266436000&end=1590531327000&m=none:machine.sensor.raw_wire_output_diameter{machine_name=65mm_extruder}
+
+
+Processing Label - B1 NCD 12bit 4mA 
+Time window: (1590797194095, 1591054653037)
+http://34.221.154.248:4242/api/query?start=1590797194095&end=1591054653037&m=none:machine.sensor.raw_melt_temperature{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1590797194095&end=1591054653037&m=none:machine.sensor.raw_melt_pressure{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1590797194095&end=1591054653037&m=none:machine.sensor.raw_screw_speed{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1590797194095&end=1591054653037&m=none:machine.sensor.raw_line_speed{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1590797194095&end=1591054653037&m=none:machine.sensor.raw_barrel_temperature_1{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1590797194095&end=1591054653037&m=none:machine.sensor.raw_barrel_temperature_2{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1590797194095&end=1591054653037&m=none:machine.sensor.raw_machine_powerOn_state{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1590797194095&end=1591054653037&m=none:machine.sensor.raw_wire_output_diameter{machine_name=65mm_extruder}
+
+
+Processing Label - B1 NCD 12bit 12mA 
+Time window: (1590535460459, 1590795803317)
+http://34.221.154.248:4242/api/query?start=1590535460459&end=1590795803317&m=none:machine.sensor.raw_melt_temperature{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1590535460459&end=1590795803317&m=none:machine.sensor.raw_melt_pressure{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1590535460459&end=1590795803317&m=none:machine.sensor.raw_screw_speed{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1590535460459&end=1590795803317&m=none:machine.sensor.raw_line_speed{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1590535460459&end=1590795803317&m=none:machine.sensor.raw_barrel_temperature_1{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1590535460459&end=1590795803317&m=none:machine.sensor.raw_barrel_temperature_2{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1590535460459&end=1590795803317&m=none:machine.sensor.raw_machine_powerOn_state{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1590535460459&end=1590795803317&m=none:machine.sensor.raw_wire_output_diameter{machine_name=65mm_extruder}
+
+
+Processing Label - B1 NCD 12bit 20mA 
+Time window: (1591056123708, 1591195347829)
+http://34.221.154.248:4242/api/query?start=1591056123708&end=1591195347829&m=none:machine.sensor.raw_melt_temperature{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1591056123708&end=1591195347829&m=none:machine.sensor.raw_melt_pressure{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1591056123708&end=1591195347829&m=none:machine.sensor.raw_screw_speed{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1591056123708&end=1591195347829&m=none:machine.sensor.raw_line_speed{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1591056123708&end=1591195347829&m=none:machine.sensor.raw_barrel_temperature_1{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1591056123708&end=1591195347829&m=none:machine.sensor.raw_barrel_temperature_2{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1591056123708&end=1591195347829&m=none:machine.sensor.raw_machine_powerOn_state{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1591056123708&end=1591195347829&m=none:machine.sensor.raw_wire_output_diameter{machine_name=65mm_extruder}
+
+
+Processing Label - B2 Meanwell 12bit noise 
+Time window: (1590776274005, 1591121874005)
 http://34.221.154.248:4242/api/query?start=1590776274005&end=1591121874005&m=none:machine.sensor.raw_melt_temperature{machine_name=90mm_extruder}
 http://34.221.154.248:4242/api/query?start=1590776274005&end=1591121874005&m=none:machine.sensor.raw_melt_pressure{machine_name=90mm_extruder}
 http://34.221.154.248:4242/api/query?start=1590776274005&end=1591121874005&m=none:machine.sensor.raw_screw_speed{machine_name=90mm_extruder}
@@ -86,7 +108,44 @@ http://34.221.154.248:4242/api/query?start=1590776274005&end=1591121874005&m=non
 http://34.221.154.248:4242/api/query?start=1590776274005&end=1591121874005&m=none:machine.sensor.raw_wire_output_diameter{machine_name=90mm_extruder}
 
 
-Processing Label ' NCD B2 12bit 12mA ' --  Time window: (1591840083264, 1592116101309)
+Processing Label - B2 Meanwell 12bit 12mA 
+Time window: (1592682580604, 1592856251133)
+http://34.221.154.248:4242/api/query?start=1592682580604&end=1592856251133&m=none:machine.sensor.raw_melt_temperature{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1592682580604&end=1592856251133&m=none:machine.sensor.raw_melt_pressure{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1592682580604&end=1592856251133&m=none:machine.sensor.raw_screw_speed{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1592682580604&end=1592856251133&m=none:machine.sensor.raw_line_speed{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1592682580604&end=1592856251133&m=none:machine.sensor.raw_barrel_temperature_1{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1592682580604&end=1592856251133&m=none:machine.sensor.raw_barrel_temperature_2{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1592682580604&end=1592856251133&m=none:machine.sensor.raw_machine_powerOn_state{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1592682580604&end=1592856251133&m=none:machine.sensor.raw_wire_output_diameter{machine_name=65mm_extruder}
+
+
+Processing Label - B2 NCD 12bit noise 
+Time window: (1592510414274, 1592678666905)
+http://34.221.154.248:4242/api/query?start=1592510414274&end=1592678666905&m=none:machine.sensor.raw_melt_temperature{machine_name=90mm_extruder}
+http://34.221.154.248:4242/api/query?start=1592510414274&end=1592678666905&m=none:machine.sensor.raw_melt_pressure{machine_name=90mm_extruder}
+http://34.221.154.248:4242/api/query?start=1592510414274&end=1592678666905&m=none:machine.sensor.raw_screw_speed{machine_name=90mm_extruder}
+http://34.221.154.248:4242/api/query?start=1592510414274&end=1592678666905&m=none:machine.sensor.raw_line_speed{machine_name=90mm_extruder}
+http://34.221.154.248:4242/api/query?start=1592510414274&end=1592678666905&m=none:machine.sensor.raw_barrel_temperature_1{machine_name=90mm_extruder}
+http://34.221.154.248:4242/api/query?start=1592510414274&end=1592678666905&m=none:machine.sensor.raw_barrel_temperature_2{machine_name=90mm_extruder}
+http://34.221.154.248:4242/api/query?start=1592510414274&end=1592678666905&m=none:machine.sensor.raw_machine_powerOn_state{machine_name=90mm_extruder}
+http://34.221.154.248:4242/api/query?start=1592510414274&end=1592678666905&m=none:machine.sensor.raw_wire_output_diameter{machine_name=90mm_extruder}
+
+
+Processing Label - B2 NCD 12bit 4mA 
+Time window: (1592163652732, 1592333405881)
+http://34.221.154.248:4242/api/query?start=1592163652732&end=1592333405881&m=none:machine.sensor.raw_melt_temperature{machine_name=90mm_extruder}
+http://34.221.154.248:4242/api/query?start=1592163652732&end=1592333405881&m=none:machine.sensor.raw_melt_pressure{machine_name=90mm_extruder}
+http://34.221.154.248:4242/api/query?start=1592163652732&end=1592333405881&m=none:machine.sensor.raw_screw_speed{machine_name=90mm_extruder}
+http://34.221.154.248:4242/api/query?start=1592163652732&end=1592333405881&m=none:machine.sensor.raw_line_speed{machine_name=90mm_extruder}
+http://34.221.154.248:4242/api/query?start=1592163652732&end=1592333405881&m=none:machine.sensor.raw_barrel_temperature_1{machine_name=90mm_extruder}
+http://34.221.154.248:4242/api/query?start=1592163652732&end=1592333405881&m=none:machine.sensor.raw_barrel_temperature_2{machine_name=90mm_extruder}
+http://34.221.154.248:4242/api/query?start=1592163652732&end=1592333405881&m=none:machine.sensor.raw_machine_powerOn_state{machine_name=90mm_extruder}
+http://34.221.154.248:4242/api/query?start=1592163652732&end=1592333405881&m=none:machine.sensor.raw_wire_output_diameter{machine_name=90mm_extruder}
+
+
+Processing Label - B2 NCD 12bit 12mA 
+Time window: (1591840083264, 1592116101309)
 http://34.221.154.248:4242/api/query?start=1591840083264&end=1592116101309&m=none:machine.sensor.raw_melt_temperature{machine_name=90mm_extruder}
 http://34.221.154.248:4242/api/query?start=1591840083264&end=1592116101309&m=none:machine.sensor.raw_melt_pressure{machine_name=90mm_extruder}
 http://34.221.154.248:4242/api/query?start=1591840083264&end=1592116101309&m=none:machine.sensor.raw_screw_speed{machine_name=90mm_extruder}
@@ -97,98 +156,259 @@ http://34.221.154.248:4242/api/query?start=1591840083264&end=1592116101309&m=non
 http://34.221.154.248:4242/api/query?start=1591840083264&end=1592116101309&m=none:machine.sensor.raw_wire_output_diameter{machine_name=90mm_extruder}
 
 
-Processing Label ' Meanwell B3 12bit 12mA ' --  Time window: (1592109864283, 1592163203788)
-http://34.221.154.248:4242/api/query?start=1592109864283&end=1592163203788&m=none:machine.sensor.raw_melt_temperature{machine_name=65mm_extruder}
-http://34.221.154.248:4242/api/query?start=1592109864283&end=1592163203788&m=none:machine.sensor.raw_melt_pressure{machine_name=65mm_extruder}
-http://34.221.154.248:4242/api/query?start=1592109864283&end=1592163203788&m=none:machine.sensor.raw_screw_speed{machine_name=65mm_extruder}
-http://34.221.154.248:4242/api/query?start=1592109864283&end=1592163203788&m=none:machine.sensor.raw_line_speed{machine_name=65mm_extruder}
-http://34.221.154.248:4242/api/query?start=1592109864283&end=1592163203788&m=none:machine.sensor.raw_barrel_temperature_1{machine_name=65mm_extruder}
-http://34.221.154.248:4242/api/query?start=1592109864283&end=1592163203788&m=none:machine.sensor.raw_barrel_temperature_2{machine_name=65mm_extruder}
-http://34.221.154.248:4242/api/query?start=1592109864283&end=1592163203788&m=none:machine.sensor.raw_machine_powerOn_state{machine_name=65mm_extruder}
-http://34.221.154.248:4242/api/query?start=1592109864283&end=1592163203788&m=none:machine.sensor.raw_wire_output_diameter{machine_name=65mm_extruder}
+Processing Label - B2 NCD 12bit 20mA 
+Time window: (1592337306552, 1592507785142)
+http://34.221.154.248:4242/api/query?start=1592337306552&end=1592507785142&m=none:machine.sensor.raw_melt_temperature{machine_name=90mm_extruder}
+http://34.221.154.248:4242/api/query?start=1592337306552&end=1592507785142&m=none:machine.sensor.raw_melt_pressure{machine_name=90mm_extruder}
+http://34.221.154.248:4242/api/query?start=1592337306552&end=1592507785142&m=none:machine.sensor.raw_screw_speed{machine_name=90mm_extruder}
+http://34.221.154.248:4242/api/query?start=1592337306552&end=1592507785142&m=none:machine.sensor.raw_line_speed{machine_name=90mm_extruder}
+http://34.221.154.248:4242/api/query?start=1592337306552&end=1592507785142&m=none:machine.sensor.raw_barrel_temperature_1{machine_name=90mm_extruder}
+http://34.221.154.248:4242/api/query?start=1592337306552&end=1592507785142&m=none:machine.sensor.raw_barrel_temperature_2{machine_name=90mm_extruder}
+http://34.221.154.248:4242/api/query?start=1592337306552&end=1592507785142&m=none:machine.sensor.raw_machine_powerOn_state{machine_name=90mm_extruder}
+http://34.221.154.248:4242/api/query?start=1592337306552&end=1592507785142&m=none:machine.sensor.raw_wire_output_diameter{machine_name=90mm_extruder}
+
+
+Processing Label - B3 Meanwell 12bit 4mA 
+Time window: (1592285476504, 1592457115799)
+http://34.221.154.248:4242/api/query?start=1592285476504&end=1592457115799&m=none:machine.sensor.raw_melt_temperature{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1592285476504&end=1592457115799&m=none:machine.sensor.raw_melt_pressure{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1592285476504&end=1592457115799&m=none:machine.sensor.raw_screw_speed{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1592285476504&end=1592457115799&m=none:machine.sensor.raw_line_speed{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1592285476504&end=1592457115799&m=none:machine.sensor.raw_barrel_temperature_1{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1592285476504&end=1592457115799&m=none:machine.sensor.raw_barrel_temperature_2{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1592285476504&end=1592457115799&m=none:machine.sensor.raw_machine_powerOn_state{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1592285476504&end=1592457115799&m=none:machine.sensor.raw_wire_output_diameter{machine_name=65mm_extruder}
+
+
+Processing Label - B3 Meanwell 12bit 12mA 
+Time window: (1592110735947, 1592282375242)
+http://34.221.154.248:4242/api/query?start=1592110735947&end=1592282375242&m=none:machine.sensor.raw_melt_temperature{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1592110735947&end=1592282375242&m=none:machine.sensor.raw_melt_pressure{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1592110735947&end=1592282375242&m=none:machine.sensor.raw_screw_speed{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1592110735947&end=1592282375242&m=none:machine.sensor.raw_line_speed{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1592110735947&end=1592282375242&m=none:machine.sensor.raw_barrel_temperature_1{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1592110735947&end=1592282375242&m=none:machine.sensor.raw_barrel_temperature_2{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1592110735947&end=1592282375242&m=none:machine.sensor.raw_machine_powerOn_state{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1592110735947&end=1592282375242&m=none:machine.sensor.raw_wire_output_diameter{machine_name=65mm_extruder}
+
+
+Processing Label - B3 Meanwell 12bit 20mA 
+Time window: (1592459002292, 1592680067863)
+http://34.221.154.248:4242/api/query?start=1592459002292&end=1592680067863&m=none:machine.sensor.raw_melt_temperature{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1592459002292&end=1592680067863&m=none:machine.sensor.raw_melt_pressure{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1592459002292&end=1592680067863&m=none:machine.sensor.raw_screw_speed{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1592459002292&end=1592680067863&m=none:machine.sensor.raw_line_speed{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1592459002292&end=1592680067863&m=none:machine.sensor.raw_barrel_temperature_1{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1592459002292&end=1592680067863&m=none:machine.sensor.raw_barrel_temperature_2{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1592459002292&end=1592680067863&m=none:machine.sensor.raw_machine_powerOn_state{machine_name=65mm_extruder}
+http://34.221.154.248:4242/api/query?start=1592459002292&end=1592680067863&m=none:machine.sensor.raw_wire_output_diameter{machine_name=65mm_extruder}
+
+
+Processing Label - B3 NCD 12bit 4mA 
+Time window: (1592859521554, 1593032103921)
+http://34.221.154.248:4242/api/query?start=1592859521554&end=1593032103921&m=none:machine.sensor.raw_melt_temperature{machine_name=90mm_extruder}
+http://34.221.154.248:4242/api/query?start=1592859521554&end=1593032103921&m=none:machine.sensor.raw_melt_pressure{machine_name=90mm_extruder}
+http://34.221.154.248:4242/api/query?start=1592859521554&end=1593032103921&m=none:machine.sensor.raw_screw_speed{machine_name=90mm_extruder}
+http://34.221.154.248:4242/api/query?start=1592859521554&end=1593032103921&m=none:machine.sensor.raw_line_speed{machine_name=90mm_extruder}
+http://34.221.154.248:4242/api/query?start=1592859521554&end=1593032103921&m=none:machine.sensor.raw_barrel_temperature_1{machine_name=90mm_extruder}
+http://34.221.154.248:4242/api/query?start=1592859521554&end=1593032103921&m=none:machine.sensor.raw_barrel_temperature_2{machine_name=90mm_extruder}
+http://34.221.154.248:4242/api/query?start=1592859521554&end=1593032103921&m=none:machine.sensor.raw_machine_powerOn_state{machine_name=90mm_extruder}
+http://34.221.154.248:4242/api/query?start=1592859521554&end=1593032103921&m=none:machine.sensor.raw_wire_output_diameter{machine_name=90mm_extruder}
+
+
+Processing Label - B3 NCD 12bit 12mA 
+Time window: (1592682304060, 1592855609324)
+http://34.221.154.248:4242/api/query?start=1592682304060&end=1592855609324&m=none:machine.sensor.raw_melt_temperature{machine_name=90mm_extruder}
+http://34.221.154.248:4242/api/query?start=1592682304060&end=1592855609324&m=none:machine.sensor.raw_melt_pressure{machine_name=90mm_extruder}
+http://34.221.154.248:4242/api/query?start=1592682304060&end=1592855609324&m=none:machine.sensor.raw_screw_speed{machine_name=90mm_extruder}
+http://34.221.154.248:4242/api/query?start=1592682304060&end=1592855609324&m=none:machine.sensor.raw_line_speed{machine_name=90mm_extruder}
+http://34.221.154.248:4242/api/query?start=1592682304060&end=1592855609324&m=none:machine.sensor.raw_barrel_temperature_1{machine_name=90mm_extruder}
+http://34.221.154.248:4242/api/query?start=1592682304060&end=1592855609324&m=none:machine.sensor.raw_barrel_temperature_2{machine_name=90mm_extruder}
+http://34.221.154.248:4242/api/query?start=1592682304060&end=1592855609324&m=none:machine.sensor.raw_machine_powerOn_state{machine_name=90mm_extruder}
+http://34.221.154.248:4242/api/query?start=1592682304060&end=1592855609324&m=none:machine.sensor.raw_wire_output_diameter{machine_name=90mm_extruder}
 
 
 See boxplots generated here: /vagrant/boxplots/
 
-Label format: <power_src> <ADC board> <sampling resolution> <input_signal>
-Label                                        Metric          DataPt      Min      Max     Mean   StdDev percentDev
-NCD B1 12bit noise             raw_melt_temperature           30031       10       16     12.7     1.45    11.44
-NCD B1 12bit noise                raw_melt_pressure           30031       27       64     42.5     8.81    20.75
-NCD B1 12bit noise                  raw_screw_speed           30030       20       45     30.6     6.32    20.65
-NCD B1 12bit noise                   raw_line_speed           30030        3        3      3.0     0.00     0.00
-NCD B1 12bit noise         raw_barrel_temperature_1           30030       14       31     21.4     3.95    18.46
-NCD B1 12bit noise         raw_barrel_temperature_2           30030       16       27     20.9     2.63    12.59
-NCD B1 12bit noise        raw_machine_powerOn_state           30029        3        3      3.0     0.00     0.00
-NCD B1 12bit noise         raw_wire_output_diameter           30029        2        3      3.0     0.01     0.19
-NCD B1 12bit 12mA              raw_melt_temperature           29503     1091     1123   1107.9     6.23     0.56
-NCD B1 12bit 12mA                 raw_melt_pressure           29503     1122     1187   1151.4    11.62     1.01
-NCD B1 12bit 12mA                   raw_screw_speed           29503     1109     1160   1133.2     8.96     0.79
-NCD B1 12bit 12mA                    raw_line_speed           29503     1056     1088   1074.7     6.23     0.58
-NCD B1 12bit 12mA          raw_barrel_temperature_1           29503     1106     1142   1121.7     7.13     0.64
-NCD B1 12bit 12mA          raw_barrel_temperature_2           29503     1097     1128   1110.3     6.26     0.56
-NCD B1 12bit 12mA         raw_machine_powerOn_state           29503     1062     1089   1076.3     6.04     0.56
-NCD B1 12bit 12mA          raw_wire_output_diameter           29503     1051     1084   1068.7     6.73     0.63
-NCD B1 12bit 4mA               raw_melt_temperature           29669      359      387    373.8     6.13     1.64
-NCD B1 12bit 4mA                  raw_melt_pressure           29669      379      432    401.3     7.89     1.97
-NCD B1 12bit 4mA                    raw_screw_speed           29669      370      413    389.5     7.03     1.81
-NCD B1 12bit 4mA                     raw_line_speed           29669      333      363    350.8     6.07     1.73
-NCD B1 12bit 4mA           raw_barrel_temperature_1           29669      370      400    382.1     5.96     1.56
-NCD B1 12bit 4mA           raw_barrel_temperature_2           29669      366      393    376.7     5.66     1.50
-NCD B1 12bit 4mA          raw_machine_powerOn_state           29669      338      363    351.5     5.65     1.61
-NCD B1 12bit 4mA           raw_wire_output_diameter           29669      327      356    343.4     5.91     1.72
-NCD B1 12bit 20mA              raw_melt_temperature           15013     1824     1861   1842.2     6.44     0.35
-NCD B1 12bit 20mA                 raw_melt_pressure           15012     1868     1956   1908.9    16.71     0.88
-NCD B1 12bit 20mA                   raw_screw_speed           15012     1849     1917   1880.9    11.80     0.63
-NCD B1 12bit 20mA                    raw_line_speed           15012     1780     1815   1799.9     6.33     0.35
-NCD B1 12bit 20mA          raw_barrel_temperature_1           15012     1844     1890   1864.2     8.53     0.46
-NCD B1 12bit 20mA          raw_barrel_temperature_2           15012     1832     1868   1847.7     7.23     0.39
-NCD B1 12bit 20mA         raw_machine_powerOn_state           15012     1787     1817   1802.3     6.37     0.35
-NCD B1 12bit 20mA          raw_wire_output_diameter           15012     1778     1814   1797.0     7.16     0.40
-Meanwell B1 12bit 12mA         raw_melt_temperature           45195     1013     1194   1106.4    59.64     5.39
-Meanwell B1 12bit 12mA            raw_melt_pressure           45194     1038     1252   1143.1    60.24     5.27
-Meanwell B1 12bit 12mA              raw_screw_speed           45194     1027     1226   1127.3    60.14     5.34
-Meanwell B1 12bit 12mA               raw_line_speed           45193      987     1167   1075.6    59.46     5.53
-Meanwell B1 12bit 12mA     raw_barrel_temperature_1           45193     1013     1212   1117.2    63.49     5.68
-Meanwell B1 12bit 12mA     raw_barrel_temperature_2           45192     1007     1201   1107.7    63.20     5.71
-Meanwell B1 12bit 12mA    raw_machine_powerOn_state           45190      982     1177   1077.7    63.58     5.90
-Meanwell B1 12bit 12mA     raw_wire_output_diameter           45190      976     1173   1072.0    63.66     5.94
-Meanwell B1 12bit 4mA          raw_melt_temperature           36933      282      462    374.7    59.17    15.79
-Meanwell B1 12bit 4mA             raw_melt_pressure           36930      300      504    404.7    60.15    14.86
-Meanwell B1 12bit 4mA               raw_screw_speed           36930      291      485    392.0    59.57    15.20
-Meanwell B1 12bit 4mA                raw_line_speed           36928      263      441    349.4    58.34    16.70
-Meanwell B1 12bit 4mA      raw_barrel_temperature_1           36926      281      472    384.0    61.57    16.04
-Meanwell B1 12bit 4mA      raw_barrel_temperature_2           36924      279      468    378.0    60.69    16.05
-Meanwell B1 12bit 4mA     raw_machine_powerOn_state           36920      258      448    350.5    61.01    17.41
-Meanwell B1 12bit 4mA      raw_wire_output_diameter           36919      252      441    341.2    60.60    17.76
-Meanwell B1 12bit 20mA         raw_melt_temperature           35246     1749     1926   1840.8    57.89     3.14
-Meanwell B1 12bit 20mA            raw_melt_pressure           35246     1789     2009   1900.7    58.50     3.08
-Meanwell B1 12bit 20mA              raw_screw_speed           35246     1771     1973   1875.4    58.34     3.11
-Meanwell B1 12bit 20mA               raw_line_speed           35246     1714     1891   1800.8    57.42     3.19
-Meanwell B1 12bit 20mA     raw_barrel_temperature_1           35246     1754     1954   1860.1    63.29     3.40
-Meanwell B1 12bit 20mA     raw_barrel_temperature_2           35246     1742     1936   1844.9    62.60     3.39
-Meanwell B1 12bit 20mA    raw_machine_powerOn_state           35246     1708     1903   1803.8    63.01     3.49
-Meanwell B1 12bit 20mA     raw_wire_output_diameter           35246     1705     1900   1799.9    63.08     3.50
-Meanwell B2 12bit noise        raw_melt_temperature           40208        3        3      3.0     0.00     0.00
-Meanwell B2 12bit noise           raw_melt_pressure           40208        3        3      3.0     0.00     0.00
-Meanwell B2 12bit noise             raw_screw_speed           40208        6       11      8.0     1.18    14.81
-Meanwell B2 12bit noise              raw_line_speed           40208        3        3      3.0     0.00     0.00
-Meanwell B2 12bit noise    raw_barrel_temperature_1           40208        3        3      3.0     0.00     0.00
-Meanwell B2 12bit noise    raw_barrel_temperature_2           40208        9       13     10.6     0.97     9.18
-Meanwell B2 12bit noise   raw_machine_powerOn_state           40208        3        3      3.0     0.00     0.00
-Meanwell B2 12bit noise    raw_wire_output_diameter           40208       13       17     14.8     0.89     5.99
-NCD B2 12bit 12mA              raw_melt_temperature           40237     1082     1103   1093.6     4.05     0.37
-NCD B2 12bit 12mA                 raw_melt_pressure           40237     1081     1102   1093.0     4.07     0.37
-NCD B2 12bit 12mA                   raw_screw_speed           40238     1090     1121   1106.1     4.95     0.45
-NCD B2 12bit 12mA                    raw_line_speed           40237     1081     1102   1093.1     4.03     0.37
-NCD B2 12bit 12mA          raw_barrel_temperature_1           40237     1082     1100   1092.3     3.56     0.33
-NCD B2 12bit 12mA          raw_barrel_temperature_2           40237     1096     1121   1109.1     4.26     0.38
-NCD B2 12bit 12mA         raw_machine_powerOn_state           40237     1086     1103   1095.8     3.53     0.32
-NCD B2 12bit 12mA          raw_wire_output_diameter           40237     1108     1132   1120.8     4.23     0.38
-Meanwell B3 12bit 12mA         raw_melt_temperature            6111     1024     1211   1119.4    63.66     5.69
-Meanwell B3 12bit 12mA            raw_melt_pressure            6111      955     1146   1050.5    63.19     6.02
-Meanwell B3 12bit 12mA              raw_screw_speed            6112      992     1179   1085.6    63.44     5.84
-Meanwell B3 12bit 12mA               raw_line_speed            6112      985     1173   1079.0    64.28     5.96
-Meanwell B3 12bit 12mA     raw_barrel_temperature_1            6112      990     1168   1078.1    60.48     5.61
-Meanwell B3 12bit 12mA     raw_barrel_temperature_2            6112     1011     1188   1100.2    60.14     5.47
-Meanwell B3 12bit 12mA    raw_machine_powerOn_state            6112     1017     1194   1107.5    60.25     5.44
-Meanwell B3 12bit 12mA     raw_wire_output_diameter            6112     1011     1193   1103.5    60.29     5.46
+Label format: <ADC board> <power_src> <sampling resolution> <input_signal>
+Label                                        Metric HW chan          DataPt      Min      Max     Mean   StdDev      %Dev.
+B1 Meanwell 12bit 4mA     ----------------------------------------------------------------------------------------------------
+B1 Meanwell 12bit 4mA          raw_melt_temperature       8           36933      282      462    374.7    59.17    15.79%
+B1 Meanwell 12bit 4mA             raw_melt_pressure       7           36930      300      504    404.7    60.15    14.86%
+B1 Meanwell 12bit 4mA               raw_screw_speed       6           36930      291      485    392.0    59.57    15.20%
+B1 Meanwell 12bit 4mA                raw_line_speed       5           36928      263      441    349.4    58.34    16.70%
+B1 Meanwell 12bit 4mA      raw_barrel_temperature_1       4           36926      281      472    384.0    61.57    16.04%
+B1 Meanwell 12bit 4mA      raw_barrel_temperature_2       3           36924      279      468    378.0    60.69    16.05%
+B1 Meanwell 12bit 4mA     raw_machine_powerOn_state       2           36920      258      448    350.5    61.01    17.41%
+B1 Meanwell 12bit 4mA      raw_wire_output_diameter       1           36919      252      441    341.2    60.60    17.76%
+B1 Meanwell 12bit 4mA                      Combined       C          295410      282      441    371.8    63.76    17.15%
+B1 Meanwell 12bit 12mA    ----------------------------------------------------------------------------------------------------
+B1 Meanwell 12bit 12mA         raw_melt_temperature       8           45195     1013     1194   1106.4    59.64     5.39%
+B1 Meanwell 12bit 12mA            raw_melt_pressure       7           45194     1038     1252   1143.1    60.24     5.27%
+B1 Meanwell 12bit 12mA              raw_screw_speed       6           45194     1027     1226   1127.3    60.14     5.34%
+B1 Meanwell 12bit 12mA               raw_line_speed       5           45193      987     1167   1075.6    59.46     5.53%
+B1 Meanwell 12bit 12mA     raw_barrel_temperature_1       4           45193     1013     1212   1117.2    63.49     5.68%
+B1 Meanwell 12bit 12mA     raw_barrel_temperature_2       3           45192     1007     1201   1107.7    63.20     5.71%
+B1 Meanwell 12bit 12mA    raw_machine_powerOn_state       2           45190      982     1177   1077.7    63.58     5.90%
+B1 Meanwell 12bit 12mA     raw_wire_output_diameter       1           45190      976     1173   1072.0    63.66     5.94%
+B1 Meanwell 12bit 12mA                     Combined       C          361541     1013     1173   1103.4    66.37     6.02%
+B1 Meanwell 12bit 20mA    ----------------------------------------------------------------------------------------------------
+B1 Meanwell 12bit 20mA         raw_melt_temperature       8           35246     1749     1926   1840.8    57.89     3.14%
+B1 Meanwell 12bit 20mA            raw_melt_pressure       7           35246     1789     2009   1900.7    58.50     3.08%
+B1 Meanwell 12bit 20mA              raw_screw_speed       6           35246     1771     1973   1875.4    58.34     3.11%
+B1 Meanwell 12bit 20mA               raw_line_speed       5           35246     1714     1891   1800.8    57.42     3.19%
+B1 Meanwell 12bit 20mA     raw_barrel_temperature_1       4           35246     1754     1954   1860.1    63.29     3.40%
+B1 Meanwell 12bit 20mA     raw_barrel_temperature_2       3           35246     1742     1936   1844.9    62.60     3.39%
+B1 Meanwell 12bit 20mA    raw_machine_powerOn_state       2           35246     1708     1903   1803.8    63.01     3.49%
+B1 Meanwell 12bit 20mA     raw_wire_output_diameter       1           35246     1705     1900   1799.9    63.08     3.50%
+B1 Meanwell 12bit 20mA                     Combined       C          281968     1749     1900   1840.8    69.97     3.80%
+B1 NCD 12bit noise        ----------------------------------------------------------------------------------------------------
+B1 NCD 12bit noise             raw_melt_temperature       8           30031       10       16     12.7     1.45    11.44%
+B1 NCD 12bit noise                raw_melt_pressure       7           30031       27       64     42.5     8.81    20.75%
+B1 NCD 12bit noise                  raw_screw_speed       6           30030       20       45     30.6     6.32    20.65%
+B1 NCD 12bit noise                   raw_line_speed       5           30030        3        3      3.0     0.00     0.00%
+B1 NCD 12bit noise         raw_barrel_temperature_1       4           30030       14       31     21.4     3.95    18.46%
+B1 NCD 12bit noise         raw_barrel_temperature_2       3           30030       16       27     20.9     2.63    12.59%
+B1 NCD 12bit noise        raw_machine_powerOn_state       2           30029        3        3      3.0     0.00     0.00%
+B1 NCD 12bit noise         raw_wire_output_diameter       1           30029        2        3      3.0     0.01     0.19%
+B1 NCD 12bit noise                         Combined       C          240240       10        3     17.1    14.21    82.97%
+B1 NCD 12bit 4mA          ----------------------------------------------------------------------------------------------------
+B1 NCD 12bit 4mA               raw_melt_temperature       8           29669      359      387    373.8     6.13     1.64%
+B1 NCD 12bit 4mA                  raw_melt_pressure       7           29669      379      432    401.3     7.89     1.97%
+B1 NCD 12bit 4mA                    raw_screw_speed       6           29669      370      413    389.5     7.03     1.81%
+B1 NCD 12bit 4mA                     raw_line_speed       5           29669      333      363    350.8     6.07     1.73%
+B1 NCD 12bit 4mA           raw_barrel_temperature_1       4           29669      370      400    382.1     5.96     1.56%
+B1 NCD 12bit 4mA           raw_barrel_temperature_2       3           29669      366      393    376.7     5.66     1.50%
+B1 NCD 12bit 4mA          raw_machine_powerOn_state       2           29669      338      363    351.5     5.65     1.61%
+B1 NCD 12bit 4mA           raw_wire_output_diameter       1           29669      327      356    343.4     5.91     1.72%
+B1 NCD 12bit 4mA                           Combined       C          237352      359      356    371.1    20.31     5.47%
+B1 NCD 12bit 12mA         ----------------------------------------------------------------------------------------------------
+B1 NCD 12bit 12mA              raw_melt_temperature       8           29503     1091     1123   1107.9     6.23     0.56%
+B1 NCD 12bit 12mA                 raw_melt_pressure       7           29503     1122     1187   1151.4    11.62     1.01%
+B1 NCD 12bit 12mA                   raw_screw_speed       6           29503     1109     1160   1133.2     8.96     0.79%
+B1 NCD 12bit 12mA                    raw_line_speed       5           29503     1056     1088   1074.7     6.23     0.58%
+B1 NCD 12bit 12mA          raw_barrel_temperature_1       4           29503     1106     1142   1121.7     7.13     0.64%
+B1 NCD 12bit 12mA          raw_barrel_temperature_2       3           29503     1097     1128   1110.3     6.26     0.56%
+B1 NCD 12bit 12mA         raw_machine_powerOn_state       2           29503     1062     1089   1076.3     6.04     0.56%
+B1 NCD 12bit 12mA          raw_wire_output_diameter       1           29503     1051     1084   1068.7     6.73     0.63%
+B1 NCD 12bit 12mA                          Combined       C          236024     1091     1084   1105.5    29.11     2.63%
+B1 NCD 12bit 20mA         ----------------------------------------------------------------------------------------------------
+B1 NCD 12bit 20mA              raw_melt_temperature       8           15013     1824     1861   1842.2     6.44     0.35%
+B1 NCD 12bit 20mA                 raw_melt_pressure       7           15012     1868     1956   1908.9    16.71     0.88%
+B1 NCD 12bit 20mA                   raw_screw_speed       6           15012     1849     1917   1880.9    11.80     0.63%
+B1 NCD 12bit 20mA                    raw_line_speed       5           15012     1780     1815   1799.9     6.33     0.35%
+B1 NCD 12bit 20mA          raw_barrel_temperature_1       4           15012     1844     1890   1864.2     8.53     0.46%
+B1 NCD 12bit 20mA          raw_barrel_temperature_2       3           15012     1832     1868   1847.7     7.23     0.39%
+B1 NCD 12bit 20mA         raw_machine_powerOn_state       2           15012     1787     1817   1802.3     6.37     0.35%
+B1 NCD 12bit 20mA          raw_wire_output_diameter       1           15012     1778     1814   1797.0     7.16     0.40%
+B1 NCD 12bit 20mA                          Combined       C          120097     1824     1814   1842.9    39.66     2.15%
+B2 Meanwell 12bit noise   ----------------------------------------------------------------------------------------------------
+B2 Meanwell 12bit noise        raw_melt_temperature       8           40208        3        3      3.0     0.00     0.00%
+B2 Meanwell 12bit noise           raw_melt_pressure       7           40208        3        3      3.0     0.00     0.00%
+B2 Meanwell 12bit noise             raw_screw_speed       6           40208        6       11      8.0     1.18    14.81%
+B2 Meanwell 12bit noise              raw_line_speed       5           40208        3        3      3.0     0.00     0.00%
+B2 Meanwell 12bit noise    raw_barrel_temperature_1       4           40208        3        3      3.0     0.00     0.00%
+B2 Meanwell 12bit noise    raw_barrel_temperature_2       3           40208        9       13     10.6     0.97     9.18%
+B2 Meanwell 12bit noise   raw_machine_powerOn_state       2           40208        3        3      3.0     0.00     0.00%
+B2 Meanwell 12bit noise    raw_wire_output_diameter       1           40208       13       17     14.8     0.89     5.99%
+B2 Meanwell 12bit noise                    Combined       C          321664        3       17      6.0     4.34    71.83%
+B2 Meanwell 12bit 12mA    ----------------------------------------------------------------------------------------------------
+B2 Meanwell 12bit 12mA         raw_melt_temperature       8           19923     1000     1180   1090.1    57.83     5.31%
+B2 Meanwell 12bit 12mA            raw_melt_pressure       7           19923     1002     1184   1093.6    58.29     5.33%
+B2 Meanwell 12bit 12mA              raw_screw_speed       6           19923     1015     1195   1108.5    58.07     5.24%
+B2 Meanwell 12bit 12mA               raw_line_speed       5           19923      997     1182   1091.0    57.90     5.31%
+B2 Meanwell 12bit 12mA     raw_barrel_temperature_1       4           19922      994     1183   1089.9    60.19     5.52%
+B2 Meanwell 12bit 12mA     raw_barrel_temperature_2       3           19922     1008     1198   1107.9    60.52     5.46%
+B2 Meanwell 12bit 12mA    raw_machine_powerOn_state       2           19922      996     1185   1091.7    60.62     5.55%
+B2 Meanwell 12bit 12mA     raw_wire_output_diameter       1           19923     1015     1204   1113.4    60.58     5.44%
+B2 Meanwell 12bit 12mA                     Combined       C          159381     1000     1204   1098.3    59.98     5.46%
+B2 NCD 12bit noise        ----------------------------------------------------------------------------------------------------
+B2 NCD 12bit noise             raw_melt_temperature       8           19383        3        3      3.0     0.00     0.00%
+B2 NCD 12bit noise                raw_melt_pressure       7           19383        3        3      3.0     0.00     0.00%
+B2 NCD 12bit noise                  raw_screw_speed       6           19383        6       16      9.5     3.15    32.97%
+B2 NCD 12bit noise                   raw_line_speed       5           19382        3        3      3.0     0.00     0.00%
+B2 NCD 12bit noise         raw_barrel_temperature_1       4           19382        3        3      3.0     0.00     0.00%
+B2 NCD 12bit noise         raw_barrel_temperature_2       3           19382        9       17     11.9     2.51    21.11%
+B2 NCD 12bit noise        raw_machine_powerOn_state       2           19382        3        3      3.0     0.00     0.00%
+B2 NCD 12bit noise         raw_wire_output_diameter       1           19382       13       21     16.0     2.43    15.15%
+B2 NCD 12bit noise                         Combined       C          155059        3       21      6.6     5.15    78.58%
+B2 NCD 12bit 4mA          ----------------------------------------------------------------------------------------------------
+B2 NCD 12bit 4mA               raw_melt_temperature       8           22331      349      369    360.0     4.12     1.14%
+B2 NCD 12bit 4mA                  raw_melt_pressure       7           22331      352      372    363.1     4.14     1.14%
+B2 NCD 12bit 4mA                    raw_screw_speed       6           22329      357      384    372.1     4.75     1.28%
+B2 NCD 12bit 4mA                     raw_line_speed       5           22328      349      369    360.4     4.11     1.14%
+B2 NCD 12bit 4mA           raw_barrel_temperature_1       4           22328      352      369    362.1     3.44     0.95%
+B2 NCD 12bit 4mA           raw_barrel_temperature_2       3           22328      363      383    373.9     3.87     1.04%
+B2 NCD 12bit 4mA          raw_machine_powerOn_state       2           22328      352      369    361.8     3.41     0.94%
+B2 NCD 12bit 4mA           raw_wire_output_diameter       1           22328      368      390    379.8     3.89     1.02%
+B2 NCD 12bit 4mA                           Combined       C          178631      349      390    366.6     8.08     2.20%
+B2 NCD 12bit 12mA         ----------------------------------------------------------------------------------------------------
+B2 NCD 12bit 12mA              raw_melt_temperature       8           40237     1082     1103   1093.6     4.05     0.37%
+B2 NCD 12bit 12mA                 raw_melt_pressure       7           40237     1081     1102   1093.0     4.07     0.37%
+B2 NCD 12bit 12mA                   raw_screw_speed       6           40238     1090     1121   1106.1     4.95     0.45%
+B2 NCD 12bit 12mA                    raw_line_speed       5           40237     1081     1102   1093.1     4.03     0.37%
+B2 NCD 12bit 12mA          raw_barrel_temperature_1       4           40237     1082     1100   1092.3     3.56     0.33%
+B2 NCD 12bit 12mA          raw_barrel_temperature_2       3           40237     1096     1121   1109.1     4.26     0.38%
+B2 NCD 12bit 12mA         raw_machine_powerOn_state       2           40237     1086     1103   1095.8     3.53     0.32%
+B2 NCD 12bit 12mA          raw_wire_output_diameter       1           40237     1108     1132   1120.8     4.23     0.38%
+B2 NCD 12bit 12mA                          Combined       C          321897     1082     1132   1100.5    10.62     0.97%
+B2 NCD 12bit 20mA         ----------------------------------------------------------------------------------------------------
+B2 NCD 12bit 20mA              raw_melt_temperature       8           21779     1815     1837   1826.5     4.06     0.22%
+B2 NCD 12bit 20mA                 raw_melt_pressure       7           21779     1811     1834   1823.4     4.08     0.22%
+B2 NCD 12bit 20mA                   raw_screw_speed       6           21779     1825     1865   1844.2     6.33     0.34%
+B2 NCD 12bit 20mA                    raw_line_speed       5           21779     1814     1836   1826.2     4.06     0.22%
+B2 NCD 12bit 20mA          raw_barrel_temperature_1       4           21778     1811     1830   1822.6     3.65     0.20%
+B2 NCD 12bit 20mA          raw_barrel_temperature_2       3           21777     1832     1866   1848.6     5.71     0.31%
+B2 NCD 12bit 20mA         raw_machine_powerOn_state       2           21777     1820     1839   1830.8     3.64     0.20%
+B2 NCD 12bit 20mA          raw_wire_output_diameter       1           21777     1851     1884   1866.9     5.65     0.30%
+B2 NCD 12bit 20mA                          Combined       C          174225     1815     1884   1836.1    15.47     0.84%
+B3 Meanwell 12bit 4mA     ----------------------------------------------------------------------------------------------------
+B3 Meanwell 12bit 4mA          raw_melt_temperature       8           22545      287      472    384.5    60.53    15.74%
+B3 Meanwell 12bit 4mA             raw_melt_pressure       7           22544      227      427    324.6    60.93    18.77%
+B3 Meanwell 12bit 4mA               raw_screw_speed       6           22544      264      449    355.7    60.20    16.92%
+B3 Meanwell 12bit 4mA                raw_line_speed       5           22544      259      443    348.0    60.24    17.31%
+B3 Meanwell 12bit 4mA      raw_barrel_temperature_1       4           22543      268      444    352.3    58.82    16.69%
+B3 Meanwell 12bit 4mA      raw_barrel_temperature_2       3           22542      280      456    369.4    58.30    15.78%
+B3 Meanwell 12bit 4mA     raw_machine_powerOn_state       2           22542      285      460    376.2    58.14    15.46%
+B3 Meanwell 12bit 4mA      raw_wire_output_diameter       1           22542      282      460    371.5    58.34    15.70%
+B3 Meanwell 12bit 4mA                      Combined       C          180346      287      460    360.3    62.07    17.23%
+B3 Meanwell 12bit 12mA    ----------------------------------------------------------------------------------------------------
+B3 Meanwell 12bit 12mA         raw_melt_temperature       8           22003     1023     1212   1122.9    62.50     5.57%
+B3 Meanwell 12bit 12mA            raw_melt_pressure       7           22003      948     1146   1044.4    62.42     5.98%
+B3 Meanwell 12bit 12mA              raw_screw_speed       6           22003      992     1180   1085.6    62.34     5.74%
+B3 Meanwell 12bit 12mA               raw_line_speed       5           22003      985     1173   1078.0    62.73     5.82%
+B3 Meanwell 12bit 12mA     raw_barrel_temperature_1       4           22003      990     1168   1075.9    59.75     5.55%
+B3 Meanwell 12bit 12mA     raw_barrel_temperature_2       3           22003     1010     1189   1101.1    59.17     5.37%
+B3 Meanwell 12bit 12mA    raw_machine_powerOn_state       2           22003     1016     1195   1108.8    59.38     5.36%
+B3 Meanwell 12bit 12mA     raw_wire_output_diameter       1           22002     1011     1194   1102.7    59.60     5.40%
+B3 Meanwell 12bit 12mA                     Combined       C          176023     1023     1194   1089.9    65.13     5.98%
+B3 Meanwell 12bit 20mA    ----------------------------------------------------------------------------------------------------
+B3 Meanwell 12bit 20mA         raw_melt_temperature       8           26589     1004     1963   1871.0    59.25     3.17%
+B3 Meanwell 12bit 20mA            raw_melt_pressure       7           26590     1079     1857   1749.4    59.97     3.43%
+B3 Meanwell 12bit 20mA              raw_screw_speed       6           26590     1107     1907   1814.1    58.97     3.25%
+B3 Meanwell 12bit 20mA               raw_line_speed       5           26590     1020     1901   1806.4    59.22     3.28%
+B3 Meanwell 12bit 20mA     raw_barrel_temperature_1       4           26590     1008     1887   1792.4    55.34     3.09%
+B3 Meanwell 12bit 20mA     raw_barrel_temperature_2       3           26590     1020     1921   1835.3    54.51     2.97%
+B3 Meanwell 12bit 20mA    raw_machine_powerOn_state       2           26590     1074     1932   1848.7    54.68     2.96%
+B3 Meanwell 12bit 20mA     raw_wire_output_diameter       1           26589       36     1927   1835.7    78.26     4.26%
+B3 Meanwell 12bit 20mA                     Combined       C          212718     1004     1927   1819.1    69.92     3.84%
+B3 NCD 12bit 4mA          ----------------------------------------------------------------------------------------------------
+B3 NCD 12bit 4mA               raw_melt_temperature       8           19344      374      402    387.5     5.59     1.44%
+B3 NCD 12bit 4mA                  raw_melt_pressure       7           19344      299      339    324.3     8.91     2.75%
+B3 NCD 12bit 4mA                    raw_screw_speed       6           19344      342      362    354.1     3.72     1.05%
+B3 NCD 12bit 4mA                     raw_line_speed       5           19344      336      358    349.5     4.13     1.18%
+B3 NCD 12bit 4mA           raw_barrel_temperature_1       4           19344      334      362    350.9     5.41     1.54%
+B3 NCD 12bit 4mA           raw_barrel_temperature_2       3           19344      357      379    369.1     4.27     1.16%
+B3 NCD 12bit 4mA          raw_machine_powerOn_state       2           19343      362      389    375.9     4.98     1.32%
+B3 NCD 12bit 4mA           raw_wire_output_diameter       1           19343      361      379    371.6     4.09     1.10%
+B3 NCD 12bit 4mA                           Combined       C          154750      374      379    360.3    19.22     5.33%
+B3 NCD 12bit 12mA         ----------------------------------------------------------------------------------------------------
+B3 NCD 12bit 12mA              raw_melt_temperature       8           19907     1110     1142   1124.8     6.34     0.56%
+B3 NCD 12bit 12mA                 raw_melt_pressure       7           19907     1022     1068   1049.9     9.94     0.95%
+B3 NCD 12bit 12mA                   raw_screw_speed       6           19907     1075     1095   1086.8     3.82     0.35%
+B3 NCD 12bit 12mA                    raw_line_speed       5           19907     1072     1095   1085.9     4.26     0.39%
+B3 NCD 12bit 12mA          raw_barrel_temperature_1       4           19907     1062     1093   1080.2     6.09     0.56%
+B3 NCD 12bit 12mA          raw_barrel_temperature_2       3           19907     1087     1110   1099.5     4.43     0.40%
+B3 NCD 12bit 12mA         raw_machine_powerOn_state       2           19907     1093     1121   1107.7     5.32     0.48%
+B3 NCD 12bit 12mA          raw_wire_output_diameter       1           19907     1094     1113   1105.1     4.12     0.37%
+B3 NCD 12bit 12mA                          Combined       C          159256     1110     1113   1092.5    21.78     1.99%
