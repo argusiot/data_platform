@@ -16,36 +16,17 @@ import sys
 from metric_query import get_data_set
 from collections import OrderedDict
 
+# A flag that controls we're running in development mode or regular mode.
+# In development mode, we use hardcoded test data and do not accept input
+# file as a command line argument.
+TOOL_IN_DEVELOPMENT_MODE = False
+
 parser = argparse.ArgumentParser(description="Tool to generate box plot for" \
    " all 8 channels of extruder machine")
-parser.add_argument("input_file", help=".csv file containing the input data. Example data file: https://docs.google.com/spreadsheets/d/1a1GZeSylfCLVpj_lTlNcSvNi1Cz1qwTYQkfh2wGA5PQ/edit#gid=0")
+if not TOOL_IN_DEVELOPMENT_MODE:
+  parser.add_argument("input_file", help=".csv file containing the input data. Example data file: https://docs.google.com/spreadsheets/d/1a1GZeSylfCLVpj_lTlNcSvNi1Cz1qwTYQkfh2wGA5PQ/edit#gid=0")
 parser.add_argument("output_dir", help="Location to save the generated boxplots")
 args = parser.parse_args()
-
-'''
- These values come from:
- https://docs.google.com/document/d/1gE8gTbTKHgaSs3BjsOmuH920oyZDiPX0nw-zpAyvgsw/edit#
-  Format:
-    data set name -> ([time window], machine_name)
-
-    This allows us to collect and analyse data sets from parallel experiments
-    being done on different gateways (attached to different machines). This
-    works as long as the machines are of the same "extrude type" and the
-    parameters being read from there are identical.
-
-  Usage of "data set name" for box plot filename:
-  -----------------------------------------------
-  The box plot file name is derived from the data set name by replacing space
-  with underscore.
-
-ENABLE THIS FOR TOOL DEVELOPMENT MODE:
-test_data_src = OrderedDict()
-test_data_src["B2 Meanwell 12bit noise"] = (["2m-ago", "1m-ago"], "65mm_extruder")
-test_data_src["B2 Meanwell 12bit 4mA"] = (["2m-ago", "1m-ago"], "65mm_extruder")
-test_data_src["B2 Meanwell 12bit 12mA"] = (["2m-ago", "1m-ago"], "65mm_extruder")
-test_data_src["B2 Meanwell 12bit 20mA"] = (["2m-ago", "1m-ago"], "65mm_extruder")
-'''
-
 
 def generate_filename(timewindow_id):
   return timewindow_id.replace(" ", "_")
@@ -115,8 +96,20 @@ def build_test_data_src_from_csv(input_file):
                                   machine)
   return test_data
 
+def get_hardcoded_test_data():
+  test_data = OrderedDict()
+  test_data["B2 Meanwell 12bit 4mA"] = (["2m-ago", "1m-ago"], "65mm_extruder")
+  test_data["B2 Meanwell 12bit 12mA"] = (["2m-ago", "1m-ago"], "65mm_extruder")
+  test_data["B2 Meanwell 12bit 20mA"] = (["2m-ago", "1m-ago"], "65mm_extruder")
+  return test_data
+
+
 # Populate test_data_src from CSV file input.
-test_data_src = build_test_data_src_from_csv(args.input_file)
+test_data_src = None
+if TOOL_IN_DEVELOPMENT_MODE:
+  test_data_src = get_hardcoded_test_data()
+else:
+  test_data_src = build_test_data_src_from_csv(args.input_file)
 
 for data_label, (time_window, machine_name) in test_data_src.items():
   
