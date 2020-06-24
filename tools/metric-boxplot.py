@@ -133,9 +133,13 @@ for data_label, (time_window, machine_name) in test_data_src.items():
     url = url_template % (time_window[0], time_window[1], \
                           metric_list[idx], machine_name)
     print(url)
-    sorted_data_values = get_data_set(url).values()  # Extract list of values
-                                                     # from the returned dict.
-    sorted_data_values.sort()                        # ...and sort the list.
+
+    # Extract list of values from the returned dict and sort the list. We sort
+    # here because we want to easily get min/max (for reporting purposes).
+    # FIXME: Once we move to Python3 we can use the statistics package and wont
+    # need to do these silly things like sort to get min/max etc.
+    sorted_data_values = get_data_set(url).values()
+    sorted_data_values.sort()
     
     # Calculate statistics for the data received and store in the stats result.
     np_stats_calculator = np.array([sorted_data_values])
