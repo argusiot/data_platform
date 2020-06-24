@@ -7,6 +7,7 @@
 '''
 
 import argparse
+import csv
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
@@ -14,6 +15,12 @@ import numpy as np
 import sys
 from metric_query import get_data_set
 from collections import OrderedDict
+
+parser = argparse.ArgumentParser(description="Tool to generate box plot for" \
+   " all 8 channels of extruder machine")
+parser.add_argument("input_file", help=".csv file containing the input data. Example data file: https://docs.google.com/spreadsheets/d/1a1GZeSylfCLVpj_lTlNcSvNi1Cz1qwTYQkfh2wGA5PQ/edit#gid=0")
+parser.add_argument("output_dir", help="Location to save the generated boxplots")
+args = parser.parse_args()
 
 '''
  These values come from:
@@ -30,22 +37,18 @@ from collections import OrderedDict
   -----------------------------------------------
   The box plot file name is derived from the data set name by replacing space
   with underscore.
-'''
-label_format="Label format: <ADC board> <power_src> <sampling resolution> <input_signal>"
+
+ENABLE THIS FOR TOOL DEVELOPMENT MODE:
 test_data_src = OrderedDict()
 test_data_src["B2 Meanwell 12bit noise"] = (["2m-ago", "1m-ago"], "65mm_extruder")
 test_data_src["B2 Meanwell 12bit 4mA"] = (["2m-ago", "1m-ago"], "65mm_extruder")
 test_data_src["B2 Meanwell 12bit 12mA"] = (["2m-ago", "1m-ago"], "65mm_extruder")
 test_data_src["B2 Meanwell 12bit 20mA"] = (["2m-ago", "1m-ago"], "65mm_extruder")
+'''
 
 
 def generate_filename(timewindow_id):
   return timewindow_id.replace(" ", "_")
-
-parser = argparse.ArgumentParser(description="Tool to generate box plot for" \
-   " all 8 channels of extruder machine")
-parser.add_argument("output_dir", help="Location to save the generated boxplots")
-args = parser.parse_args()
 
 '''
   The following 2 pieces of information (metric_list and hardware_channel_num)
@@ -79,9 +82,45 @@ url_template="http://34.221.154.248:4242/api/query?start=%s&end=%s&m=none:machin
 # (label_str, metric_id, hw_chan_num, total_cnt, Min, Max, Mean, StdDev, %age-std-dev)
 statistics_results = []
 
+# Build a dictionary from the input CSV file. The dictionary should look like
+# test_data_src.
+# CSV schema:
+# ['Board', 'Power supply', 'Sampling resolution', 'Input signal', 'Start time', 'End time', 'Machine', 'Manually audited', 'Start time (derived)', 'End time (derived)', 'Query URL']
+label_format="Label format: <ADC board> <power_src> <sampling resolution> <input_signal>"
+def build_test_data_src_from_csv(input_file):
+  test_data = OrderedDict()
+  with open(input_file) as csvfile:
+      first_line = True
+      reader = csv.reader(csvfile, delimiter=',')
+      for line in reader:
+        if first_line:  # skip the first line
+          first_line = False
+          continue
+
+        board, power_supply, sampling_res, input_signal, \
+        start_time_msec, end_time_msec, machine, audited, ignore1, \
+        ignore2, ignore3 = line
+
+        # The data_label is formatted per label_format above !
+        data_label = "%s %s %s %s" % (board, power_supply, sampling_res, \
+                                      input_signal)
+        if start_time_msec == "" or \
+           end_time_msec == "" or \
+           machine == "":
+          print("Skipping %s ...incomplete information !"  % data_label)
+          continue
+
+        # Add record into test_data{}
+        test_data[data_label] = ([int(start_time_msec), int(end_time_msec)], \
+                                  machine)
+  return test_data
+
+# Populate test_data_src from CSV file input.
+test_data_src = build_test_data_src_from_csv(args.input_file)
+
 for data_label, (time_window, machine_name) in test_data_src.items():
   
-  print "Processing Label '", data_label, "' -- ",
+  print("Processing Label - %s " % data_label)
   if len(time_window) > 0:
     print("Time window: (%s, %s)" % (time_window[0], time_window[1]))
   else:
