@@ -28,11 +28,12 @@ parser = argparse.ArgumentParser(description="Tool to generate box plot for" \
 if not TOOL_IN_DEVELOPMENT_MODE:
   parser.add_argument("input_file", help=".csv file containing the input data. Example data file: https://docs.google.com/spreadsheets/d/1a1GZeSylfCLVpj_lTlNcSvNi1Cz1qwTYQkfh2wGA5PQ/edit#gid=0")
 parser.add_argument("output_dir", help="Location to save the generated boxplots")
+parser.add_argument("--column_separator", help="Use supplied column separator e.g. --column_separator=',' to generate a .csv friendly output")
 parser.add_argument("--report_board_aggr", help="For a given input signal, we record and analyse separately for each channel. However its useful to get a collective sense across the board. This option enables generation of the combination of data across all channels for a given input signal. Look for the metric_id 'Combined' in the report. Note that 'Combined' is an articificial construct for analysis purposes only. Use like this: --report_board_aggr=True", type=bool, default=False)
 args = parser.parse_args()
 
-def generate_filename(timewindow_id):
-  return timewindow_id.replace(" ", "_")
+def generate_filename(timewindow_id, column_spacer):
+  return timewindow_id.replace(column_spacer, "_")
 
 '''
   The following 2 pieces of information (metric_list and hardware_channel_id)
@@ -59,6 +60,28 @@ metric_list = ["raw_melt_temperature", "raw_melt_pressure", "raw_screw_speed", \
 if args.report_board_aggr:
   hardware_channel_id.append('C')
 
+def get_y_axis_range(data_label, column_spacer):
+  '''
+    Splits the data_label into its 4 components.
+    Uses the input signal level & bit resolution to return Y axis range.
+  '''
+  y_axis_range_map = { \
+    "12bit": { \
+      "noise": [0,100], \
+      "4mA": [300,450], \
+      "12mA": [1050,1250], \
+      "20mA": [1700,1950] \
+    }, \
+    "16bit": { \
+      # To be filled \
+    } \
+  }
+
+  # order after splitting: 0:board 1:pwr supply 2:resolution 3:input signal
+  label_parts = data_label.split(column_spacer)
+  return y_axis_range_map[label_parts[2]][label_parts[3]]
+  
+  
 
 # For now, we hardcode the URL template. Ideally, we should not have to do this.
 # This should be an API for us to get the data from.
@@ -73,7 +96,7 @@ statistics_results = []
 # CSV schema:
 # ['Board', 'Power supply', 'Sampling resolution', 'Input signal', 'Start time', 'End time', 'Machine', 'Manually audited', 'Start time (derived)', 'End time (derived)', 'Query URL']
 label_format="Label format: <ADC board> <power_src> <sampling resolution> <input_signal>"
-def build_test_data_src_from_csv(input_file):
+def build_test_data_src_from_csv(input_file, column_spacer):
   test_data = OrderedDict()
   with open(input_file) as csvfile:
       first_line = True
@@ -88,8 +111,10 @@ def build_test_data_src_from_csv(input_file):
         ignore2, ignore3 = line
 
         # The data_label is formatted per label_format above !
-        data_label = "%s %s %s %s" % (board, power_supply, sampling_res, \
-                                      input_signal)
+        data_label = "%s%s%s%s%s%s%s" % (board, column_spacer, \
+                                         power_supply, column_spacer, \
+                                         sampling_res, column_spacer, \
+                                         input_signal)
         if start_time_msec == "" or \
            end_time_msec == "" or \
            machine == "":
@@ -103,7 +128,7 @@ def build_test_data_src_from_csv(input_file):
 
 def get_hardcoded_test_data():
   test_data = OrderedDict()
-  test_data["Current data on 65mm"] = (["2m-ago", "1m-ago"], "65mm_extruder")
+  test_data["Current data 12bit 20mA"] = (["2m-ago", "1m-ago"], "65mm_extruder")
   return test_data
 
 # Helper routine to compute stats and record the outcome into some housekeeping
@@ -122,13 +147,13 @@ def record_data(data_label, sorted_data_values, metric_id, hw_chan_id, \
   box_plot_data.append(sorted_data_values)
 
 
-def analyse_data():
+def analyse_data(column_spacer):
   # Populate test_data_src from CSV file input.
   test_data_src = None
   if TOOL_IN_DEVELOPMENT_MODE:
     test_data_src = get_hardcoded_test_data()
   else:
-    test_data_src = build_test_data_src_from_csv(args.input_file)
+    test_data_src = build_test_data_src_from_csv(args.input_file, column_spacer)
 
   for data_label, (time_window, machine_name) in test_data_src.items():
     
@@ -174,15 +199,22 @@ def analyse_data():
     ax1.boxplot(box_plot_data, labels=hardware_channel_id, showmeans=True, showfliers=True)
     plt.ylabel('Value read on channel')
     plt.xlabel('Channel number (on ADC board)')
+    axes = plt.gca()
+    axes.set_ylim(get_y_axis_range(data_label, column_spacer))
     plt.grid(True)
 
     # Save plot to file
-    fq_file_path = "%s/%s" % (args.output_dir, generate_filename(data_label))
+    fq_file_path = "%s/%s" % (args.output_dir, generate_filename(data_label, \
+                                                                 column_spacer))
     plt.savefig(fq_file_path)
     print("\n")
 
 
-analyse_data() # Begin analysis !!
+col_spacer = " "
+if args.column_separator:
+  col_spacer = args.column_separator
+
+analyse_data(col_spacer) # Begin analysis !!
 
 print("See boxplots generated here: %s\n" % args.output_dir)
 
@@ -198,5 +230,5 @@ for result in statistics_results:
     print("%-25s %s" % (label, '-'*100))
     old_label = label
 
-  print("%-25s %25s %7s %15d %8d %8d %8.1f %8.02f %8.02f%%" % \
-        (label, metric, str(hw_chan), dp_count, min_val, max_val, mean, stddev, percent_dev))
+  print("%-25s%s%25s%s%7s%s%15d%s%8d%s%8d%s%8.1f%s%8.02f%s%8.02f%%" % \
+        (label, col_spacer, metric, col_spacer, str(hw_chan), col_spacer, dp_count, col_spacer, min_val, col_spacer, max_val, col_spacer, mean, col_spacer, stddev, col_spacer, percent_dev))
