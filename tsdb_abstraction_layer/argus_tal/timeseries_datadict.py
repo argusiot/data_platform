@@ -210,7 +210,8 @@ class TimeseriesDataDict(object):
     return len(self.__ts_dps_dict) == 0
 
   #############################################################################
-  # Non-public methods start here.
+  # Non-public methods BUT supporting a public interface start here e.g.
+  # iteration, len() etc. start here.
   #############################################################################
   def __iter__(self):
     self.__iter_idx = 0;
@@ -225,6 +226,13 @@ class TimeseriesDataDict(object):
     value = self.__ts_dps_dict[key]
     return key, value
 
+  def __len__(self):
+    assert len(self.__ts_keys_arr) == len(self.__ts_dps_dict)
+    return len(self.__ts_keys_arr)
+
+  #############################################################################
+  # Pure private helper methods start here.
+  #############################################################################
   def __search_timestamp_index(self, timestamp, lookup_qualifier):
     # Initialize housekeeping vars for doing binary search self.__ts_keys_arr.
     low = 0

@@ -56,15 +56,18 @@ class TsDataDict_Tests(unittest.TestCase):
     ###########################################################################
     # Trivial tests for empty / non-empty
     ###########################################################################
-    def test_empty(self):
+    def test_empty_and_check_tsdd_length(self):
       ts_dd = tsd.TimeseriesDataDict( \
         tid.TimeseriesID(self.__metric, self.__ts_filters), {})  # dps empty.
       self.assertTrue(ts_dd.is_empty())
+      self.assertEqual(len(ts_dd), 0)
 
-    def test_Not_empty(self):
+    def test_Not_empty_and_check_tsdd_length(self):
       ts_dd = tsd.TimeseriesDataDict( \
         tid.TimeseriesID(self.__metric, self.__ts_filters), self.__sorted_dps)
       self.assertFalse(ts_dd.is_empty())
+      self.assertEqual(len(ts_dd), len(self.__sorted_dps))
+
 
     ###########################################################################
     # Triplets of {get_min_key(), get_max_key()} tests for sorted,
