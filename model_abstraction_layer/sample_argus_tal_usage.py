@@ -27,7 +27,8 @@ def log_in_out(func):
   return decorated_func
 
 @log_in_out
-def example_query_for_1_timeseries(get_result_silently=True):
+def example_query_for_1_timeseries(get_result_silently=True, \
+                                   flag_compute_rate=False):
   # We specify the metric name (machine.sensor.raw_melt_temperature) and
   # 1 filter to be able to disambiguate this timeseries from other timeseries
   # (with the same metric).
@@ -45,7 +46,8 @@ def example_query_for_1_timeseries(get_result_silently=True):
           "34.221.154.248", 4242, \
           start_timestamp, end_timestamp, \
           [timeseries_id], \
-          bt.Aggregator.NONE \
+          bt.Aggregator.NONE, \
+          flag_compute_rate,   # Controls whether this a rate vs regular query.
         )
 
   rv = foo.populate_ts_data()
@@ -59,6 +61,9 @@ def example_query_for_1_timeseries(get_result_silently=True):
   # Returns results before we start printing anyting to the console.
   if get_result_silently:
     return result_list, start_timestamp, end_timestamp
+
+  if flag_compute_rate:
+    print("This is a RATE query !")
 
   print("Number of timeseries retrieved -- %d" % len(result_list))
   for result in result_list:
@@ -224,6 +229,8 @@ def example_iterating_over_a_slice_using_result_from_other_ts():
 def main():
   example_query_for_1_timeseries()
   example_query_for_all_timeseries()
+  example_query_for_1_timeseries(flag_compute_rate=True, # make it a rate query
+                                 get_result_silently=False) # print output
   example_explore_result_object_api_aka_TimeseriesDataDict_api()
   example_iterating_over_a_slice_using_result_from_other_ts()
 

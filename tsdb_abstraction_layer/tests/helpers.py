@@ -16,6 +16,10 @@ def get_url_for_dummy_query_params():
   return "http://172.1.1.1:4242/api/query?start=1234510&end=1234570" \
       "&m=none:some_metric{filter1=value1}" \
 
+def get_url_for_dummy_query_params_with_rate():
+  return "http://172.1.1.1:4242/api/query?start=1234510&end=1234570" \
+      "&m=none:rate:some_metric{filter1=value1}" \
+
 def get_url_for_truncated_json_response():
   return "http://172.1.1.1:4242/api/query?start=1234510&end=1234570" \
       "&m=none:truncated_json_metric{filter1=value1}" \
@@ -58,8 +62,34 @@ def get_good_json_response():
             } \
         }]
 
-def __generate_test_dict(key_as_string):
-  tmp_dict = get_UNsorted_datapoints()
+def get_good_json_response_for_rate():
+  # The rate math below is just slope of 2 points (ts1, val1) and (ts2, val2).
+  # Rate = (val2 - val1) / (ts2 - ts1)
+  # Since all points are 10s apart and values are 10sec apart, the slope is 1
+  # for all cases except for the first point.
+  return [{ \
+            "aggregateTags": [], \
+            "dps": { \
+              1234510: 0, \
+              1234560: 1, \
+              1234570: 1, \
+              1234530: 1, \
+              1234520: 1, \
+              1234550: 1, \
+              1234540: 1, \
+            }, \
+            "metric": "some_metric", \
+            "tags": { \
+                "filter1": "value1" \
+            } \
+        }]
+
+def __generate_test_dict(key_as_string, use_rate_dps=False):
+  tmp_dict = None
+  if use_rate_dps:
+    tmp_dict = get_UNsorted_RATE_datapoints()
+  else:
+    tmp_dict = get_UNsorted_datapoints()
   keys = sorted(tmp_dict.keys())
   new_dict = {}
   for kk in keys:
@@ -79,6 +109,9 @@ def get_sorted_datapoints():
 def get_distance():
   return 10  # the distance between the keys and values in the test datapoints.
 
+def get_sorted_datapoints_for_rate():
+  return __generate_test_dict(key_as_string=False, use_rate_dps=True)
+
 def get_datapoint_slice(start_idx, end_idx):
   test_dps = get_UNsorted_datapoints()
   key_list = list(sorted(test_dps.keys()))
@@ -96,6 +129,16 @@ def get_UNsorted_datapoints():
           1234520: 20, \
           1234550: 50, \
           1234540: 40, \
+         }
+
+def get_UNsorted_RATE_datapoints():
+  return {1234510: 0, \
+          1234560: 1, \
+          1234570: 1, \
+          1234530: 1, \
+          1234520: 1, \
+          1234550: 1, \
+          1234540: 1, \
          }
 
 def get_string_datapoints():
