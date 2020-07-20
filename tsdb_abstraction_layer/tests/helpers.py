@@ -156,9 +156,8 @@ def get_largest_key_and_its_value():
 
 def get_arbit_key_and_value():
   sorted_test_data = get_sorted_datapoints()
-  # Generate a random number from the keys such that we exclude both the
-  # boundary elements.
-  arbit_key_idx = 2 # int(random.uniform(1, len(key_list) - 1))
+  arb_k_idx = 3
   key_list = list(sorted_test_data.keys())
-  return key_list[arbit_key_idx], \
-         sorted_test_data[key_list[arbit_key_idx]]
+  return (key_list[arb_k_idx-1], sorted_test_data[key_list[arb_k_idx-1]]), \
+         (key_list[arb_k_idx], sorted_test_data[key_list[arb_k_idx]]), \
+         (key_list[arb_k_idx+1], sorted_test_data[key_list[arb_k_idx+1]])

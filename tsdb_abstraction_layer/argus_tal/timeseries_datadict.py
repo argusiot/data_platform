@@ -234,10 +234,11 @@ class TimeseriesDataDict(object):
   # Pure private helper methods start here.
   #############################################################################
   def __search_timestamp_index(self, timestamp, lookup_qualifier):
-    # Initialize housekeeping vars for doing binary search self.__ts_keys_arr.
+    # Initialize housekeeping vars for doing binary search in self.__ts_keys_arr
     low = 0
     high = len(self.__ts_keys_arr) - 1
     mid = 0
+    key_match_found = False
 
     # Now we do a binary search.
     while low <= high:
@@ -247,12 +248,45 @@ class TimeseriesDataDict(object):
       elif timestamp < self.__ts_keys_arr[mid]:  # half. Othewise ignore right
         high = mid - 1                           # half.
       else:
-        return mid  # return index where timestamp has an exact match.
+        key_match_found = True
+        break # we've found an exact match for supplied timestamp.
 
-    if lookup_qualifier == LookupQualifier.EXACT_MATCH:
-      # If caller has requested EXACT_MATCH and the key wasn't found during
-      # binary search, there's nothing more we can do. Hence...
-      return None
+    # Lets handle the cases when match was found.
+    if key_match_found:
+      if lookup_qualifier == LookupQualifier.EXACT_MATCH:
+        return mid
+
+      # Lets now delicately handle the 2 cases where mid is a boundary elem
+      # AND the qualifier is going to push the 'result to be returned' outside
+      # the bounds.
+      if mid == 0:  # mid at lower boundary
+        if lookup_qualifier == LookupQualifier.NEAREST_SMALLER:
+          return None
+        if lookup_qualifier == LookupQualifier.NEAREST_SMALLER_WEAK:
+          return mid
+      if mid == len(self.__ts_keys_arr) - 1:  # mid at upper boundary
+        if lookup_qualifier == LookupQualifier.NEAREST_LARGER:
+          return None
+        if lookup_qualifier == LookupQualifier.NEAREST_LARGER_WEAK:
+          return mid
+
+      # Now that boundary condition for mid is handled lets trivially handle
+      # the remaining non-boundary mid and qualifier cases.
+      if lookup_qualifier == LookupQualifier.NEAREST_SMALLER or \
+         lookup_qualifier == LookupQualifier.NEAREST_SMALLER_WEAK:
+        return mid - 1
+      if lookup_qualifier == LookupQualifier.NEAREST_LARGER or \
+         lookup_qualifier == LookupQualifier.NEAREST_LARGER_WEAK:
+        return mid + 1
+    else:
+      # If match was not found, the only lookup qualifier we need to tackle here
+      # is EXACT_MATCH. Other cases are handled by the fallthrough code below.
+      if lookup_qualifier == LookupQualifier.EXACT_MATCH:
+        return None
+
+    assert lookup_qualifier != LookupQualifier.EXACT_MATCH
+    # We've completely handled EXACT_MATCH above this point. Below this point
+    # we're going to *onl* handle other lookup qualifiers.
 
     '''
     Post binary search we have 3 cases based on value of low & high w.r.t

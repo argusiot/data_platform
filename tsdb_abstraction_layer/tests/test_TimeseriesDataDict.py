@@ -25,7 +25,13 @@ class TsDataDict_Tests(unittest.TestCase):
       self.__k_Max, self.__v_Max = hh.get_largest_key_and_its_value() 
       self.__k_lt_k_0 = int(self.__k_0/2)   # "key less than key 0"
       self.__k_gt_k_Max = self.__k_Max * 2  # "key greater than key Max"
-      self.__k_Arb, self.__v_Arb = hh.get_arbit_key_and_value()
+
+      # We get an arbitrary datapoint (Arb) in the middle of the range. We also
+      # get the data point before and after that Arb data point.
+      (self.__k_Arb_minus_1, self.__v_Arb_minus_1), \
+        (self.__k_Arb, self.__v_Arb), \
+        (self.__k_Arb_plus_1, self.__v_Arb_plus_1) = hh.get_arbit_key_and_value()
+
       self.__k_betn_0_and_1 = self.__k_0 + 5
       self.__k_betn_Max_minus_1_and_Max  = self.__k_Max - 5
       self.__k_betn_i_and_j = self.__k_Arb + 5
@@ -209,9 +215,9 @@ class TsDataDict_Tests(unittest.TestCase):
          # sub-test label ,   input key,        expected key,     expected value
          ("lt than k_0",      self.__k_lt_k_0,   self.__k_0,        self.__v_0), \
          ("gt than k_Max",    self.__k_gt_k_Max, self.__k_gt_k_Max, None), \
-         ("equals k_0",       self.__k_0,        self.__k_0,        self.__v_0), \
-         ("equals k_Max",     self.__k_Max,      self.__k_Max,      self.__v_Max), \
-         ("equals k_Arb",     self.__k_Arb,      self.__k_Arb,      self.__v_Arb), \
+         ("equals k_0",       self.__k_0,        self.__k_1,        self.__v_1), \
+         ("equals k_Max",     self.__k_Max,      self.__k_Max,      None), \
+         ("equals k_Arb",     self.__k_Arb,      self.__k_Arb_plus_1,  self.__v_Arb_plus_1), \
          ("betn k_0 and k_1", self.__k_betn_0_and_1, self.__k_1,    self.__v_1), \
          ("betn k_Max-1 and k_Max", self.__k_betn_Max_minus_1_and_Max, \
                                     self.__k_Max, self.__v_Max), \
@@ -232,9 +238,9 @@ class TsDataDict_Tests(unittest.TestCase):
          # sub-test label ,   input key,        expected key,    expected value
          ("lt than k_0",      self.__k_lt_k_0,   self.__k_0,     self.__v_0), \
          ("gt than k_Max",    self.__k_gt_k_Max, self.__k_Max,   self.__v_Max), \
-         ("equals k_0",       self.__k_0,        self.__k_0,     self.__v_0), \
+         ("equals k_0",       self.__k_0,        self.__k_1,        self.__v_1), \
          ("equals k_Max",     self.__k_Max,      self.__k_Max,   self.__v_Max), \
-         ("equals k_Arb",     self.__k_Arb,      self.__k_Arb,   self.__v_Arb), \
+         ("equals k_Arb",     self.__k_Arb,      self.__k_Arb_plus_1,  self.__v_Arb_plus_1), \
          ("betn k_0 and k_1", self.__k_betn_0_and_1, self.__k_1, self.__v_1), \
          ("betn k_Max-1 and k_Max", self.__k_betn_Max_minus_1_and_Max, \
                                     self.__k_Max, self.__v_Max), \
@@ -255,9 +261,9 @@ class TsDataDict_Tests(unittest.TestCase):
          # sub-test label ,   input key,        expected key,     expected value
          ("lt than k_0",      self.__k_lt_k_0,   self.__k_lt_k_0,   None), \
          ("gt than k_Max",    self.__k_gt_k_Max, self.__k_Max,      self.__v_Max), \
-         ("equals k_0",       self.__k_0,        self.__k_0,        self.__v_0), \
-         ("equals k_Max",     self.__k_Max,      self.__k_Max,      self.__v_Max), \
-         ("equals k_Arb",     self.__k_Arb,      self.__k_Arb,      self.__v_Arb), \
+         ("equals k_0",       self.__k_0,        self.__k_0,        None), \
+         ("equals k_Max",     self.__k_Max,      self.__k_Max_minus_1,  self.__v_Max_minus_1), \
+         ("equals k_Arb",     self.__k_Arb,      self.__k_Arb_minus_1,  self.__v_Arb_minus_1), \
          ("betn k_0 and k_1", self.__k_betn_0_and_1, self.__k_0,    self.__v_0), \
          ("betn k_Max-1 and k_Max", self.__k_betn_Max_minus_1_and_Max, \
                                     self.__k_Max_minus_1, self.__v_Max_minus_1), \
@@ -279,8 +285,8 @@ class TsDataDict_Tests(unittest.TestCase):
          ("lt than k_0",      self.__k_lt_k_0,   self.__k_0,        self.__v_0), \
          ("gt than k_Max",    self.__k_gt_k_Max, self.__k_Max,      self.__v_Max), \
          ("equals k_0",       self.__k_0,        self.__k_0,        self.__v_0), \
-         ("equals k_Max",     self.__k_Max,      self.__k_Max,      self.__v_Max), \
-         ("equals k_Arb",     self.__k_Arb,      self.__k_Arb,      self.__v_Arb), \
+         ("equals k_Max",     self.__k_Max,      self.__k_Max_minus_1,  self.__v_Max_minus_1), \
+         ("equals k_Arb",     self.__k_Arb,      self.__k_Arb_minus_1,  self.__v_Arb_minus_1), \
          ("betn k_0 and k_1", self.__k_betn_0_and_1, self.__k_0,    self.__v_0), \
          ("betn k_Max-1 and k_Max", self.__k_betn_Max_minus_1_and_Max, \
                                     self.__k_Max_minus_1, self.__v_Max_minus_1), \
