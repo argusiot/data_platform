@@ -1,0 +1,19 @@
+{
+  "time":{
+    "start":"5m-ago",
+    "aggregator":"none"
+  },
+ "filters":[
+   { "id":"f1", "tags":[ { "type":"literal_or", "tagk":"machine_name", "filter":"65mm_extruder", "groupBy":false } ] }
+ ],
+ "metrics":[
+   { "metric":"machine.sensor.raw_melt_pressure", "id":"a", "filter": "f1" },
+   { "metric":"machine.sensor.raw_melt_pressure", "id":"b", "filter": "f1" }
+  ],
+ "expressions":[
+   { "id":"e", "expr":"a + b" }
+  ],
+ "outputs":[
+   {"id":"e", "alias": "WOOT THIS WORKS"}
+ ]
+}

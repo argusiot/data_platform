@@ -1,0 +1,41 @@
+This file describes what has been done in the post_query file.
+
+To allow comments in post_query we'll have enable comments in the open TSDB
+config; until that is done we'll maintain this separate README.post_query
+file.
+
+
+{
+ // A start time for the query and an aggregator. Note that 'end' time is
+ // optional.
+  "time":{
+    "start":"5m-ago",
+    "aggregator":"none"    // no aggregators
+  },
+
+ // Define a filter 'f1'. This entures "filters": [...] is equivalent to:
+ //                  {machine_name="65mm_extruder"}
+ "filters":[
+   { "id":"f1", "tags":[ { "type":"literal_or", "tagk":"machine_name", "filter":"65mm_extruder", "groupBy":false } ] }
+ ],
+
+ // Query for 2 metrics and save 1st as 'a' and second as 'b'. In this case
+ // for conveniene we query the same metric twice but this could easily be
+ // the same metric. Notice how we choose to use the same filter 'f1' for
+ // both metrics.
+ "metrics":[
+   { "metric":"machine.sensor.raw_melt_pressure", "id":"a", "filter": "f1" },
+   { "metric":"machine.sensor.raw_melt_pressure", "id":"b", "filter": "f1" }
+  ],
+
+ // Add the timeseries 'a' to timeseries 'b' and save the result in an
+ // emphemeral timeseries 'e'.
+ "expressions":[
+   { "id":"e", "expr":"a + b" }
+  ],
+
+ // Return the timeseries 'e' with the alias shown below.
+ "outputs":[
+   {"id":"e", "alias": "WOOT THIS WORKS"}
+ ]
+}
