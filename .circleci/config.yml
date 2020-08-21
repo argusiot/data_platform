@@ -17,7 +17,9 @@ jobs:
             pip install coverage # For code coverage
             pip install requests # required for HTTP querying
             pip install -U pip setuptools # reqd to install argus_tal package
-            sudo apt-get install -y python3-setuptools
+            sudo apt-get update
+            sudo apt-get upgrade
+            sudo apt-get install -y python-setuptools
       - run:
           name: "Run TSDB Abstraction Layer (TAL) tests and code coverage"
           command: |
