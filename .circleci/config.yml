@@ -27,3 +27,8 @@ jobs:
             # which can be accessed via a browser on the CircleCI dashboard.
             path: /tmp/htmlcov     
             destination: htmlcov
+      - run:
+          name: "Machine analytics tests"
+          command: |
+            cd machine_analytics
+            make tests   # Basic protection for machine analysis code
