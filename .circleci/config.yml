@@ -31,4 +31,4 @@ jobs:
           name: "Machine analytics tests"
           command: |
             cd machine_analytics
-            make tests   # Basic protection for machine analysis code
+            make test   # Basic protection for machine analysis code
