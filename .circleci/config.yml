@@ -30,5 +30,7 @@ jobs:
       - run:
           name: "Machine analytics tests"
           command: |
-            cd machine_analytics
+            cd tsdb_abstraction_layer
+            sudo make install   # install the argus_tal package
+            cd ../machine_analytics
             make test   # Basic protection for machine analysis code
