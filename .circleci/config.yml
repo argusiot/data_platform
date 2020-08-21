@@ -17,9 +17,6 @@ jobs:
             pip install coverage # For code coverage
             pip install requests # required for HTTP querying
             pip install -U pip setuptools # reqd to install argus_tal package
-            sudo apt-get update
-            sudo apt-get upgrade
-            sudo apt-get install -y python-setuptools
       - run:
           name: "Run TSDB Abstraction Layer (TAL) tests and code coverage"
           command: |
@@ -35,6 +32,6 @@ jobs:
           name: "Machine analytics tests"
           command: |
             cd tsdb_abstraction_layer
-            sudo make install   # install argus_tal package
+            make install   # install argus_tal package
             cd ../machine_analytics
             make test   # Basic protection for machine analysis code
