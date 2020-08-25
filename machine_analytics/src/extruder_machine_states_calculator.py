@@ -12,13 +12,11 @@
        (2) how is each timeseries used (functionally)
 '''
 
-from argus_tal import query_api
-from argus_tal import timeseries_id as ts_id
 from argus_tal import timestamp as ts
-from argus_tal import basic_types as bt
 from argus_tal.timeseries_datadict import LookupQualifier as LQ
 
 from all_machines_common_base import ComputationMode, MachineAnalyticsBase, PowerState
+from common_power_state_calculator import PowerStateCalculator
 
 class ExtruderMachineStateCalculator(MachineAnalyticsBase):
   def __init__(self, data_source_IP_address,
@@ -28,111 +26,52 @@ class ExtruderMachineStateCalculator(MachineAnalyticsBase):
                      melt_temperature_ts_id,
                      line_speed_ts_id,
                      screw_speed_ts):
-    super(ExtruderMachineStateCalculator, self).__init__("Extruder_machine")
-    self.__data_source_IP_address = data_source_IP_address
-    self.__data_source_TCP_port = data_source_TCP_port
+    super(ExtruderMachineStateCalculator, self).__init__(
+        "Extruder_machine", data_source_IP_address, data_source_TCP_port)
+
     self.__computation_mode = computation_mode
-    self.__power_state_ts_id = power_state_ts_id
     self.__melt_temperature_ts_id = melt_temperature_ts_id
     self.__line_speed_ts_id = line_speed_ts_id
     self.__screw_speed_ts_id = screw_speed_ts
+    self.__power_state_ts_id = power_state_ts_id
 
+    # For power state calculation we take help from the PowerStateCalculator.
+    self.__power_state_obj = PowerStateCalculator(
+        data_source_IP_address,
+        data_source_TCP_port,
+        ComputationMode.ON_DEMAND,
+        power_state_ts_id)
+
+    # For delegate power state calculation to the PowerStateCalculator obj.
   def compute_result(self, start_time, end_time):
-    stateList = self.__createPowerStateList(start_time, end_time)
-    time_in_off_state, time_in_on_state = self.__calculateTotalTimeOnOff(stateList)
-    time_in_ready_state = self.__calculateTotalReadyTime(stateList)
-    time_in_purge_state = self.__calculateTotalPurgeTime(stateList)
+    # Compute power state list and on/off state
+    power_state_result = self.__power_state_obj.compute_result(
+        start_time, end_time)
+
+    # Now use the power state transitions to calculate time in READY state
+    # and ...
+    time_in_ready_state = self.__calculate_ready_time(
+        self.__power_state_obj.state_transition_list)
+    # ... time in PURGE state.
+    time_in_purge_state = self.__calculate_purge_time(
+        self.__power_state_obj.state_transition_list)
 
     # Fill result map
     result_map = {}
     result_map['time_window'] = (start_time, end_time)
-    result_map['off_state'] = time_in_off_state
-    result_map['on_state'] = time_in_on_state
+    result_map['off_state'] = power_state_result['off_state']
+    result_map['on_state'] = power_state_result['on_state']
     result_map['ready_state'] = time_in_ready_state
     result_map['purge_state'] = time_in_purge_state
     return result_map
 
-
-  def __get_timeseries_data(self, timeseries_id,
-                                  start_timestamp,
-                                  end_timestamp,
-                                  flag_compute_rate=False):
-
-      foo = query_api.QueryApi(
-          self.__data_source_IP_address, self.__data_source_TCP_port,
-          start_timestamp, end_timestamp,
-          [timeseries_id],
-          bt.Aggregator.NONE,
-          flag_compute_rate,
-          )
-
-      rv = foo.populate_ts_data()
-      assert rv == 0
-
-      result_list = foo.get_result_set()
-      assert len(result_list) == 1
-
-      # for result in result_list:
-      #     for kk, vv in result:
-      #         print("\t%s->%d" % (kk, vv))
-      return result_list[0]
-
-  def __createPowerStateList(self, start_timestamp, end_timestamp):
-      result = self.__get_timeseries_data(
-          self.__power_state_ts_id, start_timestamp, end_timestamp)
-
-      # Housekeeping variables.
-      # FIXME_Vishwas: Please add comments here to explain what is happening
-      # in the loop below. Specifically what do we expect to find inside
-      # stateList.
-      Startkey = 0
-      EndKey = 0
-      StartValue = 0
-      stateList = []
-
-      #Below block traverses the result and forms tuple of start and end timestamps with powerstate
-      i=0
-      for k, v in result:
-          if i == 0:
-              Startkey = k
-              StartValue = v
-          elif i == len(result) - 1:
-              EndKey = k
-              stateList.append(tuple((Startkey, EndKey, StartValue)))
-          elif v == result.get_datapoint(k, LQ.NEAREST_SMALLER)[1]:
-              # print(k,v,result.get_datapoint(k, LQ.NEAREST_SMALLER)[0],result.get_datapoint(k, LQ.NEAREST_SMALLER)[1])
-              i += 1
-              continue
-          else:
-              EndKey = result.get_datapoint(k, LQ.NEAREST_SMALLER)[0]
-              stateList.append(tuple((Startkey, EndKey, StartValue)))
-              Startkey = k
-              StartValue = v
-          i += 1
-
-      return stateList
-
-  #Uses powestate tuples and calculates overall timeon and timeoff 
-  # FIXME: Can be potentially moved to base class since this is going to be 
-  # needed for any machine.
-  def __calculateTotalTimeOnOff(self, stateList):
-      total_time_on = 0
-      total_time_off = 0
-      for entry in stateList:
-          if entry[2] == 0.0:
-              total_time_off += (entry[1]) - (entry[0])
-          elif entry[2] == 1.0:
-              total_time_on += (entry[1]) - (entry[0])
-      return (total_time_off, total_time_on)
-
-
-  def __calculateTotalReadyTime(self, stateList):
+  def __calculate_ready_time(self, stateList):
       total_ready_time = 0
       for entry in stateList:
           if entry[2] == 1.0: #Checks the power state list and if in ON state proceeds
               start_timestamp = ts.Timestamp(entry[0])
               end_timestamp = ts.Timestamp(entry[1])
-              rate = self.__get_timeseries_data(self.__melt_temperature_ts_id,start_timestamp,end_timestamp,flag_compute_rate=True)
+              rate = self.get_timeseries_data(self.__melt_temperature_ts_id,start_timestamp,end_timestamp,flag_compute_rate=True)
 
               StartTime = 0
               for k,v in rate:
@@ -148,13 +87,13 @@ class ExtruderMachineStateCalculator(MachineAnalyticsBase):
       return total_ready_time
 
 
-  def __calculateTotalPurgeTime(self, stateList): #linespeed zero, screw speed non-zero
+  def __calculate_purge_time(self, stateList): #linespeed zero, screw speed non-zero
       total_purge_time = 0
       for entry in stateList:
           if entry[2] == 1.0: #Checks if machine state is on
               start_timestamp = ts.Timestamp(entry[0])
               end_timestamp = ts.Timestamp(entry[1])
-              data = self.__get_timeseries_data(
+              data = self.get_timeseries_data(
                   self.__line_speed_ts_id, start_timestamp, end_timestamp)
 
               Startkey = 0
@@ -181,7 +120,7 @@ class ExtruderMachineStateCalculator(MachineAnalyticsBase):
               for entry in tempStateList: #check screwspeed at all intervals for every tuple created above
                   start_timestamp = ts.Timestamp(entry[0])
                   end_timestamp = ts.Timestamp(entry[1])
-                  screwdata = self.__get_timeseries_data(
+                  screwdata = self.get_timeseries_data(
                       self.__screw_speed_ts_id, start_timestamp, end_timestamp)
                   for k,v in screwdata:
                       if 20 <= v <= 200: #If screw speed is non zero and in range (Values needs to discussed!!)
@@ -194,7 +133,7 @@ class ExtruderMachineStateCalculator(MachineAnalyticsBase):
               for entry in tempStateList:
                   start_timestamp = ts.Timestamp(entry[0])
                   end_timestamp = ts.Timestamp(entry[1])
-                  meltdata = self.__get_timeseries_data(
+                  meltdata = self.get_timeseries_data(
                       self.__melt_temperature_ts_id,
                       start_timestamp, end_timestamp)
 
