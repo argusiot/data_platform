@@ -7,9 +7,18 @@
   Use case: ADP_DASH_SW5
 
   Core algorithm:
-     FIXME_Vishwas please fill in at a high level:
-       (1) which timeseries are used to compute machine usage.
-       (2) how is each timeseries used (functionally)
+     FIXME_Vishwas please fill in at a high level: [IN PROGRESS]
+       (1) In order to compute machine usage, the following time series data is used: 
+       power_state, melt_temperature, line_speed and screw_speed.
+       (2) The ready state time is calclated by picking each power state tuple where the 
+       machine was in a power on state and looking if the following conditions are satisfied:
+         -- melt_temperature will have have stable values at target setpoint
+         -- melt_temperature rate of change should be near 0
+         This is done by iteratively looking into each entry in the melt_temperature rate ts
+         for the selected time period. If the rate of change ~ 0 , the time stamp is noted and 
+         melt_temperature_ts is checked for point where it rate is out of range.
+         Such transitions are noted and total ready time is cumulative of all the transition 
+         window time.
 '''
 
 from argus_tal import timestamp as ts
