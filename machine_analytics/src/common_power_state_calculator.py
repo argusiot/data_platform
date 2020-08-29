@@ -7,9 +7,17 @@
   Use case: COMMON_INFRA
 
   Core algorithm:
-     FIXME_Vishwas please fill in at a high level:
-       How is the power timeseries used to compute the transition state tuple
-       list ?
+     In order to compute machine power states, the power_state timeseries is used.
+     When the value of an entry in power_state_ts is 1, machine is considered ON,
+     it is considered OFF when the value is 0.
+     The goal is create a list of tuples of form (t1, t2, state_k) where t1 and t2 represent
+     the start and end timestamps of the period in which the machine was in state(ON or OFF)
+     represented by state_k. 
+     This is achieved by looking for transitions of value in the power_state_ts.
+     When a transition occurs from ON to OFF or vice versa, the timestamp is recorded as t1.
+     Further power_state_ts is sequentially checked for the next transition and that timestamp 
+     is recorded as t2. state_k is recorded as the one the machine spent from t1 to t2.
+     The tuple is appended to a list and the process is repeated until the end of the power_state_ts. 
 '''
 
 from argus_tal.timeseries_datadict import LookupQualifier as LQ
