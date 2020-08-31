@@ -76,41 +76,40 @@ class PowerStateCalculator(MachineAnalyticsBase):
       # Housekeeping variables.
       # FIXME_Vishwas: Please add comments here to explain what is happening
       # in the loop below. Specifically what do we expect to find inside
-      # stateList.
-      Startkey = 0
-      EndKey = 0
-      StartValue = 0
-      stateList = []
+      # state_transition_list.
+      start_key = 0
+      end_key = 0
+      start_value = 0
+      state_transition_list = []
 
       #Below block traverses the result and forms tuple of start and end timestamps with powerstate
-      i=0
-      for k, v in result:
-          if i == 0:
-              Startkey = k
-              StartValue = v
-          elif i == len(result) - 1:
-              EndKey = k
-              stateList.append(tuple((Startkey, EndKey, StartValue)))
-          elif v == result.get_datapoint(k, LQ.NEAREST_SMALLER)[1]:
-              # print(k,v,result.get_datapoint(k, LQ.NEAREST_SMALLER)[0],result.get_datapoint(k, LQ.NEAREST_SMALLER)[1])
-              i += 1
+      #FIXME_Vishwas: Discuss this with Vishwas !
+      for idx, (kk, vv) in enumerate(result):
+          if idx == 0:  # Initial condition
+              start_key = kk
+              start_value = vv
+          elif idx == len(result) - 1:  # Last element in the result
+              end_key = kk
+              state_transition_list.append(tuple((start_key, end_key, start_value)))
+          elif vv == result.get_datapoint(kk, LQ.NEAREST_SMALLER)[1]:
               continue
           else:
-              EndKey = result.get_datapoint(k, LQ.NEAREST_SMALLER)[0]
-              stateList.append(tuple((Startkey, EndKey, StartValue)))
-              Startkey = k
-              StartValue = v
-          i += 1
+              end_key = kk
+              state_transition_list.append(tuple((start_key, end_key, start_value)))
+              start_key = kk
+              start_value = vv
 
-      return stateList
+      return state_transition_list
 
   #Uses powestate tuples and calculates overall timeon and timeoff
-  def __calculate_on_off_time(self, stateList):
+  def __calculate_on_off_time(self, state_transition_list):
       total_time_on = 0
       total_time_off = 0
-      for entry in stateList:
-          if entry[2] == 0.0:
-              total_time_off += (entry[1]) - (entry[0])
-          elif entry[2] == 1.0:
-              total_time_on += (entry[1]) - (entry[0])
+      for entry in state_transition_list:
+          start_time, end_time, state_value = entry # unpack
+          if state_value == 0.0:
+              total_time_off += (end_time - start_time)
+          else:
+              assert(state_value == 1.0)  # No other value is possible.
+              total_time_on += (end_time - start_time)
       return (total_time_off, total_time_on)

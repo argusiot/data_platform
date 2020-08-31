@@ -72,14 +72,12 @@ class ESMC_Tests(unittest.TestCase):
     '''
       FIXME: These numbers are using the original (Vishwas) data as is. It is
       understood that these values fail the following audit:
-      1) off_state + on_state = window_duration
       2) on_state = ready_state + purge_state
       We'll fix the code later and add suitable MOCK based unit tests in follow
       up commits.
     '''
     # All numbers below are in seconds.
     self.assertEqual(1794, window_duration)
-    self.assertEqual(874, result['off_state'])
-    self.assertEqual(903, result['on_state'])
-    self.assertEqual(844, result['ready_state'])
+    self.assertEqual(result['off_state'] + result['on_state'], window_duration)
+    self.assertEqual(850, result['ready_state'])
     self.assertEqual(18, result['purge_state'])
