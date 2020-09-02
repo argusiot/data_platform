@@ -92,7 +92,15 @@ class PSC_Tests(unittest.TestCase):
                              # datapoints, which is just convenient for
                              # visual verification of testdata.
     self.__period_std_dev = 3 # Choice of 3 is arbitrary.
-    self.__test_data = [
+    self.__tsdb_ip = "172.1.1.1"
+    self.__tsdb_port = 4242
+    # Initialize the timeseries id of interest
+    self.__power_state_ts_id = ts_id.TimeseriesID(
+      "machine.sensor.dummy_machine_powerOn_stat",
+      {"machine_name": "90mm_extruder"}
+    )
+
+    self.__fixed_period_test_data = [
          ("Continuous power ON", [(1234510, 1234570, 1.0)]),
          ("Continuous power OFF", [(1234610, 1234670, 0.0)]),
          ("OFF->ON transition", [(1234800, 1234850, 0.0),
@@ -122,20 +130,24 @@ class PSC_Tests(unittest.TestCase):
     self.__test_result_dict = { }
 
 
-  def __update_dict(self, value_dict, key, value):
+  def __update_time_spent_in_state(self, value_dict, key, value):
     # Update cummulative value.
     updated_value = value_dict.get(key, 0) + value
     value_dict[key] = int(updated_value)
 
   def __generate_timeseries(self, time_window_and_value_list,
                                   period_mean,
-                                  period_stddev,
-                                  window_chaining = True):
+                                  period_stddev):
     '''Generates a timeseries for the supplied time window list.
+
+       time_window_and_value_list is of the form:
+          [(start_w1, end_w1, value), (start_w2, end_w2, value), ...]
 
        Each datapoint has the same 'value'.
 
-       The period is a tuple : (mean, std_dev).
+       The period dictates distance between data points. Its normally distributed
+       with the period_mean and period_stddev. By supplying a value of 0 for
+       the stddev caller can generate *exactly* equidistant datapoints.
 
        The timestamps for the data points are generated using the start window
        time and period mean/std_dev values and are guaranteed to not exceed the
@@ -147,56 +159,65 @@ class PSC_Tests(unittest.TestCase):
          timeseries:
            A map containing time->value.
 
-         total_time_in_each_state:
+         cumm_duration_in_this_state:
            Stores the cummulative durations associated with each of the
            values that were supplied in the timeseries generation parameters.
            e.g. Over the entire time duration value 0.0 was seen for 60sec
            and 1.0 was seen for 90sec. This is used for verification of results
            returned by machine analytics.
+
+        first_timestamp:
+            This is the timestamp of the first datapoint in the generated
+            timeseries.
+
+        last_timestamp:
+            This is the timestamp of the last datapoint in the generated
+            timeseries.
      '''
     timeseries = {}  # Stores the generated timeseries data.
-    total_time_in_each_state = {}  # to store cummulative values written
+    cumm_duration_in_this_state = {}  # to store cummulative values written
 
-    # An house keeping variable to allow to chain time windows wherever needed.
-    if window_chaining:
-      last_ts_in_prev_timeseries = None
-
+    # Initialize variables that allow us to chain successive time windows.
+    # FIXME: Explain how these are getting used.
+    last_ts_in_prev_timeseries = None
     for vv in time_window_and_value_list:
-      start_time, end_time, value = vv  # Unpack the test data params.
-      if window_chaining and last_ts_in_prev_timeseries != None:
+      start_time, end_time, dp_value = vv  # Unpack the test data params.
+
+      # From the 2nd time window onwards, the start_time gets overridden
+      # with the last_ts_in_prev_timeseries (time window chaining).
+      if last_ts_in_prev_timeseries != None:
         start_time = last_ts_in_prev_timeseries
 
       # Initialize housekeep variables
       timestamp = start_time
       next_ts_distance = 0
 
+      '''Its crucial to understand how next_ts_distance is used here.
+
+         FIXME: Add how next_ts_distance computed in one iteration affects
+                computation in the next iteration.
+      '''
       while timestamp + next_ts_distance <= end_time:
         timestamp += next_ts_distance  # Update timestamp and...
-        timeseries[timestamp] = value # ... add datapoint into timeseries.
+        timeseries[timestamp] = dp_value # ... add datapoint into timeseries.
 
         # Generate (temporal) distance for next datapoint.
         next_ts_distance = int(random.gauss(period_mean, period_stddev))
 
-        # Update cummulative value for current timestamp
-        self.__update_dict(total_time_in_each_state, value, next_ts_distance)
-
       last_ts_in_prev_timeseries = timestamp
-      # last_ts_in_prev_timeseries = timestamp + next_ts_distance
+
+      # Update cummulative duration spent in 'dp_value' state.
+      duration = last_ts_in_prev_timeseries - start_time
+      updated_value = cumm_duration_in_this_state.get(dp_value, 0) + duration
+      cumm_duration_in_this_state[dp_value] = int(updated_value)
+
 
     # Lets pull out the first timestamp in the timeseries. This will be the
     # start time of the first window in the window and value list.
     first_window = time_window_and_value_list[0]
     start_time, end_time, state = first_window
 
-    return timeseries, total_time_in_each_state, start_time, last_ts_in_prev_timeseries
-
-  #FIXME: Develop this for the variable period case.
-  def __audit_fixed_period_timestamps(self, timeseries, period):
-    old_ts = None
-    for ts in timeseries:
-      if old_ts != None:
-        self.assertEqual(ts, old_ts + period)
-      old_ts = ts # Update old_ts to current timestamp
+    return timeseries, cumm_duration_in_this_state, start_time, last_ts_in_prev_timeseries
 
   def __build_opentsdb_json_response(self, ts_id, timeseries_dict):
     json_response = [
@@ -227,9 +248,9 @@ class PSC_Tests(unittest.TestCase):
   def __setup_testcase_data(self, time_window_params,
                                   period_mean,
                                   period_std_dev,
-                                  tsdb_ip,
-                                  tsdb_port,
-                                  power_state_ts_id):
+                                  server_ip,
+                                  server_port,
+                                  ts_id_obj):
     '''
       Setup the test case data.
 
@@ -251,44 +272,79 @@ class PSC_Tests(unittest.TestCase):
     '''
     # Step 1:
     timeseries, \
-    total_time_in_each_state, \
+    cummulative_time_in_each_state, \
     first_timestamp, \
     last_timestamp = self.__generate_timeseries(
                  time_window_params,
                  period_mean,
                  period_std_dev)
-    self.__audit_fixed_period_timestamps(timeseries, self.__period_mean)
 
     # Step 2:
     start_ts, end_ts = ts.Timestamp(first_timestamp), ts.Timestamp(last_timestamp)
     url_to_expect = qurlgen.url(
-       bt.Tsdb.OPENTSDB, tsdb_ip, tsdb_port,
+       bt.Tsdb.OPENTSDB, server_ip, server_port,
        start_ts, end_ts,
-       bt.Aggregator.NONE, [power_state_ts_id])
+       bt.Aggregator.NONE, [ts_id_obj])
 
-    self.__store_expected_result(url_to_expect, 200, power_state_ts_id,  timeseries)
-    return start_ts, end_ts
+    self.__store_expected_result(url_to_expect, 200, ts_id_obj,  timeseries)
+    return start_ts, end_ts, cummulative_time_in_each_state
+
+  def __verify_power_state_obj_results(self, power_state_calc_obj,
+                                             time_window_params,
+                                             total_expected_duration,
+                                             test_case_label,
+                                             computed_result,
+                                             cumm_state_from_generated_ts_data,
+                                             strict_verification=True):
+    '''Verify the PowerStateCalculator object results with expected data.
+
+       If strict_verification is True, then both generated state transition
+       time windows and the computed cummulative time spent in each state are
+       verified.
+
+       If strict_verification is False, then only the computed cummulative time
+       spent in each state are verified. Verification of transition windows is
+       skipped.
+    '''
+    # 1) Verify computed state tranistion time windows
+    # Verify that the state transition list computed exactly matches our
+    # time windows from the test data.
+    if strict_verification:
+      self.assertEqual(power_state_calc_obj.state_transition_list,
+                       time_window_params,
+                       msg=test_case_label)
+
+    # 2) Audit computed result for time spent in each state.
+    # Verify that in the computed result, the time spent in ON and OFF
+    # states equals total time window.
+    self.assertEqual(computed_result['off_state'] + computed_result['on_state'],
+                     total_expected_duration)
+
+    # 3) Verify that cummulative duration spent each state.
+    # More precisely, verify that expected values for time spent in
+    # ON/OFF states matches that with our generated data.
+    self.assertEqual(cumm_state_from_generated_ts_data.get(1.0, 0),
+                     computed_result['on_state'])
+    self.assertEqual(cumm_state_from_generated_ts_data.get(0.0, 0),
+                     computed_result['off_state'])
 
   def mocked_requests_get(self, url):
-    print("[TESTING FOR] URL: %s" % url)
+    print("GENERATED URL: %s" % url)
     resp_mock = Mock()
     resp_mock.status_code, resp_mock.json.return_value = self.__test_result_dict[url]
     return resp_mock
 
-  def testOffToOnTransition(self):
-    '''Test Power state calcuation for test cases in self.__test_data.'''
+  def testAllSubtestCasesForFixedPeriod(self):
+    '''Test Power state calcuation for fixed period test data.
 
-    tsdb_ip = "172.1.1.1"
-    tsdb_port = 4242
-    # Initialize the timeseries id of interest
-    power_state_ts_id = ts_id.TimeseriesID(
-      "machine.sensor.dummy_machine_powerOn_stat",
-      {"machine_name": "90mm_extruder"}
-    )
+       In the test method we generate timeseries with a fixed period between
+       the data points.
+    '''
 
     # tc = test_case
-    for tc_idx, tc_data in enumerate(self.__test_data):
+    for tc_idx, tc_data in enumerate(self.__fixed_period_test_data):
       test_case_label, time_window_params = tc_data # Unpack test case data
+      print("\nTesting: %s" % test_case_label)
       with self.subTest():
         with patch('argus_tal.query_api.requests') as mock_tsdb:
 
@@ -296,35 +352,116 @@ class PSC_Tests(unittest.TestCase):
           mock_tsdb.get.side_effect = self.mocked_requests_get
 
           # Setup test case data that PowerStateCalculator consumes.
-          start_ts, end_ts = self.__setup_testcase_data(
+          start_ts, end_ts, \
+          cumm_state_from_generated_ts_data = self.__setup_testcase_data(
               time_window_params,
               self.__period_mean,
               0, # Std dev = 0 i.e. fixed distance between data points.
-              tsdb_ip,
-              tsdb_port,
-              power_state_ts_id)
+              self.__tsdb_ip,
+              self.__tsdb_port,
+              self.__power_state_ts_id)
 
           # Instantiate Object Under Test and invoke the functionality being
           # tested.
           power_state_calc_obj = PowerStateCalculator(
-              tsdb_ip, tsdb_port, ComputationMode.ON_DEMAND, power_state_ts_id)
-          result = power_state_calc_obj.compute_result(start_ts, end_ts)
-
-          #
-          # Verify expected outcomes and side effects.
-          #
+              self.__tsdb_ip,
+              self.__tsdb_port,
+              ComputationMode.ON_DEMAND,
+              self.__power_state_ts_id)
+          computed_result = power_state_calc_obj.compute_result(start_ts,
+                                                                end_ts)
 
           mock_tsdb.get.assert_called_once()
 
-          # Verify that the state transition list computed exactly matches our
-          # time windows from the test data.
-          self.assertEqual(power_state_calc_obj.state_transition_list,
-                           time_window_params,
-                           msg=test_case_label)
+          # Verify that PowerStateCalculator object matches expected results
+          # by comparing against generated timeseries data.
+          self.__verify_power_state_obj_results(
+              power_state_calc_obj,
+              time_window_params,
+              end_ts.value - start_ts.value,  # total duration
+              test_case_label,
+              computed_result,
+              cumm_state_from_generated_ts_data)
 
-          # Verify that the time spent in ON and OFF states equals total time
-          # window.
-          self.assertEqual(result['off_state'] + result['on_state'],
-                           end_ts.value - start_ts.value)
 
+  def testAllSubtestCasesForVariablePeriod(self):
+    '''Test Power state calcuation for fixed period test data.
 
+       In the test method we generate timeseries with a fixed period between
+       the data points.
+    '''
+
+    start = 1239000
+    window = 50
+    time_windows = [
+        (start, start+window, 0.0),
+        (-1, start+2*window, 1.0),
+        (-1, start+3*window, 0.0),
+        (-1, start+10*window, 1.0),
+        (-1, start+11*window, 0.0),
+    ]
+    variable_period_test_data = [
+        ("Variable period window *** FIX TIME WINDOW AUDITING",
+          time_windows)
+    ]
+
+    # tc = test_case
+    for tc_idx, tc_data in enumerate(variable_period_test_data):
+      test_case_label, time_window_params = tc_data # Unpack test case data
+      print("\nTesting: %s" % test_case_label)
+      with self.subTest():
+        with patch('argus_tal.query_api.requests') as mock_tsdb:
+
+          # Setup mock handler
+          mock_tsdb.get.side_effect = self.mocked_requests_get
+
+          # Setup test case data that PowerStateCalculator consumes.
+          start_ts, end_ts, \
+          cumm_state_from_generated_ts_data = self.__setup_testcase_data(
+              time_window_params,
+              self.__period_mean,
+              self.__period_std_dev,
+              self.__tsdb_ip,
+              self.__tsdb_port,
+              self.__power_state_ts_id)
+
+          # Instantiate Object Under Test and invoke the functionality being
+          # tested.
+          power_state_calc_obj = PowerStateCalculator(
+              self.__tsdb_ip,
+              self.__tsdb_port,
+              ComputationMode.ON_DEMAND,
+              self.__power_state_ts_id)
+          computed_result = power_state_calc_obj.compute_result(start_ts,
+                                                                end_ts)
+
+          mock_tsdb.get.assert_called_once()
+
+          # Verify that PowerStateCalculator object matches expected results
+          # by comparing against generated timeseries data.
+          self.__verify_power_state_obj_results(
+              power_state_calc_obj,
+              time_window_params,
+              end_ts.value - start_ts.value,  # total duration
+              test_case_label,
+              computed_result,
+              cumm_state_from_generated_ts_data,
+              strict_verification=False)
+
+  def testVariableTimePeriod2(self):
+    start = 1239000
+    window = 50
+    time_windows = [
+        (start, start+window, 1.0),
+        (-1, start+2*window, 0.0),
+        (-1, start+3*window, 1.0),
+    ]
+
+    timeseries_dps, \
+    time_in_each_state, \
+    _, \
+    _ = self.__generate_timeseries(time_windows,
+                                   self.__period_mean,
+                                   self.__period_std_dev)
+    print(timeseries_dps)
+    print(time_in_each_state)
