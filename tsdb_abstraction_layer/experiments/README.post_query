@@ -4,38 +4,94 @@ To allow comments in post_query we'll have enable comments in the open TSDB
 config; until that is done we'll maintain this separate README.post_query
 file.
 
+HIGH LEVEL OBJECTIVE: Study usage of "+" in an expression
+--------------------
+High level objective here is to compare the outcome of using the "+" operator
+in an expression.
 
+First time we use the "+" operation with 2 different timeseries. We choose to
+use melt_temperature metric for 2 different machines (65mm & 90mm extruders).
+We store this result in res1.
+
+Second we use the "+" operation with 2 the same timeseries. We choose to
+use melt_temperature metric on 65mm extruder for this.
+We store this result in res2.
+
+RESULTS:
+-------
+In the result we get series back.
+
+res1 contains a union of timestamp from both series. At each timestamp, we see
+2 values i.e. one from each series. If a series is missing a dp for a timestamp,
+then fillPolicy kicks in. We have left fillPolicy to default, hence we get a '0'
+(zero) back for timestamps that dont have a value.
+
+res2 contains exactly same no. of timestamps are original series. At each
+timestamp we see the addition of the dp from the original series.
+
+
+QUERY EXPLANATION:
+-----------------
 {
  // A start time for the query and an aggregator. Note that 'end' time is
  // optional.
   "time":{
-    "start":"5m-ago",
-    "aggregator":"none"    // no aggregators
+    "start":"1603912202086",  // For repeatability, we're fixing the time
+    "end":"1603912341278",    // window to be a fixed one.
+    "aggregator":"none"       // no aggregators
   },
 
- // Define a filter 'f1'. This entures "filters": [...] is equivalent to:
- //                  {machine_name="65mm_extruder"}
+  // Grafana dashboard corresponding to the above time window:
+  // http://34.221.154.248:3000/d/D0h7GutMz/query-experiments-using-post?orgId=1&from=1603912204000&to=1603912338000
+
+
+ // Define 2 filters 'f1' & 'f2'.
+ //     f1 is equivalent to: {machine_name="65mm_extruder"}
+ //     f2 is equivalent to: {machine_name="90mm_extruder"}
  "filters":[
-   { "id":"f1", "tags":[ { "type":"literal_or", "tagk":"machine_name", "filter":"65mm_extruder", "groupBy":false } ] }
+   {
+     "id":"f1",
+     "tags":[ {
+       "type":"literal_or",
+       "tagk":"machine_name",
+       "filter":"65mm_extruder",
+       "groupBy":false
+     } ]
+   },
+   {
+     "id":"f2",
+     "tags":[ {
+       "type":"literal_or",
+       "tagk":"machine_name",
+       "filter":"90mm_extruder",
+       "groupBy":false
+     } ]
+   }
  ],
 
- // Query for 2 metrics and save 1st as 'a' and second as 'b'. In this case
- // for conveniene we query the same metric twice but this could easily be
- // the same metric. Notice how we choose to use the same filter 'f1' for
- // both metrics.
+ // Define 2 identifiers, called 'a' & 'b'. Each id is defined by taking a
+ // metric and applying a filter to it.
+ //    So 'a' is defined as melt_temp with filter f1.
+ //    So 'b' is defined as melt_temp with filter f2.
+ //
+ // Its ok to use the same metric with same filter multiple times, as long as
+ // we assign it to a different id e.g. define 'c' with melt_temp and f1 filter.
  "metrics":[
-   { "metric":"machine.sensor.raw_melt_pressure", "id":"a", "filter": "f1" },
-   { "metric":"machine.sensor.raw_melt_pressure", "id":"b", "filter": "f1" }
+   { "metric":"machine.sensor.raw_melt_temperature", "id":"a", "filter": "f1" },
+   { "metric":"machine.sensor.raw_melt_temperature", "id":"b", "filter": "f2" }
   ],
 
  // Add the timeseries 'a' to timeseries 'b' and save the result in an
- // emphemeral timeseries 'e'.
+ // emphemeral timeseries 'e'. Similarly, add timeseries 'a' to itself and store
+ // result in emphemeral timeseries 'res2'.
  "expressions":[
-   { "id":"e", "expr":"a + b" }
+   { "id":"res1", "expr":"a + b", "join": { "operator": "union" } },
+   { "id":"res2", "expr":"a + a", "join": { "operator": "union" } }
   ],
 
- // Return the timeseries 'e' with the alias shown below.
+ // Return the timeseries res1 & res2 with the alias shown below.
  "outputs":[
-   {"id":"e", "alias": "WOOT THIS WORKS"}
+   {"id":"res1", "alias": "Addition of values for melt_temp from diff machines"},
+   {"id":"res2", "alias": "Addition of melt_temp to itself for same machine"}
  ]
 }

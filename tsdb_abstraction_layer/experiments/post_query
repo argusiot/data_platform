@@ -1,19 +1,43 @@
 {
   "time":{
-    "start":"5m-ago",
+    "start":"1603912202086",
+    "end":"1603912341278",
     "aggregator":"none"
   },
+
  "filters":[
-   { "id":"f1", "tags":[ { "type":"literal_or", "tagk":"machine_name", "filter":"65mm_extruder", "groupBy":false } ] }
+   {
+     "id":"f1",
+     "tags":[ {
+       "type":"literal_or",
+       "tagk":"machine_name",
+       "filter":"65mm_extruder",
+       "groupBy":false
+     } ]
+   },
+   {
+     "id":"f2",
+     "tags":[ {
+       "type":"literal_or",
+       "tagk":"machine_name",
+       "filter":"90mm_extruder",
+       "groupBy":false
+     } ]
+   }
  ],
+
  "metrics":[
-   { "metric":"machine.sensor.raw_melt_pressure", "id":"a", "filter": "f1" },
-   { "metric":"machine.sensor.raw_melt_pressure", "id":"b", "filter": "f1" }
+   { "metric":"machine.sensor.raw_melt_temperature", "id":"a", "filter": "f1" },
+   { "metric":"machine.sensor.raw_melt_temperature", "id":"b", "filter": "f2" }
   ],
+
  "expressions":[
-   { "id":"e", "expr":"a + b" }
+   { "id":"res1", "expr":"a + b", "join": { "operator": "union" } },
+   { "id":"res2", "expr":"a + a", "join": { "operator": "union" } }
   ],
+
  "outputs":[
-   {"id":"e", "alias": "WOOT THIS WORKS"}
+   {"id":"res1", "alias": "Addition of values for melt_temp from diff machines"},
+   {"id":"res2", "alias": "Addition of melt_temp to itself for same machine"}
  ]
 }
