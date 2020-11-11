@@ -28,6 +28,16 @@ from all_machines_common_base import ComputationMode, MachineAnalyticsBase, Powe
 from common_power_state_calculator import PowerStateCalculator
 
 class ExtruderMachineStateCalculator(MachineAnalyticsBase):
+  def is_parameter_stable(rate_v):
+    return -1 <= rate_v <= 1
+
+  def is_parameter_changing(rate_v):
+    return rate_v < -1 or rate_v > 1
+
+  def compute_time_in_stable_state(ts_id, cur_time, window_start_time):
+    tmp_time, _ = ts_id.get_datapoint(cur_time, LQ.NEAREST_SMALLER)
+    return tmp_time - window_start_time
+
   def __init__(self, data_source_IP_address,
                      data_source_TCP_port,
                      computation_mode,
@@ -51,7 +61,6 @@ class ExtruderMachineStateCalculator(MachineAnalyticsBase):
         ComputationMode.ON_DEMAND,
         power_state_ts_id)
 
-    # For delegate power state calculation to the PowerStateCalculator obj.
   def compute_result(self, start_time, end_time):
     # Compute power state list and on/off state
     power_state_result = self.__power_state_obj.compute_result(
@@ -77,28 +86,40 @@ class ExtruderMachineStateCalculator(MachineAnalyticsBase):
   def __calculate_ready_time(self, stateList):
       total_ready_time = 0
       for entry in stateList:
-          if entry[2] == 1.0: #Checks the power state list and if in ON state proceeds
-              start_timestamp = ts.Timestamp(entry[0])
-              end_timestamp = ts.Timestamp(entry[1])
-              rate = self.get_timeseries_data(self.__melt_temperature_ts_id,start_timestamp,end_timestamp,flag_compute_rate=True)
+          tmp_start_time, tmp_end_time, power_state = entry
+          if power_state == 1.0: #Checks the power state list and if in ON state proceeds
+              start_timestamp = ts.Timestamp(tmp_start_time)
+              end_timestamp = ts.Timestamp(tmp_end_time)
+              melt_temp_change_rate = self.get_timeseries_data(self.__melt_temperature_ts_id,
+                                              start_timestamp,end_timestamp,
+                                              flag_compute_rate=True)
 
+              # While power_state is 1.0 we want to count the duration for which
+              # melt_temperature was stable. We consider melt temp stable
+              # when its rate of change in the window of time is between
+              # -1 & +1 i.e. the values read are quasi-stable. Quasi-stability
+              # is sufficient because the values returned by the ADC are
+              # *always* going to have a small variation even if the underlying
+              # temperature is stable.
               StartTime = 0
-              for k,v in rate:
-                  if v < -1 or v > 1: #Rate is considered stable if within -1 and +1 so result set is checked
+              for tt , rate_v in melt_temp_change_rate:
+                  if __class__.is_parameter_changing(rate_v):  #Parameter is changing.
                       if StartTime != 0:
-                          total_ready_time += rate.get_datapoint(k, LQ.NEAREST_SMALLER)[0] - StartTime #Rate out of range stop and add time to total ready time
+                          total_ready_time += __class__.compute_time_in_stable_state(melt_temp_change_rate, tt, StartTime)
                           StartTime = 0
-                  elif 1 > v > -1: #Rate in range proceed to next datapoint
+                  else: #Rate in stable proceed to next datapoint
+                      assert __class__.is_parameter_stable(rate_v)
                       if StartTime == 0:
-                          StartTime = k
-                      elif k == rate.get_max_key() and StartTime != 0: #rate in range throught dataset so add time on the last entry
-                          total_ready_time += rate.get_datapoint(k, LQ.NEAREST_SMALLER)[0] - StartTime
+                          StartTime = tt
+                      elif tt == melt_temp_change_rate.get_max_key() and StartTime != 0: #rate in range throught dataset so add time on the last entry
+                          total_ready_time += __class__.compute_time_in_stable_state(melt_temp_change_rate, tt, StartTime)
       return total_ready_time
 
 
   def __calculate_purge_time(self, stateList): #linespeed zero, screw speed non-zero
       total_purge_time = 0
       for entry in stateList:
+          start_time, end_time, power_state = entry
           if entry[2] == 1.0: #Checks if machine state is on
               start_timestamp = ts.Timestamp(entry[0])
               end_timestamp = ts.Timestamp(entry[1])
