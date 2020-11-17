@@ -1,0 +1,8 @@
+ArgusIoT service stack installer script.
+
+Currently script is only tested on Vagrant.
+
+But it works reliably to install - Hbase, OpenTSDB & Grafana on Vagrant.
+
+Script will need some changes to reliably install on a new AWS instance. That
+will be taken up as a follow-up activity.
