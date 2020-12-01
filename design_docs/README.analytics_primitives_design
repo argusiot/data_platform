@@ -17,12 +17,23 @@
         In addition, S' also records every timestamp where a transition is
         values of the following type occurs: j->k or k->j, where j is a value
         outside the acceptable the threshold. For such a j, the timestamp is
-        recorded along with the value of MARKER.
+        recorded along with a. pre-defined fixed value of MARKER.
         
         e.g. (t_j, j), (t_k, k) are 2 successive data points in S, then 
              (t_j, MARKER), (t_k, k) are present in S'
+             OR
+             (t_k, k), (t_m, m) are 2 successive data points in S, then 
+             (t_k, k), (t_m, MARKER) are present in S'
+         
+     2) INTERSECT: 
+        A pre-requisite for actully performing the INTERSECT operation is a
+        transformation step where data points are converted to time windows.
         
-     2) INTERSECT: Perform timeseries intersection operation
+        Parag add details: TRANSFORM DPS to TIMEWINDOWS
+         
+        Outcome of transformation is a TIME_WINDOW_SERIES.
+        
+        Perform timeseries intersection operation on the TIME_WINDOW_SERIES.
         e.g. S = S1 intersect S2
         where S contains all the time windows where S1 & S2 overlap (ignoring
         the values).
@@ -43,6 +54,8 @@
          result.append((t_i, v_i))
 
   2. INTERSECTION: S1 & S2:
+     The transformation of DPS into TIME_WINDOW_SERIES has already been done.
+     Remainder of this algorithm assumes TIME_WINDOW_SERIES.
        Comparing (t1_i, t1_j, v1_i) & (t2_i', t2_j', v2_i')
        Obs1: Values can be ignored, so we're really comparing:
                 (t1_i, t1_j) & (t2_i', t2_j')
