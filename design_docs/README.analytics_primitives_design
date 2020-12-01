@@ -13,6 +13,15 @@
              where op is one of {<, >, <=, >=, ==}
              and k is a constant value
         S' is a new series.
+        
+        In addition, S' also records every timestamp where a transition is
+        values of the following type occurs: j->k or k->j, where j is a value
+        outside the acceptable the threshold. For such a j, the timestamp is
+        recorded along with the value of MARKER.
+        
+        e.g. (t_j, j), (t_k, k) are 2 successive data points in S, then 
+             (t_j, MARKER), (t_k, k) are present in S'
+        
      2) INTERSECT: Perform timeseries intersection operation
         e.g. S = S1 intersect S2
         where S contains all the time windows where S1 & S2 overlap (ignoring
@@ -25,7 +34,8 @@
 
   Pseudo-code
   ===========
-  1. FILTER primitive: S op k
+  1. ****UPDATE PSEUDO-CODE BELOW TO ACCOUNT FOR MARKER***
+     FILTER primitive: S op k
      [Possible values for op:  <  >  ==  >=   <=   ]
      result = []
      for (t_i, v_i) in S:
