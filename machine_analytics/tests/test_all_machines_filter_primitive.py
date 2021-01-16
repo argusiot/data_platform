@@ -61,7 +61,7 @@ class FilterPrimitive_Tests(unittest.TestCase):
         end_timestamp = ts.Timestamp(1587949197)
         test_timeseries = getTimeSeriesData(self.__test_timeseries_ts_id, start_timestamp, end_timestamp)
         filtered_result = FilteredTimeseries(test_timeseries, FilterQualifier.GREATERTHAN, 100)
-        self.assertEqual(filtered_result.get_data_dict(), test_timeseries)
+        self.assertEqual(filtered_result.get_timeseries_data_dict(), test_timeseries)
         self.assertEqual(filtered_result.get_tsid(), self.__test_timeseries_ts_id)
 
 

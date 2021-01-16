@@ -50,7 +50,7 @@ class FilterQualifier(Enum):
     EQUALS = "=="
 
 
-ops = {
+filtering_criterion_ops = {
     FilterQualifier.LESSERTHAN: operator.lt,
     FilterQualifier.LESSERTHAN_EQUAL: operator.le,
     FilterQualifier.GREATERTHAN: operator.gt,
@@ -98,7 +98,7 @@ class FilteredTimeseries(object):
 
     # constructor for FilteredTimeseries
     def __init__(self, ts_datadict, filter_qualifier, filter_constant):
-        self.__data_dict = ts_datadict
+        self.__timeseries_data_dict = ts_datadict
         self.__tsid = ts_datadict.get_timeseries_id()
         self.__filter_qualifier = filter_qualifier
         self.__filter_constant = filter_constant
@@ -106,8 +106,8 @@ class FilteredTimeseries(object):
         self.__first_marker = None
         self.__filter_by()
 
-    def get_data_dict(self):
-        return self.__data_dict
+    def get_timeseries_data_dict(self):
+        return self.__timeseries_data_dict
 
     def get_tsid(self):
         return self.__tsid
@@ -130,12 +130,17 @@ class FilteredTimeseries(object):
 
     def __filter_by(self):
         result_dict = OrderedDict()
-        op_func = ops[self.__filter_qualifier]
+        filter_criterion_func = filtering_criterion_ops[self.__filter_qualifier]
 
-        # PASS 1
-        for index, (key, value) in enumerate(self.__data_dict):
-            if index == 0:
-                if op_func(value, self.__filter_constant):
+        '''
+        Spread Sheet containing the cases the following logic is designed for.
+        https://docs.google.com/spreadsheets/d/1qenFE7QDa_4zUordDWembJJ6BMWZWDXJv_fveTm5y2s/edit#gid=0
+        '''
+        # Pass 1 : Identify all the markers.
+        # We define any element that doesn't meet filtering criterion as marker.
+        for cur_index, (key, value) in enumerate(self.__timeseries_data_dict):
+            if cur_index == 0: # First element requires special handling
+                if filter_criterion_func(value, self.__filter_constant):
                     marker = FilteredTimeseries.Marker(FilteredTimeseries.MarkerTypes.INIT, key - 1, value)
                     result_dict.update({key - 1: marker})
                     result_dict.update({key: value})
@@ -144,43 +149,47 @@ class FilteredTimeseries(object):
                     marker = FilteredTimeseries.Marker(FilteredTimeseries.MarkerTypes.INIT, key, value)
                     result_dict.update({key: marker})
                     self.__first_marker = marker
-            elif index == len(self.__data_dict) - 1:
-                if op_func(value, self.__filter_constant):
+            elif cur_index == len(self.__timeseries_data_dict) - 1: # Last element requires special handling
+                if filter_criterion_func(value, self.__filter_constant):
                     marker = FilteredTimeseries.Marker(FilteredTimeseries.MarkerTypes.EXIT, key + 1, value)
                     result_dict.update({key: value})
                     result_dict.update({key + 1: marker})
                 else:
                     marker = FilteredTimeseries.Marker(FilteredTimeseries.MarkerTypes.EXIT, key, value)
                     result_dict.update({key: marker})
-            elif op_func(value, self.__filter_constant):
-                result_dict.update({key: value})
-            elif not op_func(value, self.__filter_constant):
-                marker = FilteredTimeseries.Marker(FilteredTimeseries.MarkerTypes.NORMAL, key, value)
-                result_dict.update({key: marker})
+            else:  # All other elements
+                if not not filter_criterion_func(value, self.__filter_constant):
+                    # Any value filtered out is a marker.
+                    marker = FilteredTimeseries.Marker(FilteredTimeseries.MarkerTypes.NORMAL, key, value)
+                    result_dict.update({key: marker})
+                else:
+                    # Value meets criterion to not get filtered out, hence include as is in result set.
+                    result_dict.update({key: value})
 
-        # PASS 2
+        # Pass 2 - Compress non-boundary markers
         items = list(result_dict.items())
-        prev_v = items[0]
-        index = 1
+        prev_key, prev_value = items[0]
+        cur_index = 1
         end = len(items)
-        while index < end - 1:
-            if isinstance(prev_v[1], FilteredTimeseries.Marker) \
-                    and isinstance(items[index][1], FilteredTimeseries.Marker) \
-                    and isinstance(items[index + 1][1], FilteredTimeseries.Marker):
-                result_dict.pop(items[index][0])
-            prev_v = items[index]
-            index += 1
+        while cur_index < end - 1:
+            # Remove the current item if prev, current & next are all markers
+            if isinstance(prev_value[1], FilteredTimeseries.Marker) \
+                    and isinstance(items[cur_index][1], FilteredTimeseries.Marker) \
+                    and isinstance(items[cur_index + 1][1], FilteredTimeseries.Marker):
+                result_dict.pop(items[cur_index][0])
+            prev_key, prev_value = items[cur_index]
+            cur_index += 1
 
         # PASS 3 - Marker Fixup
         items = list(result_dict.items())
-        for index, (key, value) in enumerate(result_dict.items()):
+        for cur_index, (key, value) in enumerate(result_dict.items()):
             if isinstance(value, FilteredTimeseries.Marker):
                 if value.get_marker_type() is FilteredTimeseries.MarkerTypes.INIT:
-                    value.set_next_element(items[index + 1][1])
+                    value.set_next_element(items[cur_index + 1][1])
                 if value.get_marker_type() is FilteredTimeseries.MarkerTypes.NORMAL:
-                    value.set_next_element(items[index + 1][1])
-                    value.set_prev_element(items[index - 1][1])
+                    value.set_next_element(items[cur_index + 1][1])
+                    value.set_prev_element(items[cur_index - 1][1])
                 if value.get_marker_type() is FilteredTimeseries.MarkerTypes.EXIT:
-                    value.set_prev_element(items[index - 1][1])
+                    value.set_prev_element(items[cur_index - 1][1])
 
         self.__filtered_dict = result_dict
