@@ -158,7 +158,7 @@ class FilteredTimeseries(object):
                     marker = FilteredTimeseries.Marker(FilteredTimeseries.MarkerTypes.EXIT, key, value)
                     result_dict.update({key: marker})
             else:  # All other elements
-                if not not filter_criterion_func(value, self.__filter_constant):
+                if not filter_criterion_func(value, self.__filter_constant):
                     # Any value filtered out is a marker.
                     marker = FilteredTimeseries.Marker(FilteredTimeseries.MarkerTypes.NORMAL, key, value)
                     result_dict.update({key: marker})
@@ -172,8 +172,7 @@ class FilteredTimeseries(object):
         cur_index = 1
         end = len(items)
         while cur_index < end - 1:
-            # Remove the current item if prev, current & next are all markers
-            if isinstance(prev_value[1], FilteredTimeseries.Marker) \
+            if isinstance(prev_value, FilteredTimeseries.Marker) \
                     and isinstance(items[cur_index][1], FilteredTimeseries.Marker) \
                     and isinstance(items[cur_index + 1][1], FilteredTimeseries.Marker):
                 result_dict.pop(items[cur_index][0])
