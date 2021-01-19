@@ -56,7 +56,9 @@ class FilterPrimitive_Tests(unittest.TestCase):
                               ts_id_obj):
 
         # Step 1:
-        with open('test_data.json', 'r') as dataFile:
+        this_dir = os.path.dirname(os.path.realpath(__file__))
+        file_path = os.path.join(this_dir, 'test_data.json')
+        with open(file_path, 'r') as dataFile:
             data = dataFile.read()
         raw_dict = loads(data, object_pairs_hook=OrderedDict)
 
