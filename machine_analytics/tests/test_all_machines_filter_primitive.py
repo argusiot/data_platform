@@ -2,6 +2,110 @@
     Test cases for filter primitive
     Spread Sheet containing the design cases.
     https://docs.google.com/spreadsheets/d/1qenFE7QDa_4zUordDWembJJ6BMWZWDXJv_fveTm5y2s/edit#gid=0
+
+    The following test data patterns corresponds to the "Case X" from the design spreadsheet.
+
+    <Case 1> <Case 7>
+    "1587947408": 149.4,
+    "1587947414": 147.2,
+    "1587948199": 148.6,
+    "1587948205": 106.8,
+    "1587948211": 17.8,
+    "1587948217": 17.9,
+    "1587948678": 56.5,
+    "1587948684": 76.0,
+    "1587948690": 96.4,
+    "1587948696": 114.3,
+    "1587948702": 147.8,
+    "1587949179": 158.2,
+    "1587949185": 158.2,
+    "1587949191": 157.8,
+    "1587949197": 159.5
+
+    <Case 2>
+    "1587948690": 96.4,
+    "1587948696": 114.3,
+    "1587948702": 147.8,
+    "1587948708": 159.7,
+    "1587948714": 157.9,
+    "1587949173": 158.7,
+    "1587949179": 158.2,
+    "1587949185": 158.2,
+    "1587949191": 157.8,
+    "1587949197": 159.5
+
+    <Case 3>
+    "1587947408": 149.4,
+    "1587947414": 147.2,
+    "1587947420": 149.5,
+    "1587948193": 147.2,
+    "1587948199": 148.6,
+    "1587948205": 106.8,
+    "1587948211": 17.8
+
+    <Case 4>
+    "1587948690": 96.4,
+    "1587948696": 114.3,
+    "1587948702": 147.8,
+    "1587949185": 158.2,
+    "1587949191": 157.8,
+    "1587949197": 159.5,
+    "1587949200": 90
+
+    <Case 5>
+    "1587949214": 150,
+    "1587949215": 90,
+    "1587949216": 90,
+    "1587949217": 150
+
+    <Case 6>
+    "1587949200": 90,
+    "1587949201": 150,
+    "1587949202": 90,
+    "1587949203": 150
+
+    <Case 8>
+    "1587949205": 150,
+    "1587949206": 150,
+    "1587949207": 150,
+    "1587949208": 90,
+    "1587949209": 90,
+    "1587949210": 90
+
+    <Case 9>
+    "1587949208": 90,
+    "1587949209": 90,
+    "1587949210": 90,
+    "1587949211": 150,
+    "1587949212": 150,
+    "1587949213": 150,
+    "1587949214": 150
+
+    <Case 10>
+    "1587948211": 17.8,
+    "1587948217": 17.9,
+    "1587948223": 16.9,
+    "1587948667": 16.8,
+    "1587948673": 23.7,
+    "1587948678": 56.5,
+    "1587948684": 76.0,
+
+    <Case 11> similar to <Case 8>
+    "1587947408": 149.4,
+    "1587947414": 147.2,
+    "1587947420": 149.5,
+    "1587948193": 147.2,
+    "1587948199": 148.6,
+    "1587948205": 106.8,
+    "1587948211": 17.8,
+    "1587948217": 17.9,
+    "1587948223": 16.9,
+    "1587948667": 16.8,
+    "1587948673": 23.7,
+    "1587948678": 56.5,
+    "1587948684": 76.0,
+    "1587948690": 96.4
+
 '''
 
 import os
@@ -139,25 +243,8 @@ class FilterPrimitive_Tests(unittest.TestCase):
             self.assertEqual(filtered_result.get_tsid(), self.__test_timeseries_ts_id)
 
     def testInitExitQualifyingAndNormalMarker_ExpectSuccess(self):
-        '''
-            Case 1 and Case 7
-            "1587947408": 149.4,
-            "1587947414": 147.2,
-            "1587948199": 148.6,
-            "1587948205": 106.8,
-            "1587948211": 17.8,
-            "1587948217": 17.9,
-            "1587948678": 56.5,
-            "1587948684": 76.0,
-            "1587948690": 96.4,
-            "1587948696": 114.3,
-            "1587948702": 147.8,
-            "1587949179": 158.2,
-            "1587949185": 158.2,
-            "1587949191": 157.8,
-            "1587949197": 159.5
-        '''
-        
+        # Uses Case 1 dataset
+
         with patch('argus_tal.query_api.requests') as mock_tsdb:
             mock_tsdb.get.side_effect = self.mocked_requests_get
 
@@ -191,19 +278,7 @@ class FilterPrimitive_Tests(unittest.TestCase):
             self.assertEqual(end_marker.get_prev_element(), mock_end_marker.get_prev_element())
 
     def testInitDisqualifyAndExitQualifyingMarker(self):
-        '''
-            Case 2
-            "1587948690": 96.4,
-            "1587948696": 114.3,
-            "1587948702": 147.8,
-            "1587948708": 159.7,
-            "1587948714": 157.9,
-            "1587949173": 158.7,
-            "1587949179": 158.2,
-            "1587949185": 158.2,
-            "1587949191": 157.8,
-            "1587949197": 159.5
-        '''
+        # Uses Case 2 dataset
 
         with patch('argus_tal.query_api.requests') as mock_tsdb:
             mock_tsdb.get.side_effect = self.mocked_requests_get
@@ -229,16 +304,7 @@ class FilterPrimitive_Tests(unittest.TestCase):
             self.assertEqual(end_marker.get_marker_key(), mock_end_marker.get_marker_key())
 
     def testInitQualifyAndExitDisqualifyingMarker(self):
-        '''
-            Case 3
-            "1587947408": 149.4,
-            "1587947414": 147.2,
-            "1587947420": 149.5,
-            "1587948193": 147.2,
-            "1587948199": 148.6,
-            "1587948205": 106.8,
-            "1587948211": 17.8
-        '''
+        # Uses Case 3 dataset
 
         with patch('argus_tal.query_api.requests') as mock_tsdb:
             mock_tsdb.get.side_effect = self.mocked_requests_get
@@ -263,125 +329,9 @@ class FilterPrimitive_Tests(unittest.TestCase):
             self.assertEqual(first_marker.get_marker_key(), mock_first_marker.get_marker_key())
             self.assertEqual(end_marker.get_marker_key(), mock_end_marker.get_marker_key())
 
-    def testExitContinuousCompressionMarker(self):
-        '''
-            "1587947408": 149.4,
-            "1587947414": 147.2,
-            "1587947420": 149.5,
-            "1587948193": 147.2,
-            "1587948199": 148.6,
-            "1587948205": 106.8,
-            "1587948211": 17.8,
-            "1587948217": 17.9,
-            "1587948223": 16.9,
-            "1587948667": 16.8,
-            "1587948673": 23.7,
-            "1587948678": 56.5,
-            "1587948684": 76.0,
-            "1587948690": 96.4
-        '''
-
-        with patch('argus_tal.query_api.requests') as mock_tsdb:
-            mock_tsdb.get.side_effect = self.mocked_requests_get
-
-            self.__setup_testcase_data(
-                1587947403, 1587948690,
-                self.__tsdb_ip,
-                self.__tsdb_port,
-                self.__test_timeseries_ts_id)
-
-            start_timestamp = ts.Timestamp(1587947403)
-            end_timestamp = ts.Timestamp(1587948690)
-            test_timeseries = getTimeSeriesData(self.__test_timeseries_ts_id, start_timestamp, end_timestamp)
-            filtered_result = FilteredTimeseries(test_timeseries, FilterQualifier.GREATERTHAN, 100)
-
-            mock_first_marker = FilteredTimeseries.Marker(FilteredTimeseries.MarkerTypes.INIT, 1587947407, 149.4)
-            mock_end_marker = FilteredTimeseries.Marker(FilteredTimeseries.MarkerTypes.EXIT, 1587948690, 96.4)
-
-            first_marker = filtered_result.get_first_marker()
-            end_marker = filtered_result.get_next_marker(filtered_result.get_next_marker(first_marker))
-
-            self.assertEqual(first_marker.get_marker_key(), mock_first_marker.get_marker_key())
-            self.assertEqual(end_marker.get_marker_key(), mock_end_marker.get_marker_key())
-
-    def testNoQualifyingEntriesInDataSet(self):
-        '''
-            "1587948211": 17.8,
-            "1587948217": 17.9,
-            "1587948223": 16.9,
-            "1587948667": 16.8,
-            "1587948673": 23.7,
-            "1587948678": 56.5,
-            "1587948684": 76.0,
-            "1587948690": 96.4
-        '''
-
-        with patch('argus_tal.query_api.requests') as mock_tsdb:
-            mock_tsdb.get.side_effect = self.mocked_requests_get
-
-            self.__setup_testcase_data(
-                1587948211, 1587948690,
-                self.__tsdb_ip,
-                self.__tsdb_port,
-                self.__test_timeseries_ts_id)
-
-            start_timestamp = ts.Timestamp(1587948211)
-            end_timestamp = ts.Timestamp(1587948690)
-            test_timeseries = getTimeSeriesData(self.__test_timeseries_ts_id, start_timestamp, end_timestamp)
-            filtered_result = FilteredTimeseries(test_timeseries, FilterQualifier.GREATERTHAN, 100)
-
-            mock_first_marker = FilteredTimeseries.Marker(FilteredTimeseries.MarkerTypes.INIT, 1587948211, 17.8)
-            mock_end_marker = FilteredTimeseries.Marker(FilteredTimeseries.MarkerTypes.EXIT, 1587948690, 96.4)
-
-            first_marker = filtered_result.get_first_marker()
-            end_marker = filtered_result.get_next_marker(first_marker)
-
-            self.assertEqual(first_marker.get_marker_key(), mock_first_marker.get_marker_key())
-            self.assertEqual(end_marker.get_marker_key(), mock_end_marker.get_marker_key())
-
-    def testSawToothPattern(self):
-        '''
-            Case 6
-            "1587949200": 90,
-            "1587949201": 150,
-            "1587949202": 90,
-            "1587949203": 150
-        '''
-
-        with patch('argus_tal.query_api.requests') as mock_tsdb:
-            mock_tsdb.get.side_effect = self.mocked_requests_get
-
-            self.__setup_testcase_data(
-                1587949200, 1587949203,
-                self.__tsdb_ip,
-                self.__tsdb_port,
-                self.__test_timeseries_ts_id)
-
-            start_timestamp = ts.Timestamp(1587949200)
-            end_timestamp = ts.Timestamp(1587949203)
-            test_timeseries = getTimeSeriesData(self.__test_timeseries_ts_id, start_timestamp, end_timestamp)
-            filtered_result = FilteredTimeseries(test_timeseries, FilterQualifier.GREATERTHAN, 100)
-
-            mock_first_marker = FilteredTimeseries.Marker(FilteredTimeseries.MarkerTypes.INIT, 1587949200, 90)
-            mock_end_marker = FilteredTimeseries.Marker(FilteredTimeseries.MarkerTypes.EXIT, 1587949204, 150)
-
-            first_marker = filtered_result.get_first_marker()
-            end_marker = filtered_result.get_next_marker(filtered_result.get_next_marker(first_marker))
-
-            self.assertEqual(first_marker.get_marker_key(), mock_first_marker.get_marker_key())
-            self.assertEqual(end_marker.get_marker_key(), mock_end_marker.get_marker_key())
-
     def testInitAndExitDisqualifyingMarker(self):
-        '''
-            Case 4
-            "1587948690": 96.4,
-            "1587948696": 114.3,
-            "1587948702": 147.8,
-            "1587949185": 158.2,
-            "1587949191": 157.8,
-            "1587949197": 159.5,
-            "1587949200": 90
-        '''
+        # Uses Case 4 dataset
+
         with patch('argus_tal.query_api.requests') as mock_tsdb:
             mock_tsdb.get.side_effect = self.mocked_requests_get
 
@@ -405,84 +355,8 @@ class FilterPrimitive_Tests(unittest.TestCase):
             self.assertEqual(first_marker.get_marker_key(), mock_first_marker.get_marker_key())
             self.assertEqual(end_marker.get_marker_key(), mock_end_marker.get_marker_key())
 
-    def testExitContinuousMarker(self):
-        '''
-            Case 8
-            "1587949205": 150,
-            "1587949206": 150,
-            "1587949207": 150,
-            "1587949208": 90,
-            "1587949209": 90,
-            "1587949210": 90
-        '''
-
-        with patch('argus_tal.query_api.requests') as mock_tsdb:
-            mock_tsdb.get.side_effect = self.mocked_requests_get
-
-            self.__setup_testcase_data(
-                1587949205, 1587949210,
-                self.__tsdb_ip,
-                self.__tsdb_port,
-                self.__test_timeseries_ts_id)
-
-            start_timestamp = ts.Timestamp(1587949205)
-            end_timestamp = ts.Timestamp(1587949210)
-            test_timeseries = getTimeSeriesData(self.__test_timeseries_ts_id, start_timestamp, end_timestamp)
-            filtered_result = FilteredTimeseries(test_timeseries, FilterQualifier.GREATERTHAN, 100)
-
-            mock_first_marker = FilteredTimeseries.Marker(FilteredTimeseries.MarkerTypes.INIT, 1587949204, 150)
-            mock_end_marker = FilteredTimeseries.Marker(FilteredTimeseries.MarkerTypes.EXIT, 1587949210, 90)
-
-            first_marker = filtered_result.get_first_marker()
-            end_marker = filtered_result.get_next_marker(filtered_result.get_next_marker(first_marker))
-
-            self.assertEqual(first_marker.get_marker_key(), mock_first_marker.get_marker_key())
-            self.assertEqual(end_marker.get_marker_key(), mock_end_marker.get_marker_key())
-
-    def testInitContinuousMarker(self):
-        '''
-            Case 9
-            "1587949208": 90,
-            "1587949209": 90,
-            "1587949210": 90,
-            "1587949211": 150,
-            "1587949212": 150,
-            "1587949213": 150,
-            "1587949214": 150
-        '''
-
-        with patch('argus_tal.query_api.requests') as mock_tsdb:
-            mock_tsdb.get.side_effect = self.mocked_requests_get
-
-            self.__setup_testcase_data(
-                1587949208, 1587949214,
-                self.__tsdb_ip,
-                self.__tsdb_port,
-                self.__test_timeseries_ts_id)
-
-            start_timestamp = ts.Timestamp(1587949208)
-            end_timestamp = ts.Timestamp(1587949214)
-            test_timeseries = getTimeSeriesData(self.__test_timeseries_ts_id, start_timestamp, end_timestamp)
-            filtered_result = FilteredTimeseries(test_timeseries, FilterQualifier.GREATERTHAN, 100)
-
-            mock_first_marker = FilteredTimeseries.Marker(FilteredTimeseries.MarkerTypes.INIT, 1587949208, 90)
-            mock_end_marker = FilteredTimeseries.Marker(FilteredTimeseries.MarkerTypes.EXIT, 1587949215, 150)
-
-            first_marker = filtered_result.get_first_marker()
-            end_marker = filtered_result.get_next_marker(filtered_result.get_next_marker(first_marker))
-
-            self.assertEqual(first_marker.get_marker_key(), mock_first_marker.get_marker_key())
-            self.assertEqual(end_marker.get_marker_key(), mock_end_marker.get_marker_key())
-            self.assertEqual(None, filtered_result.get_next_marker(end_marker))
-
     def testAdjacentNormalMarker(self):
-        '''
-            Case 5
-            "1587949214": 150,
-            "1587949215": 90,
-            "1587949216": 90,
-            "1587949217": 150
-        '''
+        # Uses Case 5 dataset
 
         with patch('argus_tal.query_api.requests') as mock_tsdb:
             mock_tsdb.get.side_effect = self.mocked_requests_get
@@ -516,3 +390,134 @@ class FilterPrimitive_Tests(unittest.TestCase):
             self.assertEqual(first_marker.get_marker_value(), mock_first_marker.get_marker_value())
             self.assertEqual(adjacent_marker1.get_marker_value(), mock_adjacent_marker1.get_marker_value())
             self.assertEqual(adjacent_marker2.get_marker_value(), mock_adjacent_marker2.get_marker_value())
+
+    def testSawToothPattern(self):
+        # Uses Case 6 dataset
+
+        with patch('argus_tal.query_api.requests') as mock_tsdb:
+            mock_tsdb.get.side_effect = self.mocked_requests_get
+
+            self.__setup_testcase_data(
+                1587949200, 1587949203,
+                self.__tsdb_ip,
+                self.__tsdb_port,
+                self.__test_timeseries_ts_id)
+
+            start_timestamp = ts.Timestamp(1587949200)
+            end_timestamp = ts.Timestamp(1587949203)
+            test_timeseries = getTimeSeriesData(self.__test_timeseries_ts_id, start_timestamp, end_timestamp)
+            filtered_result = FilteredTimeseries(test_timeseries, FilterQualifier.GREATERTHAN, 100)
+
+            mock_first_marker = FilteredTimeseries.Marker(FilteredTimeseries.MarkerTypes.INIT, 1587949200, 90)
+            mock_end_marker = FilteredTimeseries.Marker(FilteredTimeseries.MarkerTypes.EXIT, 1587949204, 150)
+
+            first_marker = filtered_result.get_first_marker()
+            end_marker = filtered_result.get_next_marker(filtered_result.get_next_marker(first_marker))
+
+            self.assertEqual(first_marker.get_marker_key(), mock_first_marker.get_marker_key())
+            self.assertEqual(end_marker.get_marker_key(), mock_end_marker.get_marker_key())
+
+    def testExitContinuousMarker(self):
+        # Uses Case 8 dataset
+
+        with patch('argus_tal.query_api.requests') as mock_tsdb:
+            mock_tsdb.get.side_effect = self.mocked_requests_get
+
+            self.__setup_testcase_data(
+                1587949205, 1587949210,
+                self.__tsdb_ip,
+                self.__tsdb_port,
+                self.__test_timeseries_ts_id)
+
+            start_timestamp = ts.Timestamp(1587949205)
+            end_timestamp = ts.Timestamp(1587949210)
+            test_timeseries = getTimeSeriesData(self.__test_timeseries_ts_id, start_timestamp, end_timestamp)
+            filtered_result = FilteredTimeseries(test_timeseries, FilterQualifier.GREATERTHAN, 100)
+
+            mock_first_marker = FilteredTimeseries.Marker(FilteredTimeseries.MarkerTypes.INIT, 1587949204, 150)
+            mock_end_marker = FilteredTimeseries.Marker(FilteredTimeseries.MarkerTypes.EXIT, 1587949210, 90)
+
+            first_marker = filtered_result.get_first_marker()
+            end_marker = filtered_result.get_next_marker(filtered_result.get_next_marker(first_marker))
+
+            self.assertEqual(first_marker.get_marker_key(), mock_first_marker.get_marker_key())
+            self.assertEqual(end_marker.get_marker_key(), mock_end_marker.get_marker_key())
+
+    def testInitContinuousMarker(self):
+        # Uses Case 9 dataset
+
+        with patch('argus_tal.query_api.requests') as mock_tsdb:
+            mock_tsdb.get.side_effect = self.mocked_requests_get
+
+            self.__setup_testcase_data(
+                1587949208, 1587949214,
+                self.__tsdb_ip,
+                self.__tsdb_port,
+                self.__test_timeseries_ts_id)
+
+            start_timestamp = ts.Timestamp(1587949208)
+            end_timestamp = ts.Timestamp(1587949214)
+            test_timeseries = getTimeSeriesData(self.__test_timeseries_ts_id, start_timestamp, end_timestamp)
+            filtered_result = FilteredTimeseries(test_timeseries, FilterQualifier.GREATERTHAN, 100)
+
+            mock_first_marker = FilteredTimeseries.Marker(FilteredTimeseries.MarkerTypes.INIT, 1587949208, 90)
+            mock_end_marker = FilteredTimeseries.Marker(FilteredTimeseries.MarkerTypes.EXIT, 1587949215, 150)
+
+            first_marker = filtered_result.get_first_marker()
+            end_marker = filtered_result.get_next_marker(filtered_result.get_next_marker(first_marker))
+
+            self.assertEqual(first_marker.get_marker_key(), mock_first_marker.get_marker_key())
+            self.assertEqual(end_marker.get_marker_key(), mock_end_marker.get_marker_key())
+            self.assertEqual(None, filtered_result.get_next_marker(end_marker))
+
+    def testNoQualifyingEntriesInDataSet(self):
+        # Uses Case 10 dataset
+
+        with patch('argus_tal.query_api.requests') as mock_tsdb:
+            mock_tsdb.get.side_effect = self.mocked_requests_get
+
+            self.__setup_testcase_data(
+                1587948211, 1587948690,
+                self.__tsdb_ip,
+                self.__tsdb_port,
+                self.__test_timeseries_ts_id)
+
+            start_timestamp = ts.Timestamp(1587948211)
+            end_timestamp = ts.Timestamp(1587948690)
+            test_timeseries = getTimeSeriesData(self.__test_timeseries_ts_id, start_timestamp, end_timestamp)
+            filtered_result = FilteredTimeseries(test_timeseries, FilterQualifier.GREATERTHAN, 100)
+
+            mock_first_marker = FilteredTimeseries.Marker(FilteredTimeseries.MarkerTypes.INIT, 1587948211, 17.8)
+            mock_end_marker = FilteredTimeseries.Marker(FilteredTimeseries.MarkerTypes.EXIT, 1587948690, 96.4)
+
+            first_marker = filtered_result.get_first_marker()
+            end_marker = filtered_result.get_next_marker(first_marker)
+
+            self.assertEqual(first_marker.get_marker_key(), mock_first_marker.get_marker_key())
+            self.assertEqual(end_marker.get_marker_key(), mock_end_marker.get_marker_key())
+
+    def testExitContinuousCompressionMarker(self):
+        # Uses Case 11 dataset
+
+        with patch('argus_tal.query_api.requests') as mock_tsdb:
+            mock_tsdb.get.side_effect = self.mocked_requests_get
+
+            self.__setup_testcase_data(
+                1587947403, 1587948690,
+                self.__tsdb_ip,
+                self.__tsdb_port,
+                self.__test_timeseries_ts_id)
+
+            start_timestamp = ts.Timestamp(1587947403)
+            end_timestamp = ts.Timestamp(1587948690)
+            test_timeseries = getTimeSeriesData(self.__test_timeseries_ts_id, start_timestamp, end_timestamp)
+            filtered_result = FilteredTimeseries(test_timeseries, FilterQualifier.GREATERTHAN, 100)
+
+            mock_first_marker = FilteredTimeseries.Marker(FilteredTimeseries.MarkerTypes.INIT, 1587947407, 149.4)
+            mock_end_marker = FilteredTimeseries.Marker(FilteredTimeseries.MarkerTypes.EXIT, 1587948690, 96.4)
+
+            first_marker = filtered_result.get_first_marker()
+            end_marker = filtered_result.get_next_marker(filtered_result.get_next_marker(first_marker))
+
+            self.assertEqual(first_marker.get_marker_key(), mock_first_marker.get_marker_key())
+            self.assertEqual(end_marker.get_marker_key(), mock_end_marker.get_marker_key())
