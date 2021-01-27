@@ -1,5 +1,5 @@
 init:
-	pip install -r requirements.txt
+	pip3 install -r requirements.txt
 
 test:
 	# Without PYTHONHASHSEED=0, the TimeseriesID::fqid() method does not return
@@ -14,7 +14,10 @@ code_coverage:
 	coverage report -m
 
 install:
-	python3 setup.py install
+	pip3 install .
 
 uninstall:
-	python3 -m pip uninstall argus_tal
+	pip3 uninstall argus-tal
+
+clean:
+	rm -rf argus_tal.egg-info build dist
