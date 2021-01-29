@@ -50,7 +50,7 @@ class IntersectTimeseries(object):
         Patterns being sought out:
         --------------------------
         Comparing 2 time windows, only 4 possibilities exist:
-            Case 1: Full overlap
+            Case 1: Exact match
             Case 2: Partial overlap
             Case 3: No overlap
             Case 4: Subsume
@@ -76,7 +76,7 @@ class IntersectTimeseries(object):
         r_residue_in_window_1 = None
 
         if st1 == st2 and et1 == et2:
-            ''' This handles Case 1 - Full Overlap. '''
+            ''' This handles Case 1 - Exact match. '''
             overlap = (st1, et1)
         else:
             ''' ...this handles all the remaining cases. '''
