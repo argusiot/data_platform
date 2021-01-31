@@ -76,10 +76,10 @@ class IntersectTimeseries(object):
         r_residue_in_window_1 = None
 
         if st1 == st2 and et1 == et2:
-            ''' This handles Case 1 - Exact match. '''
+            # This handles Case 1 - Exact match.
             overlap = (st1, et1)
         else:
-            ''' ...this handles all the remaining cases. '''
+            #...this handles all the remaining cases.
             input_windows = [st1, et1, st2, et2]
             input_windows.sort()
 
