@@ -54,7 +54,7 @@ filtering_criterion_ops = {
     FilterQualifier.LESSERTHAN: operator.lt,
     FilterQualifier.LESSERTHAN_EQUAL: operator.le,
     FilterQualifier.GREATERTHAN: operator.gt,
-    FilterQualifier.GREATERTHAN_EQUAL: operator.gt,
+    FilterQualifier.GREATERTHAN_EQUAL: operator.ge,
     FilterQualifier.EQUALS: operator.eq
 }
 
