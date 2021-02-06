@@ -1,12 +1,13 @@
 '''
     Class to compute "intersection" of timeseries data.
 
-    Input: A list of FilteredTimeseries objects
+    Input: A list of TimeWindowSeries objects.
     Output: A FilteredTimeseries object containing only time windows where
             *all* the supplied objects had 'fired'.
 '''
 
-from all_machines_filter_primitive import FilteredTimeseries
+from all_machines_filter_primitive import TimeWindowSeries
+from collections import deque
 
 class IntersectTimeseries(object):
 
@@ -19,12 +20,16 @@ class IntersectTimeseries(object):
         W1 = 1,
         W2 = 2
 
-    def __init__(self, filterd_ts_obj_list):
-        for obj in filtered_ts_obj_list:
-            assert isinstance(obj) == FilteredTimeseries
+    def __init__(self, twin_series_obj_list):
+        # Ensure timewindow series is non-empty.
+        assert(len(twin_series_obj_list) != 0)
 
-        self.__filterd_ts_obj_list = filterd_ts_obj_list
-        self.__result = None
+        # Ensure each object in the list of of TimeWindowSeries type
+        for obj in twin_series_obj_list:
+            assert isinstance(obj) == TimeWindowSeries
+
+        # Prepare the result
+        self.__twin_series_result = self._compute(twin_series_obj_list)
 
     def _compare_time_windows(self, window1, window2):
         '''
@@ -142,6 +147,104 @@ class IntersectTimeseries(object):
         return l_residue, overlap, r_residue
 
 
-    def compute(self):
-         # pass
-         # Work out details.
+    # This is the heart of the 'Quilt Algorithm'. All the cool prep work done
+    # in tranforming the timeseries into a step function now gets used to
+    # compute the intersection. Follow along ...
+    def _compute(self, twin_series_obj_list):
+        if len(self.__twin_series_obj_list) == 1:
+            return self.__twin_series_obj_list[0]
+
+        '''
+        Objective:
+        ---------
+        Compute overlapping segments of time across all the TimeWindowSeries
+        objects stored in __twin_series_obj_list.
+
+        The heart of the algorithm is to iterate over all the twin_series
+        objects and do a litte "intersection computation" in every iteration.
+
+        The 'intersection computation' in the i-th iteration uses 2 things:
+           (1) the i-th twin_series i.e. self.__twin_series_obj_list[i], AND
+           (2) the cummulative result computed thus far (i.e. from iterations
+               [0, i-1]). We store the cummulative result below in the variable
+               'result'.
+
+        What is the 'intersection computation' ?
+        ----------------------------------------
+          Each 'intersection computation' takes 2 time series windows as
+          input.
+
+          The intersection computation is easier to follow along if we
+          consider each time window series as a queue. Thus we have 2 queues,
+          (say Q1 & Q2) one for each time window series.
+
+          The intersection computation requires us to iterate over both queues
+          and 'intersect' the time windows at the head Q1 & Q2.
+
+          'intersect':
+          ============
+              The 'intersect computation' then reduces to comparing the 2 time
+              at the head of Q1 & Q2. See _compare_time_windows for how that is
+              done.
+
+              The outcome of each 'intersect' is a left_residue, an overlapping
+              section and a right_residue.
+
+              The overlap gets appended to the result. The left_residue is
+              discarded. The right_residue is added back to the HEAD of the
+              queue (i.e. time window series) it came from.
+
+          Whats the intuition here?
+          =========================
+              Handling of the overlap is easy to understand. It is "the"
+              actual intersection result between the 2 windows. So that goes
+              to the result.
+
+              However you can get residues on either side (see the ASCII art
+              _compare_time_windows to understand this better).
+
+              Note that the right residue simply gets processed in the next
+              iteration i.e. we dont lose it.
+
+              However, discarding the the left residue needs a little
+              explanation. ADD EXPLANATION !!!
+        '''
+
+        # Collects the cummulative intersection result for the computation
+        # thus far. Also becomes the 'final result' when the computation
+        # terminates.
+        result = []
+
+        tws1_q = deque(self.__twin_series_obj_list[0])
+        for tws_idx in range(1, len(self.__twin_series_obj_list)):
+            tws2_q = deque(self.__twin_series_obj_list[tws_idx])
+            while tws1_q and tws2_q:
+                window1 = tws1_q.popleft()
+                window2 = tws2_q.popleft()
+                l_residue, overlap, r_residue = self._compare_time_windows( \
+                        window1, window2)
+
+                # Process l_residue -- do nothing i.e. discard it.
+
+                # Process overlap: Append to result
+                result.append(overlap)
+
+                # Process r_residue:
+                # re-insert the time residual time window to the head of the
+                # queue it came from.
+                st_time, end_time, win = r_residue
+                if win == TWindow.W1:
+                    tws1_q.insert(0, (st_time, end_time))  # Enque at q head
+                elif win == TWindow.W2:
+                    tws2_q.insert(0, (st_time, end_time))  # Enque at q head
+                else:
+                    assert(False)  # Should never happen
+
+            # Store result as the input #1 for next iteration.
+            tws1_q = result
+
+        self.__twin_series_result = TimeWindowSeries(result)
+
+
+    def result(self):
+        return self.__twin_series_result
