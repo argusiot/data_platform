@@ -1,13 +1,26 @@
 '''
     Class to compute "intersection" of timeseries data.
 
-    Input: A list of TimeWindowSeries objects.
+    Input: A list of TimeWindowSequence objects.
     Output: A FilteredTimeseries object containing only time windows where
             *all* the supplied objects had 'fired'.
 '''
 
-from all_machines_filter_primitive import TimeWindowSeries
+# FIXME: Enable this line once this is settled down
+# from tbd_module_name import TimeWindowSequence
 from collections import deque
+from enum import Enum
+
+# FIXME: Remove this class once the TimeWindowSequence line is enabled.
+class TimeWindowSequence(object):
+    def __init__(self, tw):
+        self.__time_windows = tw
+
+    def get_time_windows(self):
+        return self.__time_windows
+
+    def set_time_windows(self, time_windows):
+        self.__time_windows = time_windows
 
 class IntersectTimeseries(object):
 
@@ -20,18 +33,11 @@ class IntersectTimeseries(object):
         W1 = 1,
         W2 = 2
 
-    def __init__(self, twin_series_obj_list):
-        # Ensure timewindow series is non-empty.
-        assert(len(twin_series_obj_list) != 0)
-
-        # Ensure each object in the list of of TimeWindowSeries type
-        for obj in twin_series_obj_list:
-            assert isinstance(obj) == TimeWindowSeries
-
-        # Prepare the result
-        self.__twin_series_result = self._compute(twin_series_obj_list)
-
-    def _compare_time_windows(self, window1, window2):
+    # NOTE: This is a class method (not an object method). We have done this
+    # purely for the convenince of being able to test this independently AND
+    # making it class method was not (adversely) affecting the class
+    # usage/abstraction in any way.
+    def compare_time_windows(window1, window2):
         '''
         Objective:
         ----------
@@ -112,7 +118,7 @@ class IntersectTimeseries(object):
               st1 *************************** et1
                        st2 ************ et2
 
-            Case 4a: Subsume
+            Case 4b: Subsume
                        st1 ************ et1
               st2 *************************** et2
             '''
@@ -147,6 +153,18 @@ class IntersectTimeseries(object):
         return l_residue, overlap, r_residue
 
 
+    def __init__(self, twin_series_obj_list):
+        # Ensure timewindow series is non-empty.
+        assert(len(twin_series_obj_list) != 0)
+
+        # Ensure each object in the list of of TimeWindowSequence type
+        for obj in twin_series_obj_list:
+            assert isinstance(obj) == TimeWindowSequence
+
+        # Prepare the result
+        self.__twin_series_result = self._compute(twin_series_obj_list)
+
+
     # This is the heart of the 'Quilt Algorithm'. All the cool prep work done
     # in tranforming the timeseries into a step function now gets used to
     # compute the intersection. Follow along ...
@@ -157,7 +175,7 @@ class IntersectTimeseries(object):
         '''
         Objective:
         ---------
-        Compute overlapping segments of time across all the TimeWindowSeries
+        Compute overlapping segments of time across all the TimeWindowSequence
         objects stored in __twin_series_obj_list.
 
         The heart of the algorithm is to iterate over all the twin_series
@@ -221,7 +239,7 @@ class IntersectTimeseries(object):
             while tws1_q and tws2_q:
                 window1 = tws1_q.popleft()
                 window2 = tws2_q.popleft()
-                l_residue, overlap, r_residue = self._compare_time_windows( \
+                l_residue, overlap, r_residue = __class__.compare_time_windows(
                         window1, window2)
 
                 # Process l_residue -- do nothing i.e. discard it.
@@ -243,7 +261,7 @@ class IntersectTimeseries(object):
             # Store result as the input #1 for next iteration.
             tws1_q = result
 
-        self.__twin_series_result = TimeWindowSeries(result)
+        self.__twin_series_result = TimeWindowSequence(result)
 
 
     def result(self):
