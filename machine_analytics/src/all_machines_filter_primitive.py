@@ -70,7 +70,9 @@ class FilteredTimeseries(object):
             self.__type = marker_type
             self.__marker_key = m_key
             self.__marker_value = m_value
+            self.__next_key = None
             self.__next_element = None
+            self.__prev_key = None
             self.__prev_element = None
 
         def get_marker_type(self):
@@ -82,11 +84,23 @@ class FilteredTimeseries(object):
         def get_marker_value(self):
             return self.__marker_value
 
+        def set_next_key(self, key):
+            self.__next_key = key
+
+        def get_next_key(self):
+            return self.__next_key
+
         def get_next_element(self):
             return self.__next_element
 
         def set_next_element(self, value):
             self.__next_element = value
+
+        def set_prev_key(self, key):
+            self.__prev_key = key
+
+        def get_prev_key(self):
+            return self.__prev_key
 
         # This is needed only if linear interpolation is used
         def get_prev_element(self):
@@ -111,6 +125,12 @@ class FilteredTimeseries(object):
 
     def get_tsid(self):
         return self.__tsid
+
+    def get_filter_qualifier(self):
+        return self.__filter_qualifier
+
+    def get_filter_constant(self):
+        return self.__filter_constant
 
     def get_filtered_dict(self):
         return self.__filtered_dict
@@ -184,11 +204,15 @@ class FilteredTimeseries(object):
         for cur_index, (key, value) in enumerate(result_dict.items()):
             if isinstance(value, FilteredTimeseries.Marker):
                 if value.get_marker_type() is FilteredTimeseries.MarkerTypes.INIT:
+                    value.set_next_key(items[cur_index + 1][0])
                     value.set_next_element(items[cur_index + 1][1])
                 if value.get_marker_type() is FilteredTimeseries.MarkerTypes.NORMAL:
+                    value.set_next_key(items[cur_index + 1][0])
                     value.set_next_element(items[cur_index + 1][1])
+                    value.set_prev_key(items[cur_index - 1][0])
                     value.set_prev_element(items[cur_index - 1][1])
                 if value.get_marker_type() is FilteredTimeseries.MarkerTypes.EXIT:
+                    value.set_prev_key(items[cur_index - 1][0])
                     value.set_prev_element(items[cur_index - 1][1])
 
         self.__filtered_dict = result_dict
