@@ -7,20 +7,9 @@
 '''
 
 # FIXME: Enable this line once this is settled down
-# from tbd_module_name import TimeWindowSequence
+from all_machine_time_windows import TimeWindowSequence
 from collections import deque
 from enum import Enum
-
-# FIXME: Remove this class once the TimeWindowSequence line is enabled.
-class TimeWindowSequence(object):
-    def __init__(self, tw):
-        self.__time_windows = tw
-
-    def get_time_windows(self):
-        return self.__time_windows
-
-    def set_time_windows(self, time_windows):
-        self.__time_windows = time_windows
 
 class IntersectTimeseries(object):
 
