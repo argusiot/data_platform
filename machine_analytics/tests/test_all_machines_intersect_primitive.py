@@ -6,7 +6,8 @@ import os
 import sys
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
-from all_machines_intersect_primitive import IntersectTimeseries as ITim, TimeWindowSequence
+from all_machines_intersect_primitive import IntersectTimeseries as ITim
+from all_machines_time_windows import TimeWindowSequence
 
 '''
 from argus_tal import timeseries_id as ts_id

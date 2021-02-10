@@ -6,8 +6,7 @@
             *all* the supplied objects had 'fired'.
 '''
 
-# FIXME: Enable this line once this is settled down
-from all_machine_time_windows import TimeWindowSequence
+from all_machines_time_windows import TimeWindowSequence
 from collections import deque
 from enum import Enum
 
