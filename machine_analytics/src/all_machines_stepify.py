@@ -22,7 +22,7 @@
 '''
 
 from all_machines_filter_primitive import FilteredTimeseries
-from all_machine_time_windows import TimeWindowSequence
+from all_machines_time_windows import TimeWindowSequence
 
 
 class Stepify(object):
