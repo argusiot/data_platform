@@ -147,7 +147,7 @@ class IntersectTimeseries(object):
 
         # Ensure each object in the list of of TimeWindowSequence type
         for obj in twin_series_obj_list:
-            assert isinstance(obj) == TimeWindowSequence
+            assert(isinstance(obj, TimeWindowSequence))
 
         # Prepare the result
         self.__twin_series_result = self._compute(twin_series_obj_list)
@@ -157,8 +157,8 @@ class IntersectTimeseries(object):
     # in tranforming the timeseries into a step function now gets used to
     # compute the intersection. Follow along ...
     def _compute(self, twin_series_obj_list):
-        if len(self.__twin_series_obj_list) == 1:
-            return self.__twin_series_obj_list[0]
+        if len(twin_series_obj_list) == 1:
+            return twin_series_obj_list[0]
 
         '''
         Objective:
@@ -170,7 +170,7 @@ class IntersectTimeseries(object):
         objects and do a litte "intersection computation" in every iteration.
 
         The 'intersection computation' in the i-th iteration uses 2 things:
-           (1) the i-th twin_series i.e. self.__twin_series_obj_list[i], AND
+           (1) the i-th twin_series i.e. twin_series_obj_list[i], AND
            (2) the cummulative result computed thus far (i.e. from iterations
                [0, i-1]). We store the cummulative result below in the variable
                'result'.
@@ -216,14 +216,17 @@ class IntersectTimeseries(object):
               explanation. ADD EXPLANATION !!!
         '''
 
+        # shorten name for readability
+        TWindow = IntersectTimeseries.TimeWindowId
+
         # Collects the cummulative intersection result for the computation
         # thus far. Also becomes the 'final result' when the computation
         # terminates.
         result = []
 
-        tws1_q = deque(self.__twin_series_obj_list[0])
-        for tws_idx in range(1, len(self.__twin_series_obj_list)):
-            tws2_q = deque(self.__twin_series_obj_list[tws_idx])
+        tws1_q = deque(twin_series_obj_list[0].get_time_windows())
+        for tws_idx in range(1, len(twin_series_obj_list)):
+            tws2_q = deque(twin_series_obj_list[tws_idx].get_time_windows())
             while tws1_q and tws2_q:
                 window1 = tws1_q.popleft()
                 window2 = tws2_q.popleft()
@@ -249,8 +252,9 @@ class IntersectTimeseries(object):
             # Store result as the input #1 for next iteration.
             tws1_q = result
 
-        self.__twin_series_result = TimeWindowSequence(result)
+        return TimeWindowSequence(result)
 
 
+    @property
     def result(self):
         return self.__twin_series_result
