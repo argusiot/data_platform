@@ -30,14 +30,7 @@ class IntersectTimeseries(object):
         Objective:
         ----------
         Compare 2 time windows determine how much overlap exists between the
-        supplied time windows. The method returns:
-          -- 3 time windows viz.  L-Residue, Overlap, R-Residue
-             See details below for their semantics.
-          -- r_residue_in_window_1:
-             A tri-state boolean value set to:
-             True: If the R-Residue window comes from window1
-             False: If the R-Residue window comes from window2
-             None: If there's exact overlap
+        supplied time windows.
 
         Input:
         ------
@@ -68,6 +61,8 @@ class IntersectTimeseries(object):
         following format:
            Overlap window: (start_time, end_time)
            Residue windows: (start_time, end_time, time_window_identifier)
+
+           time_window_identifier is of type TimeWindowId.
         '''
         st1, et1 = window1
         st2, et2 = window2
