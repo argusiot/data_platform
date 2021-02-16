@@ -137,8 +137,8 @@ class IntersectTimeseries(object):
 
 
     def __init__(self, twin_series_obj_list):
-        # Ensure timewindow series is non-empty.
-        assert(len(twin_series_obj_list) != 0)
+        # Need at least 2 timeseries to be supplied for computing intersection.
+        assert(len(twin_series_obj_list) >= 2)
 
         # Ensure each object in the list of of TimeWindowSequence type
         for obj in twin_series_obj_list:
