@@ -21,7 +21,8 @@
      https://docs.google.com/presentation/d/15EnUsMb4w9Xwg26iMBw8uNcUB_Sd5uAqXQWmie3X60s
 '''
 
-from all_machines_filter_primitive import FilteredTimeseries
+from itertools import count
+from all_machines_filter_primitive import FilteredTimeseries, FilterQualifier, filtering_criterion_ops
 from all_machines_time_windows import TimeWindowSequence
 
 
@@ -50,6 +51,8 @@ class Stepify(object):
         x2, y2 = p2_coordinates
 
         m = (y2 - y1) / (x2 - x1)
+        if m == 0:
+            return (x1 + x2) / 2
         c = y1 - (m * x1)
         x_intercept = ((y_intercept - c) / m)
         return x_intercept
@@ -68,12 +71,14 @@ class Stepify(object):
 
     def __prepare_time_windows(self):
         time_windows = []
-        for idx, val in enumerate(self.__transition_points):
-            if idx < len(self.__transition_points) - 1:
-                time_windows.append((val, self.__transition_points[idx+1]))
+        idx = 0
+        while idx < len(self.__transition_points) - 1:
+            time_windows.append((self.__transition_points[idx], self.__transition_points[idx + 1]))
+            idx += 2
         self.__stepified_time_windows = TimeWindowSequence(time_windows)
 
     def __stepify(self):
+        filter_criterion_func = filtering_criterion_ops[self.__filtered_timeseries.get_filter_qualifier()]
         current_marker = self.__filtered_timeseries.get_first_marker()
         threshold = self.__filtered_timeseries.get_filter_constant()
         element_list = []
@@ -90,16 +95,23 @@ class Stepify(object):
         while self.__filtered_timeseries.get_next_marker(current_marker) is not None:
             if current_marker.get_marker_type() == FilteredTimeseries.MarkerTypes.INIT:
                 if not isinstance(current_marker.get_next_element(), FilteredTimeseries.Marker):
-                    element_list.append(self.__get_interpolation_point(current_marker, threshold, "NEXT"))
+                    if filter_criterion_func(current_marker.get_marker_value(), threshold):
+                        element_list.append(current_marker.get_next_key())
+                    else:
+                        element_list.append(self.__get_interpolation_point(current_marker, threshold, "NEXT"))
             elif current_marker.get_marker_type() == FilteredTimeseries.MarkerTypes.NORMAL:
                 if not isinstance(current_marker.get_prev_element(), FilteredTimeseries.Marker):
                     element_list.append(self.__get_interpolation_point(current_marker, threshold, "PREV"))
                 if not isinstance(current_marker.get_next_element(), FilteredTimeseries.Marker):
                     element_list.append(self.__get_interpolation_point(current_marker, threshold, "NEXT"))
-            elif current_marker.get_marker_type() == FilteredTimeseries.MarkerTypes.EXIT:
-                if not isinstance(current_marker.get_prev_element(), FilteredTimeseries.Marker):
-                    element_list.append(self.__get_interpolation_point(current_marker, threshold, "PREV"))
             current_marker = self.__filtered_timeseries.get_next_marker(current_marker)
+
+        if current_marker.get_marker_type() == FilteredTimeseries.MarkerTypes.EXIT:
+            if not isinstance(current_marker.get_prev_element(), FilteredTimeseries.Marker):
+                if filter_criterion_func(current_marker.get_marker_value(), threshold):
+                    element_list.append(current_marker.get_prev_key())
+                else:
+                    element_list.append(self.__get_interpolation_point(current_marker, threshold, "PREV"))
 
         self.__transition_points = element_list
         self.__prepare_time_windows()
