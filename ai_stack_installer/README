@@ -6,3 +6,29 @@ But it works reliably to install - Hbase, OpenTSDB & Grafana on Vagrant.
 
 Script will need some changes to reliably install on a new AWS instance. That
 will be taken up as a follow-up activity.
+
+Usage with Vagrant VM involves 3 steps:
+1. Creating an installer_bundle
+2. Copying the installer bundle to the shared directory of your Vagrant VM
+3. Launching the VM
+4. You should expect to the see the installer bundle under /vagrant
+5. Unbundle it
+6. Run it.
+
+
+Details:
+========
+
+To generate the service stack installer bundle:
+git clone https://github.com/argusiot/data_platform
+cd data_platform/ai_stack_installer
+make installer_bundle
+ls -l output/ai_stack_installer.tar (expect to find this file)
+
+Create your new Vagrant VM to start a new stack:
+cd ~/HOME/new_stack
+initialize your Vagrantfile
+copy ai_stack_installer.tar to this file
+vagrant up ; vagrant ssh
+tar -xvf /vagrant/ai_stack_installer.tar
+sudo /vagrant/argusiot_service_stack_install.sh
