@@ -51,8 +51,6 @@ class Stepify(object):
         x2, y2 = p2_coordinates
 
         m = (y2 - y1) / (x2 - x1)
-        if m == 0:
-            return (x1 + x2) / 2
         c = y1 - (m * x1)
         x_intercept = ((y_intercept - c) / m)
         return x_intercept
@@ -92,7 +90,7 @@ class Stepify(object):
            Decision (a) is made based on the type of marker and what precedes/follows it.
         '''
 
-        while self.__filtered_timeseries.get_next_marker(current_marker) is not None:
+        while current_marker is not None:
             if current_marker.get_marker_type() == FilteredTimeseries.MarkerTypes.INIT:
                 if not isinstance(current_marker.get_next_element(), FilteredTimeseries.Marker):
                     if filter_criterion_func(current_marker.get_marker_value(), threshold):
@@ -104,14 +102,15 @@ class Stepify(object):
                     element_list.append(self.__get_interpolation_point(current_marker, threshold, "PREV"))
                 if not isinstance(current_marker.get_next_element(), FilteredTimeseries.Marker):
                     element_list.append(self.__get_interpolation_point(current_marker, threshold, "NEXT"))
+            elif current_marker.get_marker_type() == FilteredTimeseries.MarkerTypes.EXIT:
+                if not isinstance(current_marker.get_prev_element(), FilteredTimeseries.Marker):
+                    if filter_criterion_func(current_marker.get_marker_value(), threshold):
+                        element_list.append(current_marker.get_prev_key())
+                    else:
+                        element_list.append(self.__get_interpolation_point(current_marker, threshold, "PREV"))
+            else:
+                assert False  #Should never get here
             current_marker = self.__filtered_timeseries.get_next_marker(current_marker)
-
-        if current_marker.get_marker_type() == FilteredTimeseries.MarkerTypes.EXIT:
-            if not isinstance(current_marker.get_prev_element(), FilteredTimeseries.Marker):
-                if filter_criterion_func(current_marker.get_marker_value(), threshold):
-                    element_list.append(current_marker.get_prev_key())
-                else:
-                    element_list.append(self.__get_interpolation_point(current_marker, threshold, "PREV"))
 
         self.__transition_points = element_list
         self.__prepare_time_windows()
