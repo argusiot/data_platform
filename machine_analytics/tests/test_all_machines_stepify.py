@@ -133,7 +133,6 @@ class Stepify_Tests(unittest.TestCase):
         self.assertEqual(stepified_result.get_stepified_time_windows().get_time_windows()[2],
                          (1587949210.1666667, 1587949214))
 
-
     def testStepifyCase1(self):
         stepified_result = self.mock_stepify_helper(1587947408, 1587948205)
 

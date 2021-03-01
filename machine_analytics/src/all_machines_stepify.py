@@ -21,8 +21,7 @@
      https://docs.google.com/presentation/d/15EnUsMb4w9Xwg26iMBw8uNcUB_Sd5uAqXQWmie3X60s
 '''
 
-from itertools import count
-from all_machines_filter_primitive import FilteredTimeseries, FilterQualifier, filtering_criterion_ops
+from all_machines_filter_primitive import FilteredTimeseries
 from all_machines_time_windows import TimeWindowSequence
 
 
@@ -76,7 +75,6 @@ class Stepify(object):
         self.__stepified_time_windows = TimeWindowSequence(time_windows)
 
     def __stepify(self):
-        filter_criterion_func = filtering_criterion_ops[self.__filtered_timeseries.get_filter_qualifier()]
         current_marker = self.__filtered_timeseries.get_first_marker()
         threshold = self.__filtered_timeseries.get_filter_constant()
         element_list = []
@@ -93,7 +91,7 @@ class Stepify(object):
         while current_marker is not None:
             if current_marker.get_marker_type() == FilteredTimeseries.MarkerTypes.INIT:
                 if not isinstance(current_marker.get_next_element(), FilteredTimeseries.Marker):
-                    if filter_criterion_func(current_marker.get_marker_value(), threshold):
+                    if self.__filtered_timeseries.is_value_filtered_out(current_marker.get_marker_value()):
                         element_list.append(current_marker.get_next_key())
                     else:
                         element_list.append(self.__get_interpolation_point(current_marker, threshold, "NEXT"))
@@ -104,12 +102,13 @@ class Stepify(object):
                     element_list.append(self.__get_interpolation_point(current_marker, threshold, "NEXT"))
             elif current_marker.get_marker_type() == FilteredTimeseries.MarkerTypes.EXIT:
                 if not isinstance(current_marker.get_prev_element(), FilteredTimeseries.Marker):
-                    if filter_criterion_func(current_marker.get_marker_value(), threshold):
+                    if self.__filtered_timeseries.is_value_filtered_out(current_marker.get_marker_value()):
                         element_list.append(current_marker.get_prev_key())
                     else:
                         element_list.append(self.__get_interpolation_point(current_marker, threshold, "PREV"))
             else:
-                assert False  #Should never get here
+                # Should never get here
+                assert False
             current_marker = self.__filtered_timeseries.get_next_marker(current_marker)
 
         self.__transition_points = element_list
