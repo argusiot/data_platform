@@ -60,11 +60,14 @@ class IntersectTimeseries_Tests(unittest.TestCase):
         #           *-*-*-*-*-*-*-*-*-*-*-*-*-*
         # win2:           4     7
         win1 = win2 = (4,7)
+
         l_residue, overlap, r_residue = ITim.compare_time_windows(win1, win2)
-        self.assertEqual(None, l_residue)
+
+        expected_residue_result = (None, None, ITim.TimeWindowId.EXACT_MATCH)
+        self.assertEqual(expected_residue_result, l_residue)
         self.assertEqual(win1, overlap)
         self.assertEqual(win2, overlap)
-        self.assertEqual(None, r_residue)
+        self.assertEqual(expected_residue_result, r_residue)
 
 
     def testWindowComparison_Case2a_PartialOverlap(self):
@@ -132,6 +135,20 @@ class IntersectTimeseries_Tests(unittest.TestCase):
         self.assertEqual(l_residue, (1, 3, ITim.TimeWindowId.W2))
         self.assertEqual(overlap, (3,7))
         self.assertEqual(r_residue, (7, 10, ITim.TimeWindowId.W2))
+
+    def test_Intersect_2_Identical_Series(self):
+        series1 = TimeWindowSequence([(1, 7), (10, 16)])
+        series2 = TimeWindowSequence([(1, 7), (10, 16)])
+        expected_result = TimeWindowSequence([(1, 7), (10, 16)])
+        intersect = ITim([series1, series2])
+        self.assertEqual(expected_result.get_time_windows(),
+                         intersect.result.get_time_windows())
+
+    def test_Intersect_Series_With_Itself(self):
+        series = TimeWindowSequence([(1, 7), (10, 16)])
+        intersect = ITim([series, series])
+        self.assertEqual(series.get_time_windows(),
+                         intersect.result.get_time_windows())
 
     def test_2SeriesWith_2WindowSequencesEach_Subtests(self):
         '''

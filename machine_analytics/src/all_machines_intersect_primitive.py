@@ -16,10 +16,14 @@ class IntersectTimeseries(object):
     TimeWindowId is used to annotate the L- and R- residues returned by
     _compare_time_windows. This use of an enum here is primarily for making
     code more readable so that the algorithm is easily understood.
+
+    EXACT_MATCH is used when the 2 supplied time windows exactly i.e. full
+    overlap and there are no residues.
     '''
     class TimeWindowId(Enum):
         W1 = 1,
         W2 = 2
+        EXACT_MATCH = 3
 
     # NOTE: This is a class method (not an object method). We have done this
     # purely for the convenince of being able to test this independently AND
@@ -69,9 +73,11 @@ class IntersectTimeseries(object):
         l_residue = overlap = r_residue = None
         r_residue_in_window_1 = None
 
+        TWindow = IntersectTimeseries.TimeWindowId
         if st1 == st2 and et1 == et2:
             # This handles Case 1 - Exact match.
             overlap = (st1, et1)
+            l_residue = r_residue = (None, None, TWindow.EXACT_MATCH)
         else:
             #...this handles all the remaining cases.
             input_windows = [st1, et1, st2, et2]
@@ -241,6 +247,9 @@ class IntersectTimeseries(object):
                     tws1_q.insert(0, (st_time, end_time))  # Enque at q head
                 elif win == TWindow.W2:
                     tws2_q.insert(0, (st_time, end_time))  # Enque at q head
+                elif win == TWindow.EXACT_MATCH:
+                    # No residue processing needed
+                    pass
                 else:
                     assert(False)  # Should never happen
 
