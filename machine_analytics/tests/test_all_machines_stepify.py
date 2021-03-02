@@ -1,5 +1,18 @@
 '''
-TBD
+    This Spread Sheet contains the design cases(1-11) for the Stepify unit tests
+    https://docs.google.com/spreadsheets/d/1qenFE7QDa_4zUordDWembJJ6BMWZWDXJv_fveTm5y2s/edit#gid=0
+
+    The test data is read from a resource file "test_data.json" which is shared with
+    test_all_filter_primitive.py. All HTTP calls are hence mocked and data is in-turn retrieved
+    from the json file.
+
+    The unit testing of Stepify assumes the following:
+        (a) Functionality of Filter Primitive in the expected way.
+        (b) TimeSeries Object maintains the existing properties.
+        (c) test_data.json file remains unmodified.
+
+    For better understanding of the Cases 1-11, the below spreadsheet allows one to visualize the transition points:
+    https://docs.google.com/spreadsheets/d/1x6eHR1LJ0XNgvyD3ytPKDwvZ9SkCTQMldJeSJHi52qo/edit#gid=2140809767
 '''
 
 import os
@@ -12,7 +25,6 @@ from unittest.mock import Mock, patch
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
 from all_machines_filter_primitive import FilteredTimeseries, FilterQualifier
 from all_machines_stepify import Stepify
-from all_machines_time_windows import TimeWindowSequence
 from argus_tal import timeseries_id as ts_id
 from argus_tal import query_api
 from argus_tal import basic_types as bt
@@ -45,6 +57,12 @@ class Stepify_Tests(unittest.TestCase):
                                                           {"machine_name": "90mm_extruder"})
         self.__tsdb_ip = "172.0.0.1"
         self.__tsdb_port = 4242
+
+        '''
+        The following __test_result_dict is organized in this manner:
+        "Query URL" -> "Timeseries result"
+        The query URL is constructed based on (timeseries_id, start_time & end_time) being used for a test case.
+        '''
         self.__test_result_dict = {}
 
     def __setup_testcase_data(self, start,

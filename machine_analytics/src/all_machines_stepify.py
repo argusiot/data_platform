@@ -28,8 +28,6 @@ from all_machines_time_windows import TimeWindowSequence
 class Stepify(object):
     def __init__(self, filtered_ts):
         assert(isinstance(filtered_ts, FilteredTimeseries))
-        self.__filtered_timeseries = filtered_ts
-
         self.__transition_points = None
         # self.__transition_points is used to store the 'transition points' computed during the stepify process.
         # These transition_points are actually an intermediate result that are used to compute the time windows.
@@ -37,7 +35,7 @@ class Stepify(object):
         self.__stepified_time_windows = None
         # self.__stepified_time_windows is used to store the final result (as a list of TimeWindows objects)
 
-        self.__stepify()
+        self.__stepified_time_windows, self.__transition_points = self.__stepify(filtered_ts)
 
     def get_stepified_time_windows(self):
         return self.__stepified_time_windows
@@ -66,50 +64,50 @@ class Stepify(object):
                 (current_marker.get_next_key(), current_marker.get_next_element()), threshold)
         return interpolation_point
 
-    def __prepare_time_windows(self):
+    def __prepare_time_windows(self, transition_points):
         time_windows = []
         idx = 0
-        while idx < len(self.__transition_points) - 1:
-            time_windows.append((self.__transition_points[idx], self.__transition_points[idx + 1]))
+        while idx < len(transition_points) - 1:
+            time_windows.append((transition_points[idx], transition_points[idx + 1]))
             idx += 2
-        self.__stepified_time_windows = TimeWindowSequence(time_windows)
+        return TimeWindowSequence(time_windows)
 
-    def __stepify(self):
-        current_marker = self.__filtered_timeseries.get_first_marker()
-        threshold = self.__filtered_timeseries.get_filter_constant()
-        element_list = []
+    def __stepify(self, filtered_timeseries):
+        current_marker = filtered_timeseries.get_first_marker()
+        threshold = filtered_timeseries.get_filter_constant()
+        transition_points = []
 
         '''
         The basic algorithm here is as follows:
-        Walk through all the markers:
-           At each marker, make a decision on 
-                 (a) whether a step should be generated
-                 (b) If yes, generate the step by computing the point using __get_interpolation_point()
-           Decision (a) is made based on the type of marker and what precedes/follows it.
+        1) Walk through all the markers to generate transition points.
+            At each marker, make a decision on:
+                (a) whether a step should be generated
+                (b) If yes, generate the step by computing the point using __get_interpolation_point()
+            Decision (a) is made based on the type of marker and what precedes/follows it.
+        2) Walk through the transition points to generate the stepi-fied time windows.
         '''
 
         while current_marker is not None:
             if current_marker.get_marker_type() == FilteredTimeseries.MarkerTypes.INIT:
                 if not isinstance(current_marker.get_next_element(), FilteredTimeseries.Marker):
-                    if self.__filtered_timeseries.is_value_filtered_out(current_marker.get_marker_value()):
-                        element_list.append(current_marker.get_next_key())
+                    if filtered_timeseries.is_value_filtered_out(current_marker.get_marker_value()):
+                        transition_points.append(current_marker.get_next_key())
                     else:
-                        element_list.append(self.__get_interpolation_point(current_marker, threshold, "NEXT"))
+                        transition_points.append(self.__get_interpolation_point(current_marker, threshold, "NEXT"))
             elif current_marker.get_marker_type() == FilteredTimeseries.MarkerTypes.NORMAL:
                 if not isinstance(current_marker.get_prev_element(), FilteredTimeseries.Marker):
-                    element_list.append(self.__get_interpolation_point(current_marker, threshold, "PREV"))
+                    transition_points.append(self.__get_interpolation_point(current_marker, threshold, "PREV"))
                 if not isinstance(current_marker.get_next_element(), FilteredTimeseries.Marker):
-                    element_list.append(self.__get_interpolation_point(current_marker, threshold, "NEXT"))
+                    transition_points.append(self.__get_interpolation_point(current_marker, threshold, "NEXT"))
             elif current_marker.get_marker_type() == FilteredTimeseries.MarkerTypes.EXIT:
                 if not isinstance(current_marker.get_prev_element(), FilteredTimeseries.Marker):
-                    if self.__filtered_timeseries.is_value_filtered_out(current_marker.get_marker_value()):
-                        element_list.append(current_marker.get_prev_key())
+                    if filtered_timeseries.is_value_filtered_out(current_marker.get_marker_value()):
+                        transition_points.append(current_marker.get_prev_key())
                     else:
-                        element_list.append(self.__get_interpolation_point(current_marker, threshold, "PREV"))
+                        transition_points.append(self.__get_interpolation_point(current_marker, threshold, "PREV"))
             else:
                 # Should never get here
                 assert False
-            current_marker = self.__filtered_timeseries.get_next_marker(current_marker)
+            current_marker = filtered_timeseries.get_next_marker(current_marker)
 
-        self.__transition_points = element_list
-        self.__prepare_time_windows()
+        return self.__prepare_time_windows(transition_points), transition_points
