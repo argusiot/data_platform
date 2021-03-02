@@ -216,3 +216,10 @@ class FilteredTimeseries(object):
                     value.set_prev_element(items[cur_index - 1][1])
 
         self.__filtered_dict = result_dict
+
+    def is_value_filtered_out(self, value):
+        filter_criterion_func = filtering_criterion_ops[self.__filter_qualifier]
+        if filter_criterion_func(value, self.__filter_constant):
+            return True
+        else:
+            return False
