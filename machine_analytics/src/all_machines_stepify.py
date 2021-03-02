@@ -65,6 +65,15 @@ class Stepify(object):
         return interpolation_point
 
     def __prepare_time_windows(self, transition_points):
+        '''
+        The basic algorithm here is similar to wellformedness property.
+        e.g. wellformedness of parentheses - "(", ")", "(", ")"
+
+        We iterate over the list of transition points and construct tuples by picking 2 consecutive,
+        items and then move to the next couple in an exclusive manner.
+        e.g Input: transition_points = [w,x,y,z]
+            Output: time_windows = [(w,x), (y,z)]
+        '''
         time_windows = []
         idx = 0
         while idx < len(transition_points) - 1:
