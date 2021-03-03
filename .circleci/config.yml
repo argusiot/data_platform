@@ -2,8 +2,7 @@ version: 2.1
 jobs:
   build:
     machine:
-      # image: ubuntu-1604:201903-01
-      image: ubuntu-2004:202010-01
+      image: ubuntu-1604:201903-01
     steps:
       - checkout # check out the code in the project directory
       - run:
@@ -18,6 +17,8 @@ jobs:
             pip install coverage # For code coverage
             pip install requests # required for HTTP querying
             pip install -U pip setuptools # reqd to install argus_tal package
+            pytest --version
+            pytest-3 --version
       - run:
           name: "Run TSDB Abstraction Layer (TAL) tests and code coverage"
           command: |
