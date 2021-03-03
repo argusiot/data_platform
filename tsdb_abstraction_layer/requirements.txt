@@ -2,4 +2,6 @@
 # Its really not being used right now.
 
 pytest
-sphinx  # Documentation
+# sphinx  # Documentation
+setuptools # To install argus_tal package itself
+coverage

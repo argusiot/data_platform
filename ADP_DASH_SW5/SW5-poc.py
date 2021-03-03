@@ -51,13 +51,13 @@ def checkIfReady(start,end):
     while i <= end:
         if float((rate.values()[i])) < -1 or float((rate.values()[i])) > 1: #outOfRange    check abs in range; 
             if StartTime != 0:
-                TotalReadyTime += long((rate.keys()[i-1])) - StartTime
+                TotalReadyTime += int((rate.keys()[i-1])) - StartTime
                 StartTime = 0
         elif float((rate.values()[i])) < 1 and float((rate.values()[i])) > -1: #inRange
             if StartTime == 0:
-                StartTime = long((rate.keys()[i]))
+                StartTime = int((rate.keys()[i]))
             elif i == end and StartTime != 0:
-                TotalReadyTime += long((rate.keys()[i-1])) - StartTime
+                TotalReadyTime += int((rate.keys()[i-1])) - StartTime
 
         i += 1
 
@@ -84,7 +84,7 @@ def checkIfPurge(start,end):
 			stateList.append(tuple((Startkey, EndKey)))
 			Startkey = 0
 		i +=1
-	print stateList
+	print(stateList)
 	for entry in stateList:
 		i = screwSpeed.keys().index(entry[0])
 		end = screwSpeed.keys().index(entry[1])
@@ -103,13 +103,13 @@ def checkIfPurge(start,end):
 		while i <= end:
 			if float(meltTemp.values()[i]) > 160 or float(meltTemp.values()[i]) < 147:
 				if purgeStart != 0:
-					TotalPurgeTime += long((meltTemp.keys()[i-1])) - purgeStart
+					TotalPurgeTime += int((meltTemp.keys()[i-1])) - purgeStart
 					purgeStart = 0
 			elif 147.0 <= float(meltTemp.values()[i]) <= 160.0:
 				if purgeStart == 0:
-					purgeStart = long((meltTemp.keys()[i]))
+					purgeStart = int((meltTemp.keys()[i]))
 				elif i == end and purgeStart != 0:
-					TotalPurgeTime += long((meltTemp.keys()[i-1])) - purgeStart
+					TotalPurgeTime += int((meltTemp.keys()[i-1])) - purgeStart
 			i += 1
 
 Startkey = 0
@@ -135,9 +135,9 @@ for i, (k,v) in enumerate(status.items()):
 
 for entry in stateList:
     if entry[2] == 0.0:
-        TotalTimeOff += long(entry[1]) - long(entry[0])
+        TotalTimeOff += int(entry[1]) - int(entry[0])
     elif entry[2] == 1.0:
-        TotalTimeOn += long(entry[1]) - long(entry[0])
+        TotalTimeOn += int(entry[1]) - int(entry[0])
         # make query to get data.      func get Start and End data and pass map to checkRate
         checkIfReady((rate.keys().index(entry[0])), (rate.keys().index(entry[1])))
         checkIfPurge((lineSpeed.keys().index(entry[0])), (lineSpeed.keys().index(entry[1])))

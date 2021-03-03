@@ -1,5 +1,5 @@
 init:
-	pip install -r requirements.txt
+	pip3 install -r requirements.txt
 
 test:
 	# Without PYTHONHASHSEED=0, the TimeseriesID::fqid() method does not return
@@ -7,17 +7,20 @@ test:
 	# FIXME: Experiment with PYTHONHASHSEED on CircleCI so we can re-enable the
 	# TimeseriesID::fqid() test.
 	# PYTHONHASHSEED=0 pytest -v tests
-	pytest -v tests
+	python3 -m pytest -v tests
 
 code_coverage:
-	coverage run -m --branch --source=. pytest -v tests && \
-	coverage report -m
+	python3 -m coverage run -m --branch --source=. pytest -v tests && \
+	python3 -m coverage report -m
 
 install:
-	python3 setup.py install
+	pip3 install .
 
 uninstall:
 	python3 -m pip uninstall argus_tal
 
 do_post_query:
 	curl -d @experiments/post_query http://34.221.154.248:4242/api/query/exp | python -m json.tool
+
+clean:
+	rm -rf argus_tal.egg-info build dist

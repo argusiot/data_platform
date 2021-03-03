@@ -1,0 +1,200 @@
+'''
+##############################################################################
+  Author: Parag Panse
+  Date: Oct 26th, 2020
+
+  Disclaimer: This README started out as a .py file hence it has this weird
+              mixup of code and design description.
+
+  This file lays out the primities and algorithm needed to implement operations
+  of the following type:
+     1) FILTER: Filter a series by an operation and a constant
+        S' = S op k
+             where op is one of {<, >, <=, >=, ==}
+             and k is a constant value
+        S' is a new series.
+        
+        In addition, S' also records every timestamp where a transition is
+        values of the following type occurs: j->k or k->j, where j is a value
+        outside the acceptable the threshold. For such a j, the timestamp is
+        recorded along with a. pre-defined fixed value of MARKER.
+        
+        e.g. (t_j, j), (t_k, k) are 2 successive data points in S, then 
+             (t_j, MARKER), (t_k, k) are present in S'
+             OR
+             (t_k, k), (t_m, m) are 2 successive data points in S, then 
+             (t_k, k), (t_m, MARKER) are present in S'
+         
+     2) INTERSECT: 
+        A pre-requisite for actully performing the INTERSECT operation is a
+        transformation step where data points are converted to time windows.
+        
+        Parag add details: TRANSFORM DPS to TIMEWINDOWS
+         
+        Outcome of transformation is a TIME_WINDOW_SERIES.
+        
+        Perform timeseries intersection operation on the TIME_WINDOW_SERIES.
+        e.g. S = S1 intersect S2
+        where S contains all the time windows where S1 & S2 overlap (ignoring
+        the values).
+     3) REDUCE primitive:
+        Processes a series and perfoms a reduce operation.
+        e.g.  total(S) -> produces a sum of all time windows in S.
+        Input: Single time series.
+        Output: A scalar
+
+  Pseudo-code
+  ===========
+  1. ****UPDATE PSEUDO-CODE BELOW TO ACCOUNT FOR MARKER***
+     FILTER primitive: S op k
+     [Possible values for op:  <  >  ==  >=   <=   ]
+     result = []
+     for (t_i, v_i) in S:
+       if v_i op k:
+         result.append((t_i, v_i))
+
+  2. INTERSECTION: S1 & S2:
+     The transformation of DPS into TIME_WINDOW_SERIES has already been done.
+     Remainder of this algorithm assumes TIME_WINDOW_SERIES.
+       Comparing (t1_i, t1_j, v1_i) & (t2_i', t2_j', v2_i')
+       Obs1: Values can be ignored, so we're really comparing:
+                (t1_i, t1_j) & (t2_i', t2_j')
+
+       Objective: Compute overlapping and non-overlappig segments of time.
+
+       Algo:
+         q1 <- S1 ; q2 <- S2
+         result_q <- []  # empty
+         while !q1.empty() && !q2.empty()
+            tuple1 = q1.deque()
+            tuple2 = q2.deque()
+            Look at timeseries_intersection.jpg in this directory.
+
+   3. REDUCE:
+        Exercise for reader :-)
+##############################################################################
+'''
+
+# Example usage:
+# ==============
+# Example below shows how our favorite extruder usage states can be generated
+# using these primitives.
+
+import argus_data_model as adm
+import argus_tal as tal
+import argus_analytics as aalyx # Pronounced 'Alex'
+
+TSID_melt_temp = adm.get_tsid(
+    'melt_temperature',  # sensor
+    '65mm_extruder', # machine
+    'home-lab1', # plant-site
+    'SJC')  # zone/city
+TSID_pwr = adm.get_tsid('power_OnOff', '65mm_extruder', 'home-lab1', 'SJC')
+TSID_line_spd = adm.get_tsid('line_speed', '65mm_extruder', 'home-lab1', 'SJC')
+TSID_screw_spd = adm.get_tsid('screw_speed', '65mm_extruder', 'home-lab1', 'SJC')
+
+query_obj = tal.QueryApi(
+    service_ip, service_port,
+    123400000,  # start time
+    123500000,  # end time,
+    Aggregator.NONE,
+    [TSID_melt_temp, TSID_pwr, TSID_line_spd, TSID_screw_spd])
+
+assert query_obj.populate() == 0
+
+# Obtain individual result objects from query response.
+results = query_obj.get_result_set()
+S_pwr = result[TSID_melt_temp]
+S_melt_temp = result[TSID_pwr]
+S_line_speed = result[TSID_line_spd]
+S_screw_speed = result[TSID_screw_spd]
+
+#
+# Now the fun begins ....
+#
+
+# Defining this constate for improved code readability.
+POWER_ON = 1
+
+##############################################################################
+'''
+ Approach #1
+ Build 3 primitives:
+ 1. Filter primitive:
+    Filters out data points based on the supplied criterion and constant.
+    Inputs: Single time series, a math comparator & a constant
+            The math comparator operator is one of: >, <, ==, <=, >=
+    Outputs: Single time series
+
+ 2. Intersection primitive:
+    Returns overlapping time segments for 2 series. Values from input timeseries
+    are ignored. In the returned time series, are values are set to the constant
+    aalyx.kINTERSECT
+
+'''
+##############################################################################
+
+# Goal 1: Compute time spent in SETUP state.
+
+# Run filter on each series.
+s_pwr_on = S_pwr == POWER_ON
+s_melt_temp = S_melt_temp > 210
+s_line_speed = S_line_speed == 0
+s_screw_speed = S_screw_speed == 0
+
+# Compute the intersection
+s_setup_state = s_pwr_on & s_melt_temp & s_line_speed & s_screw_speed
+
+print(aalyx.total(s_setup_state)) # Run the reduce operation to compute total
+                                  # time spent in SETUP state.
+
+##############################################################################
+
+# Goal 2: Compute time spent in PURGING state.
+
+# Run filter on each series.
+# Re-use these from prev compuation: s_pwr_on, s_melt_temp & s_line_speed
+s_screw_speed = S_screw_speed > 0
+
+# Compute the intersection
+s_purge_state = s_pwr_on & s_melt_temp & s_line_speed & s_screw_speed
+
+print(aalyx.total(s_purge_state)) # Run the reduce operation to compute total
+                                  # time spent in SETUP state.
+
+##############################################################################
+
+# Goal 3: Compute time spent in READY state.
+
+# Run filter on each series.
+# Re-use these from prev compuation: s_pwr_on, s_melt_temp & s_screw_speed
+s_line_speed = S_line_speed > 0
+
+# Compute the intersection
+s_ready_state = s_pwr_on & s_melt_temp & s_line_speed & s_screw_speed
+
+print(aalyx.total(s_ready_state)) # Run the reduce operation to compute total
+                                  # time spent in READY state.
+
+
+# Flushing out example using real numbers:
+# Using real numbers
+
+s_melt_temp = [(1,6,230), (6, 10, 231), (10, 16, 235)....]
+s_line_speed = [(2,7, 1000), (7, 10, 1100), (10, 15, 1200),....]
+
+Iter1:
+s_melt_temp = [(6, 10, 231), (10, 16, 235)....]
+s_line_speed = [(7, 10, 1100), (10, 15, 1200),....]
+
+1-2 --> discard
+6-7 --> residue
+
+result_set = [(2,6), (8, 10), (18, 20)..]
+
+s_melt_temp = [(6, 10, 231), (10, 16, 235)....]
+s_line_speed = [(6,7), (7, 10, 1100), (10, 15, 1200),....]
+
+READY_STATE = 6 -2 + 10 - 8 + 20 - 18 = 8
+
+
