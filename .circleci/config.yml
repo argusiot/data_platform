@@ -32,12 +32,12 @@ jobs:
             make code_coverage # Run tests and code coverage for machine analysis code
             coverage html --directory=/tmp/htmlcov2  # Generate an html report.
       - store_artifacts:
-            # Copies the html report from /tmp/htmlcov1 to the artefacts location
-            # which can be accessed via a browser on the CircleCI dashboard.
+            # Copies the html report from /tmp/htmlcov1 to artefacts.
+            # To access: Via argustal_coverage/index.html under the "ARTIFACTS" tab.
             path: /tmp/htmlcov1
             destination: argustal_coverage
       - store_artifacts:
-            # Copies the html report from /tmp/htmlcov1 to the artefacts location
-            # which can be accessed via a browser on the CircleCI dashboard.
+            # Copies the html report from /tmp/htmlcov2 to artefacts.
+            # To access: Via mc_analytics_coverage/index.html under the "ARTIFACTS" tab.
             path: /tmp/htmlcov2
             destination: mc_analytics_coverage
