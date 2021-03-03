@@ -7,11 +7,11 @@ test:
 	# FIXME: Experiment with PYTHONHASHSEED on CircleCI so we can re-enable the
 	# TimeseriesID::fqid() test.
 	# PYTHONHASHSEED=0 pytest -v tests
-	pytest -v tests
+	python3 -m pytest -v tests
 
 code_coverage:
-	coverage run -m --branch --source=. pytest -v tests && \
-	coverage report -m
+	python3 -m coverage run -m --branch --source=. pytest -v tests && \
+	python3 -m coverage report -m
 
 install:
 	pip3 install .
