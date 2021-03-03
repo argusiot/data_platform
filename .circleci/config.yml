@@ -23,15 +23,16 @@ jobs:
             cd tsdb_abstraction_layer
             make code_coverage   # Runs tests & generates code coverage data.
             coverage html --directory=/tmp/htmlcov  # Generate an html report.
+      - run:
+          name: "Run Machine analytics tests and code coverage"
+          command: |
+            cd tsdb_abstraction_layer
+            make install   # install argus_tal package
+            cd ../machine_analytics
+            make code_coverage # Run tests and code coverage for machine analysis code
+            coverage html --directory=/tmp/htmlcov  # Generate an html report.
       - store_artifacts:
             # Copies the html report from /tmp/htmlcov to the artefacts location
             # which can be accessed via a browser on the CircleCI dashboard.
             path: /tmp/htmlcov
             destination: htmlcov
-      - run:
-          name: "Machine analytics tests"
-          command: |
-            cd tsdb_abstraction_layer
-            make install   # install argus_tal package
-            cd ../machine_analytics
-            make test   # Basic protection for machine analysis code
