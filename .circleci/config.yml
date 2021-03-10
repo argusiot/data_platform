@@ -28,7 +28,7 @@ jobs:
           command: |
             cd tsdb_abstraction_layer
             make install   # install argus_tal package
-            cd ../machine_analytics
+            cd ../quilt
             make code_coverage # Run tests and code coverage for machine analysis code
             coverage html --directory=/tmp/htmlcov2  # Generate an html report.
       - store_artifacts:
