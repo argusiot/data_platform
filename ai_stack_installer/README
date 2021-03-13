@@ -17,21 +17,32 @@ To stand a service stack on a Vagrant VM involves 4 high level steps:
 Detailed steps:
 ===============
 
-To generate the service stack installer bundle:
------------------------------------------------
+Clone the repositories:
+-----------------------
+mkdir argusiot ; cd argusiot
 git clone https://github.com/argusiot/data_platform
-cd data_platform/ai_stack_installer
-make installer_bundle
-ls -l output/ai_stack_installer.tar (expect to find this file)
+git clone https://github.com/argusiot/argus_exporter
+cd argus_exporter
 
 Create your new Vagrant VM to start a new stack:
 ------------------------------------------------
-cd ~/HOME/new_stack
-Initialize your Vagrantfile. Leave everything to default except uncomment this line:
-  config.vm.network "public_network"
-copy ai_stack_installer.tar to this file
-vagrant up ; vagrant ssh
-tar -xvf /vagrant/ai_stack_installer.tar
+vagrant up
+vagrant ssh
+
+To generate the service stack installer bundle:
+-----------------------------------------------
+cd /vagrant_argusiot
+cd data_platform/ai_stack_installer
+make installer_bundle
+ls -l output/ai_stack_installer.tar.gz (expect to find this file)
+
+Install the stack:
+------------------
+cd ~/
+mkdir new_stack
+cd new_stack
+tar -xvf /vagrant_argusiot/data_platform/ai_stack_installer/output/ai_stack_installer.tar.gz
+
 sudo /vagrant/argusiot_service_stack_install.sh
 
 Verification:
@@ -39,11 +50,99 @@ Verification:
 See if the needed ports are up:
 netstat -l | grep 4242 
 netstat -l | grep 3000
+netstat -l | grep 2181
 
 4242 - OpenTSDB
 3000 - Grafana
+2181 - ZooKeeper
+
+telnet localhost 2181
+stat
+Expect to see Zookeeper version
 
 Capabilities now enabled:
 -------------------------
  -- OpenTSDB R/W will now work
- -- Viewing from Grafana will still not work. That requires a small step of configuring the data source in Grafana. Ask Parag how to do that.
+ -- Accessing Grafana will work.
+
+Finding ip address of the VM:
+-----------------------------
+
+The vagrant VM is initialized with with a private network address that can be reached from the host. Find the private network address (should be 172.x.x.x):
+
+ifconfig enp0s8
+
+ 
+Adding data to OpenTSDB:
+------------------------
+
+Use the virtual exporter to add data to the TSDB:
+
+/vagrant/iot_gw/virtual_exporter --ipaddr localhost your-compatible-csv-file.csv
+
+
+Accessing OpenTSDB viewer:
+--------------------------
+
+Open a web browser on your host and open (if private net ip is 172.28.128.3)
+
+http://172.28.128.3:4242
+
+
+Setting up Grafana:
+-------------------
+
+Open a web browser on your host and open (if private net ip is 172.28.128.3)
+
+http://172.28.128.3:3000
+
+Login with the default admin credentials (admin/admin).
+Provide new password. No need to make this complicated on a VM, since the VM may be destroyed at any time)
+If you want to add another user, do so as editor, but it is not needed on a VM, since the VM may be destroyed at any time).
+(These steps are important when standing up the stack on cload server)
+
+
+Config the local OpenTSBD as a new data source, following this instruction:
+
+https://grafana.com/docs/grafana/latest/datasources/add-a-data-source/
+
+Choose OpenTSDB and explicitly type "locahost:4242".
+You'll know where to type it when you see it.
+
+Click [SAVE and TEST]
+
+Now Grafana is ready to use, and as soon as you have added any data to OpenTSDB you can visualize by creating dashboards or just "Exploring" the data.
+
+
+Restarting services after restarting VM:
+----------------------------------------
+
+If you halt or restart your vagrant VM, OpenTSDB and ZooKeeper need to restarted after you do vagrant up. Grafana willl restart automatically.
+
+These are the steps:
+
+vagrant up
+vagrant ssh
+
+# Start OpenTSDB and ZooKeeper
+cd ~/hbase-1.4.13/
+sudo bin/start-hbase.sh
+sudo jps
+sudo service opentsdb restart
+
+# Optional DB inspection steps:
+    ./bin/hbase shell
+    => list 
+       # (should see 4 tables: tsdb, tsdb-meta, tsdb-tree, tsdb-uid)
+    => exit
+
+# Optional : zookeeper verification
+    telnet localhost 2181
+    stat  # (should show: “Zookeeper version: 3.4.10 . . . . <more stuff>]
+
+To stop the OpenTSDB service (e.g. to restart with above steps):
+
+sudo service opentsdb stop
+cd ~/hbase-1.4.10/
+sudo bin/stop-hbase.sh
+sudo jps
