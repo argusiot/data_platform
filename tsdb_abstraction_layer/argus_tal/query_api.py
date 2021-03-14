@@ -127,8 +127,8 @@ class QueryApi(object):
      of the timeseries_id and the value is the query result data dict object.
   '''
   def get_result_map(self):
-    res = {}  # tsid.fqid -> tsdd (i.e. query result object)
-    {res[tsdd.get_timeseries_id().fqid] = tsdd for tsdd in self.__tsdd_obj_list}
+    # tsid.fqid -> tsdd (i.e. query result object)
+    {tsdd.get_timeseries_id().fqid: tsdd for tsdd in self.__tsdd_obj_list}
     return res
 
   @property
