@@ -1,31 +1,7 @@
-                                   Machine Analytics
-                                   =================
+                    Timeseries analytics using Quilt and Applique
+                    =============================================
 
-This directory supports infrastructure to realize 'higher level' machine
-analytics. By 'higher level' we mean what can we learn about overall machine
-operation by combining/synthesizing information from multiple sensors
-attached to the machine.
-
-This requirements document covers what the 'higher level' machine analytics are
-needed to support various customer facing customer facing dashboards.
-
-ADP dashboard specs:
+Product requirement driving Quilt and Applique development:
 https://docs.google.com/document/d/1FiHxbkZ98A6GeOkCLY65IxueMRLmzkU9W-ABq4fnZm4/edit#heading=h.i6x73f5bbkch
 
-Code in this file MUST follow the following convention.
-
-Filename format: <machine_type>_<function_purpose>.py
-File top level comment format:
-'''
-    <machine_type>_<function_purpose>.py
-
-    Use case(s): ADP_DASH_SW5
-
-    <Code description....>
-'''
-
-If common infra is being added which can be used across all use cases, use
-"COMMON_INFRA" as the use case.
-
-
-
+<Add note on code organization>

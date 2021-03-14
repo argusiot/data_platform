@@ -1,0 +1,20 @@
+                    Timeseries analytics using Quilt and Applique
+                    =============================================
+
+Product requirement driving Quilt and Applique development:
+https://docs.google.com/document/d/1FiHxbkZ98A6GeOkCLY65IxueMRLmzkU9W-ABq4fnZm4/edit#heading=h.i6x73f5bbkch
+
+Quilt and Applique are names of systems designed to realize the requirements
+laid out in the document above. The documents referred to the platform as
+"Argus Data Processing" aka ADP. Hence in the doc above you'll see no mention
+of Quilt or Applique.
+
+Temporal State Specification grammar:
+=====================================
+  state_set = {t_state_1, t_state_2, ...}   (where t_state = Temporal State)
+  t_state_i = expression
+  expression = stmt_1 && stmt_2 && stmt_3 ...
+  stmt_1 = timeseries_id operator constant
+  timeseries_id = Timeseries id as defined in TSDB abstraction layer   (Leaf)
+  operator = one_of{<, >, <=, >=, ==}       (Leaf)
+  constant = one_of{integer | float}        (Leaf)

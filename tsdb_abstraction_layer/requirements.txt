@@ -5,3 +5,4 @@ pytest
 # sphinx  # Documentation
 setuptools # To install argus_tal package itself
 coverage
+jsonschema

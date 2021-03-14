@@ -10,6 +10,6 @@ Organization of code in this directory is as follows:
   plc: Experiments to read from a PLC. Should be moved to the data_exporter
        repository.
 
-  machine_analytics: Holds implementation of the Quilt algorithm.
+  quilt: Holds implementation of the Quilt algorithm.
 
   tsdb_abstraction_layer: Contains implementation of the argus_tal package.
