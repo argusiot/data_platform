@@ -45,7 +45,11 @@ class StateSetProcessorBuilder(object):
         # times build was called. The constructor is also a good placeholder
         # for storing any common parameters that are needed for all
         # StateSetProcessor
-        self.__count = 0
+        self.__build_success_count = 0
+
+    @property
+    def build_success_count(self):
+        return self.__build_success_count
 
     def validate_request(self, state_set_request):
         return jsonschema.validate(state_set_request,
@@ -69,4 +73,5 @@ class StateSetProcessorBuilder(object):
              2b) a list of TemporalState objects using 2a & #1
         3. Use #2 to construct the StateSetProcessor object
         '''
+        self.__build_success_count += 1
         return StateSetProcessor(temporal_state_obj_list, tsdb_url)
