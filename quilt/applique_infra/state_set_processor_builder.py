@@ -1,5 +1,5 @@
 '''
-   class StateSetBuilder
+   class StateSetProcessorBuilder
 
    This class builds a StateSetProcessor object from the supplied JSON
    description of a state set and returns the object.
@@ -9,12 +9,12 @@
 
    Example usage of this class showing simple* usage:
    -------------------------------------------------
-   *FIXME: Parag to update this example by 3/16 showing StateSetBuilder can
-           be embedded inside a server for running multiple StateSetProcessor
-           objects concurrently.
+   *FIXME: Parag to update this example by 3/16 showing StateSetProcessorBuilder
+           can be embedded inside a server for running multiple
+           StateSetProcessor objects concurrently.
 
 
-     ss_builder = StateSetBuilder()
+     ss_builder = StateSetProcessorBuilder()
 
      new_ss_request_json = blocking_wait_for_new_request()  # see FIXME below
 
@@ -33,12 +33,13 @@
 
 '''
 
+import json
 import jsonschema
 
 state_set_json_schema_defn = {
 }
 
-class StateSetBuilder(object):
+class StateSetProcessorBuilder(object):
     def __init__(self):
         # This class is stateless. We just maintain a count of the number of
         # times build was called. The constructor is also a good placeholder
