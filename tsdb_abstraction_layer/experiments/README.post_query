@@ -1,6 +1,6 @@
 This file describes what has been done in the post_query file.
 
-To allow comments in post_query we'll have enable comments in the open TSDB
+To allow comments in post_query we'll have to enable comments in the open TSDB
 config; until that is done we'll maintain this separate README.post_query
 file.
 
@@ -13,20 +13,20 @@ First time we use the "+" operation with 2 different timeseries. We choose to
 use melt_temperature metric for 2 different machines (65mm & 90mm extruders).
 We store this result in res1.
 
-Second we use the "+" operation with 2 the same timeseries. We choose to
+Second we use the "+" operation with 2 of the same timeseries. We choose to
 use melt_temperature metric on 65mm extruder for this.
 We store this result in res2.
 
 RESULTS:
 -------
-In the result we get series back.
+In the result we get 2 series back.
 
 res1 contains a union of timestamp from both series. At each timestamp, we see
 2 values i.e. one from each series. If a series is missing a dp for a timestamp,
 then fillPolicy kicks in. We have left fillPolicy to default, hence we get a '0'
 (zero) back for timestamps that dont have a value.
 
-res2 contains exactly same no. of timestamps are original series. At each
+res2 contains exactly same number of timestamps as the original series. At each
 timestamp we see the addition of the dp from the original series.
 
 
@@ -82,8 +82,8 @@ QUERY EXPLANATION:
   ],
 
  // Add the timeseries 'a' to timeseries 'b' and save the result in an
- // emphemeral timeseries 'e'. Similarly, add timeseries 'a' to itself and store
- // result in emphemeral timeseries 'res2'.
+ // ephemeral timeseries 'e'. Similarly, add timeseries 'a' to itself and store
+ // result in ephemeral timeseries 'res2'.
  "expressions":[
    { "id":"res1", "expr":"a + b", "join": { "operator": "union" } },
    { "id":"res2", "expr":"a + a", "join": { "operator": "union" } }
