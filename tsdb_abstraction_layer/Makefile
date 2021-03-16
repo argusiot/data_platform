@@ -17,7 +17,10 @@ install:
 	pip3 install .
 
 uninstall:
-	pip3 uninstall argus-tal
+	python3 -m pip uninstall argus_tal
+
+do_post_query:
+	curl -d @experiments/post_query http://34.221.154.248:4242/api/query/exp | python -m json.tool
 
 clean:
 	rm -rf argus_tal.egg-info build dist
