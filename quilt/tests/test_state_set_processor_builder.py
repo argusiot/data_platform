@@ -20,12 +20,18 @@ class SetProcessorBuilder_Tests(unittest.TestCase):
   def __init__(self, *args, **kwargs):
       super(SetProcessorBuilder_Tests, self).__init__(*args, **kwargs)
 
-      # o_u_t = Object_Under_Test
-      self.__o_u_t = StateSetProcessorBuilder("/home/vagrant/data_platform/quilt/applique_infra/SCHEMA_DEFN_state_set.json", "http://ignore")
+      this_dir = os.path.dirname(os.path.realpath(__file__))
+      schema_file_path = os.path.join( \
+          this_dir, '../applique_infra/SCHEMA_DEFN_state_set.json')
 
-      self.__test_json_data = None
-      with open("/home/vagrant/data_platform/quilt/tests/test_data/applique_infra_state_set_testdata.json", 'r') as test_data_f:
-          self.__test_data = json.load(test_data_f)
+      # o_u_t = Object_Under_Test
+      self.__o_u_t = StateSetProcessorBuilder(schema_file_path, "http://ignore")
+
+      test_data_file = os.path.join(
+          this_dir, "test_data/applique_infra_state_set_testdata.json")
+
+      with open(test_data_file, 'r') as dataFile:
+          self.__test_data = json.load(dataFile)
 
   def testSimpleTest(self):
       self.__o_u_t.validate_request(self.__test_data["minimum_state_set_defn"])
