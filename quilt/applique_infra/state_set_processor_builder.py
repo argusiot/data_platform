@@ -36,11 +36,8 @@
 import json
 import jsonschema
 
-state_set_json_schema_defn = {
-}
-
 class StateSetProcessorBuilder(object):
-    def __init__(self, tsdb_source_url):
+    def __init__(self, state_set_json_schema_file_path, tsdb_source_url):
         # From the POV of state set processor construction, this class is
         # stateless.
         self.__build_success_count = 0
@@ -51,13 +48,17 @@ class StateSetProcessorBuilder(object):
         #                          Not clear !!
         self.__tsdb_url = tsdb_source_url
 
+        self.__state_set_json_schema = None
+        with open(state_set_json_schema_file_path, 'r') as file:
+            self.__state_set_json_schema = json.load(file)
+
     @property
     def build_success_count(self):
         return self.__build_success_count
 
     def validate_request(self, state_set_request):
         return jsonschema.validate(state_set_request,
-                                   state_set_json_schema_defn)
+                                   self.__state_set_json_schema)
 
     '''
     Lets build the StateSetProcessor object from the supplied JSON request.

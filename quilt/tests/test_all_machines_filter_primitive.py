@@ -167,7 +167,7 @@ class FilterPrimitive_Tests(unittest.TestCase):
 
         # Step 1:
         this_dir = os.path.dirname(os.path.realpath(__file__))
-        file_path = os.path.join(this_dir, 'test_data.json')
+        file_path = os.path.join(this_dir, 'test_data/quilt_core_testdata.json')
         with open(file_path, 'r') as dataFile:
             data = dataFile.read()
         raw_dict = loads(data, object_pairs_hook=OrderedDict)

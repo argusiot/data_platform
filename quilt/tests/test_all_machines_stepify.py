@@ -2,14 +2,14 @@
     This Spread Sheet contains the design cases(1-11) for the Stepify unit tests
     https://docs.google.com/spreadsheets/d/1qenFE7QDa_4zUordDWembJJ6BMWZWDXJv_fveTm5y2s/edit#gid=0
 
-    The test data is read from a resource file "test_data.json" which is shared with
+    The test data is read from a resource file "test_data/quilt_core_testdata.json" which is shared with
     test_all_filter_primitive.py. All HTTP calls are hence mocked and data is in-turn retrieved
     from the json file.
 
     The unit testing of Stepify assumes the following:
         (a) Functionality of Filter Primitive in the expected way.
         (b) TimeSeries Object maintains the existing properties.
-        (c) test_data.json file remains unmodified.
+        (c) test_data/quilt_core_testdata.json file remains unmodified.
 
     For better understanding of the Cases 1-11, the below spreadsheet allows one to visualize the transition points:
     https://docs.google.com/spreadsheets/d/1x6eHR1LJ0XNgvyD3ytPKDwvZ9SkCTQMldJeSJHi52qo/edit#gid=2140809767
@@ -73,7 +73,7 @@ class Stepify_Tests(unittest.TestCase):
 
         # Step 1:
         this_dir = os.path.dirname(os.path.realpath(__file__))
-        file_path = os.path.join(this_dir, 'test_data.json')
+        file_path = os.path.join(this_dir, 'test_data/quilt_core_testdata.json')
         with open(file_path, 'r') as dataFile:
             data = dataFile.read()
         raw_dict = loads(data, object_pairs_hook=OrderedDict)

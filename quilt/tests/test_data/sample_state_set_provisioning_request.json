@@ -1,8 +1,6 @@
 {
-    "state_set" : {
-       "name": "extruder_states",
-       "uuid": "xxxxxxxxxxxxxxx"
-    },
+    "name": "extruder_states",
+    "uuid": "xxxxxxxxxxxxxxx",
     "state_definitions" : [
        {
           "label" : "state1",
@@ -36,7 +34,7 @@
                "key1" : "value1"
            }
        },
-     "timeseries1" : {
+     "timeseries2" : {
            "metric": "bar",
            "tags" : {
                "key2" : "value5"
