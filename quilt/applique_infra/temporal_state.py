@@ -7,9 +7,11 @@
    for details.
 '''
 
+import os
 import uuid
-import argus_tal
+import sys
 
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../core_src')))
 from all_machines_filter_primitive import FilterQualifier, FilteredTimeseries
 
 class TemporalState(object):
@@ -30,7 +32,7 @@ class TemporalState(object):
        ts_id2 = TimeseriesID("melt_pressure", "{machine: foo}")
     '''
     def __init__(self, state_label, expression_list, output_tsid):
-        self.__state_uuid = uuid()
+        self.__state_uuid = uuid.uuid4()
         self.__state_label = state_label
         self.__expression_list = list(expression_list) # clone
 
@@ -48,6 +50,15 @@ class TemporalState(object):
         self.__write_tsid = output_tsid
 
     @property
+    def state_label(self):
+        return self.__state_label
+
+    # This method is expected to be used for *testing* only. Should not be used
+    # in production code.
+    def _get_expression_list(self):
+        return self.__expression_list
+
+    @property
     def read_tsid_list(self):
         return self.__read_tsid_list
 
@@ -57,7 +68,7 @@ class TemporalState(object):
 
     @property
     def write_tsid(self):
-        return self.__output_tsid
+        return self.__write_tsid
 
     def get_time_spent_in_state(self):
         # Process self.__computation_result to compute time spent in this

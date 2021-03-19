@@ -6,12 +6,24 @@
     "schema_version" : 1.0,
 
     "definitions" : {
+         "ts_leaf_defn" : {
+             "type" : "object",
+             "properties" : {
+                 "metric" : { "type" : "string" },
+                 "tags" : { "type" : "object" }
+              },
+              "required" : ["metric", "tags"]
+         },
+
         "fq_timeseries" : {
             "type" : "object",
             "properties" : {
-                "metric" : { "type" : "string" },
-                "tags" : { "type" : "object" }
-            }
+                "ts_name" : { "type" : "string"},
+                "ts_defn" : {
+                    "$ref" : "#/definitions/ts_leaf_defn"
+                }
+            },
+            "required" : ["ts_name", "ts_defn"]
         },
 
         "statement" : {
@@ -55,12 +67,14 @@
             }
         },
         "input_timeseries" : {
-            "type" : "object",
-            "$ref" : "#/definitions/fq_timeseries"
+            "type" : "array",
+            "items": {
+                "$ref" : "#/definitions/fq_timeseries"
+            }
         },
         "output_timeseries_template" : {
             "type" : "object",
-            "$ref" : "#/definitions/fq_timeseries"
+            "$ref" : "#/definitions/ts_leaf_defn"
         }
     },
     "required" : ["name", "uuid", "state_definitions", "input_timeseries", "output_timeseries_template"]

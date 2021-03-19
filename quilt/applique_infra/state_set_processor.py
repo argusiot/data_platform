@@ -8,9 +8,12 @@
    for details.
 '''
 
+from argus_tal.timeseries_id import TimeseriesID
 
 class StateSetProcessor(object):
-    def __init__(self, temporal_state_obj_list, tsdb_url):
+    def __init__(self, name, temporal_state_obj_list, tsdb_url):
+
+        self.__name = str(name)
 
         # List of temporal state objects.
         self.__temporal_state_obj_list = temporal_state_obj_list
@@ -26,7 +29,7 @@ class StateSetProcessor(object):
         # making a single query to get their data.
         self.__read_tsids = set()
         for t_state in temporal_state_obj_list:
-            for ts_id in t_state:
+            for ts_id in t_state.read_tsid_list:
                 self.__read_tsids.add(ts_id)
 
     '''
@@ -80,9 +83,18 @@ class StateSetProcessor(object):
             # 2. end_time = start_time - periodicity_in_sec
             # 3. self.one_shot(start_time, end_time, periodicity_in_sec)
             # 4. sleep(periodicity_in_sec)
+            pass
         return # should never reach here
 
     def async_start(self, periodicity_in_sec):
         # Currently unsupported.
         raise Exception("Unsupported")
 
+    @property
+    def name(self):
+        return self.__name
+
+    # This method is meant to be used for testing only. Should NOT be used in
+    # production code.
+    def _get_temporal_obj_list(self):
+        return self.__temporal_state_obj_list

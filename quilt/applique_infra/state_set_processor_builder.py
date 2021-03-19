@@ -33,6 +33,10 @@
 
 '''
 
+from argus_tal.timeseries_id import TimeseriesID
+from temporal_state import TemporalState
+from state_set_processor import StateSetProcessor
+
 import json
 import jsonschema
 
@@ -81,9 +85,9 @@ class StateSetProcessorBuilder(object):
         state_set_json_schema_defn - A reference to the schema defined in
                       StateSetSchema.json.
     '''
-    def build(self, new_request, tsdb_url):
-        if not self.validate_request(new_request, state_set_json_schema_defn):
-            raise Exception("Invalid request")
+    def build(self, new_request):
+        # We still validate before we start the building process.
+        self.validate_request(new_request)
 
         '''
         1. "input_timeseries" processing
@@ -91,9 +95,12 @@ class StateSetProcessorBuilder(object):
         Begin by building TimeseriesID objects for timeseries supplied in
         the "input_timeseries" section.
         '''
-        input_tsid_obj_map = {}
-        for kk, vv in new_request["input_timeseries"]:
-            input_tsid_obj_map[kk] = TimeseriesID(vv["metric"], vv["tags"])
+        tsid_obj_fixup_map = {}
+        for fq_ts in new_request["input_timeseries"]:
+            ts_name = fq_ts["ts_name"]
+            ts_defn = fq_ts["ts_defn"]
+            tsid_obj_fixup_map[ts_name] = TimeseriesID(ts_defn["metric"],
+                                                       ts_defn["tags"])
 
         '''
         2a. "output_timeseries_template" pre-processing
@@ -114,21 +121,23 @@ class StateSetProcessorBuilder(object):
         for sd in new_request["state_definitions"]:
             state_label = sd["label"]
             assert sd["expression_operator"] == "AND"
-            temporal_state_expr_list = []
-            for idx, stmt in enumerate(sd.expression):
+            state_expr_list = []
+            for idx, stmt in enumerate(sd["expression"]):
                 ts_name, stmt_operator, filter_val = stmt
-                temporal_state_expr_list[idx] = \
-                    input_tsid_obj_map[ts_name], stmt_operator, filter_val
+                state_expr_list.append( \
+                    (tsid_obj_fixup_map[ts_name], stmt_operator, filter_val))
 
             # Create the output timeseries id object. Fixup the state label
             # before creating the ts_id object.
-            temp_tags = map(output_tag_template)
+            temp_tags = dict(output_tag_template)
             temp_tags["state_label"] = state_label
             out_ts_id_obj = TimeseriesID(output_metric, temp_tags)
 
             # We have everything needed to initiaize the TemporalState object.
             temporal_state_obj_list.append(TemporalState( \
-                state_label, temporal_state_obj_list, out_ts_id_obj))
+                state_label, state_expr_list, out_ts_id_obj))
 
         self.__build_success_count += 1
-        return StateSetProcessor(temporal_state_obj_list, self.__tsdb_url)
+        return StateSetProcessor(new_request["name"],
+                                 temporal_state_obj_list,
+                                 self.__tsdb_url)
