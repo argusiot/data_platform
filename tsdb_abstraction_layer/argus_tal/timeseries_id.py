@@ -36,6 +36,10 @@ class TimeseriesID(object):
   def __str__(self):
     return "%s%s" % (self.metric_id, self.filters)
 
+  def __hash__(self):
+    return hash((self.__metric_id,
+                 hash(frozenset(self.__tag_value_pairs.items()))))
+
   @property
   def metric_id(self):
     return self.__metric_id
@@ -47,4 +51,4 @@ class TimeseriesID(object):
   @property
   def fqid(self):
     '''Returns a SHA256 hash of the string-ified version of this object.'''
-    return hashlib.sha256(str(self).encode('utf-8')).hexdigest()
+    return hash(self)
