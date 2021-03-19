@@ -43,7 +43,17 @@ mkdir new_stack
 cd new_stack
 tar -xvf /vagrant_argusiot/data_platform/ai_stack_installer/output/ai_stack_installer.tar.gz
 
-sudo /vagrant/argusiot_service_stack_install.sh
+sudo ./argusiot_service_stack_install.sh
+
+Note:
+
+If prompt gets stuck here:
+
+    root@ubuntu-bionic:/home/vagrant#   
+
+then type 'exit' for the script to exit out of su shell and continue.
+The su shell is only used for "manual" wireguard configs.
+
 
 Verification:
 --------------
@@ -68,11 +78,11 @@ Capabilities now enabled:
 Finding ip address of the VM:
 -----------------------------
 
-The vagrant VM is initialized with with a private network address that can be reached from the host. Find the private network address (should be 172.x.x.x):
+The vagrant VM is initialized with a private network address that can be reached from the host. Find the private network address (should be 172.x.x.x):
 
 ifconfig enp0s8
 
- 
+
 Adding data to OpenTSDB:
 ------------------------
 
@@ -99,25 +109,25 @@ http://172.28.128.3:3000
 Login with the default admin credentials (admin/admin).
 Provide new password. No need to make this complicated on a VM, since the VM may be destroyed at any time)
 If you want to add another user, do so as editor, but it is not needed on a VM, since the VM may be destroyed at any time).
-(These steps are important when standing up the stack on cload server)
+(These steps are important when standing up the stack on cloud server)
 
 
 Config the local OpenTSBD as a new data source, following this instruction:
 
 https://grafana.com/docs/grafana/latest/datasources/add-a-data-source/
 
-Choose OpenTSDB and explicitly type "locahost:4242".
+Choose OpenTSDB and explicitly type "localhost:4242". Don't leave the default.
 You'll know where to type it when you see it.
 
 Click [SAVE and TEST]
 
-Now Grafana is ready to use, and as soon as you have added any data to OpenTSDB you can visualize by creating dashboards or just "Exploring" the data.
+Now Grafana is ready to use, and as soon as you have added any data to OpenTSDB you can visualize it by creating dashboards or just "Exploring" the data.
 
 
 Restarting services after restarting VM:
 ----------------------------------------
 
-If you halt or restart your vagrant VM, OpenTSDB and ZooKeeper need to restarted after you do vagrant up. Grafana willl restart automatically.
+If you halt or restart your vagrant VM, OpenTSDB and ZooKeeper need to be restarted after you do vagrant up. Grafana willl restart automatically.
 
 These are the steps:
 
@@ -130,9 +140,14 @@ sudo bin/start-hbase.sh
 sudo jps
 sudo service opentsdb restart
 
+Note:
+The hbase directory name may vary depending on what hbase version got installed.
+You can get the correct name by using shell completion (TAB-key) to get the right one, instead of copy-pasting the command from above.
+
+
 # Optional DB inspection steps:
     ./bin/hbase shell
-    => list 
+    => list
        # (should see 4 tables: tsdb, tsdb-meta, tsdb-tree, tsdb-uid)
     => exit
 
@@ -143,6 +158,6 @@ sudo service opentsdb restart
 To stop the OpenTSDB service (e.g. to restart with above steps):
 
 sudo service opentsdb stop
-cd ~/hbase-1.4.10/
+cd ~/hbase-1.4.13/
 sudo bin/stop-hbase.sh
 sudo jps
