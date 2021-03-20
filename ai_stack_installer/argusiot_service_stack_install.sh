@@ -9,7 +9,7 @@ AI_GRAFANA_VERSION=7.3.2   # latest Grafana release
 
 # Assume that all the supporting files needed for the install are present in
 # current directory. User may override with a "-d <dir>".
-ROOT_DIR=.
+ROOT_DIR=`pwd`
 while getopts ":d:h" opt; do
   case $opt in
     d) ROOT_DIR="$OPTARG"
