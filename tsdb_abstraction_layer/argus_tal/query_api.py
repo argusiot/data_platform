@@ -128,8 +128,8 @@ class QueryApi(object):
   '''
   def get_result_map(self):
     # tsid.fqid -> tsdd (i.e. query result object)
-    {tsdd.get_timeseries_id().fqid: tsdd for tsdd in self.__tsdd_obj_list}
-    return res
+    return { \
+        tsdd.get_timeseries_id().fqid: tsdd for tsdd in self.__tsdd_obj_list}
 
   @property
   def http_status_code(self):
