@@ -47,7 +47,7 @@ hbh=$HBASE_HOME
 unset HBASE_HOME
 
 echo =====================================================================
-echo                We crete the OpenTSDB tables in 2 steps.
+echo                We create the OpenTSDB tables in 2 steps.
 echo =====================================================================
 echo ; echo
 echo Step 1 of 2 ....create 'tsdb' table as split-regions
