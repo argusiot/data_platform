@@ -7,8 +7,16 @@
    See $HOME/data_platform/design_docs/README.quilt_and_applique_infra_design
    for details.
 '''
+import requests
+import json
+import time
 
-from argus_tal.timeseries_id import TimeseriesID
+from argus_tal import timeseries_id as ts_id
+from argus_tal import query_api
+from argus_tal import timestamp as ts
+from argus_tal import basic_types as bt
+
+
 
 class StateSetProcessor(object):
     def __init__(self, name, temporal_state_obj_list, tsdb_url):
@@ -54,18 +62,49 @@ class StateSetProcessor(object):
             will compute the first state sets at "start_time + 10sec" and then
             for every 10sec after that until it exceeds end_time.
     '''
+
+    def getTimeSeriesData(self, list_ts_ids, start_timestamp, end_timestamp):
+        foo = query_api.QueryApi(
+            "34.221.154.248", 4242,
+            start_timestamp, end_timestamp,
+            list_ts_ids,
+            bt.Aggregator.NONE,
+            False,
+        )
+
+        rv = foo.populate_ts_data()
+        assert rv == 0
+
+        result_map = foo.get_result_map()
+
+        return result_map
+
+    def push_data(self, timestamp, metric, state, value):
+        url = 'http://34.221.154.248:4242/api/put'
+        headers = {'content-type': 'application/json'}
+        datapoint = {}
+        datapoint['metric'] = metric
+        datapoint['timestamp'] = timestamp
+        datapoint['value'] = value
+        datapoint['tags'] = {}
+        datapoint['tags']['state'] = state
+        response = requests.post(url, data=json.dumps(datapoint), headers=headers)
+        return response, datapoint['timestamp']
+
     def one_shot(self, start_time, end_time, output_granularity_in_sec):
 
-        # VISHWAS to fill in
-
-        # 1. For read (i.e query): using self.__read_tsids
-        # 2. Query results can be obtained as a map using get_result_map()
-        # 3. Iterate over all the temporal state objects to allow them compute
-        #    "time spent in state". *Use the result_map from step #2.
-        # 4. Write the result from each state computation into TSDB.
-        #    For write: use self.__temporal_state_obj_list[idx].write_tsid
+        current_time = start_time
+        while current_time < end_time:
+            start_timestamp = ts.Timestamp(current_time)
+            end_timestamp = ts.Timestamp(current_time+output_granularity_in_sec)
+            result_map = self.getTimeSeriesData(list(self.__read_tsids), start_timestamp, end_timestamp)
+            for t_state in self.__temporal_state_obj_list:
+                time_spent = t_state.do_computation(result_map)
+                print(time_spent)
+                self.push_data(current_time+output_granularity_in_sec, t_state.write_tsid.metric_id,
+                               t_state.write_tsid.filters.get('state_label'), time_spent)
+            current_time += output_granularity_in_sec
         return
-
 
     '''
     This call blocks to never return. Every 'periodicity_in_sec' this method:
@@ -77,14 +116,15 @@ class StateSetProcessor(object):
            wrapped his head around Python's asyncio primitivies. For now, we
            live with this.
     '''
+
     def blocking_start(self, periodicity_in_sec):
         while True:
-            # 1. start_time = Get current time
-            # 2. end_time = start_time - periodicity_in_sec
-            # 3. self.one_shot(start_time, end_time, periodicity_in_sec)
-            # 4. sleep(periodicity_in_sec)
+            start_time = time.time()
+            end_time = start_time + periodicity_in_sec
+            self.one_shot(start_time, end_time, periodicity_in_sec)
+            time.sleep(periodicity_in_sec)
             pass
-        return # should never reach here
+        return
 
     def async_start(self, periodicity_in_sec):
         # Currently unsupported.

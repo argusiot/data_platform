@@ -13,6 +13,8 @@ import sys
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../core_src')))
 from all_machines_filter_primitive import FilterQualifier, FilteredTimeseries
+from all_machines_stepify import Stepify
+from all_machines_intersect_primitive import IntersectTimeseries
 
 class TemporalState(object):
     '''
@@ -74,7 +76,13 @@ class TemporalState(object):
         # Process self.__computation_result to compute time spent in this
         # state for previous incarnation of do_computation()
         # return self.__computation_result.add_windows()
-        pass
+
+        list_tup = self.__intersect_result_t_win.get_time_windows()
+        totaltime = 0
+        for tup in list_tup:
+            if tup is not None:
+                totaltime += tup[1] - tup[0]
+        return totaltime
 
     def do_computation(self, query_result_map):
         t_window_obj_list = []
@@ -83,7 +91,7 @@ class TemporalState(object):
 
             # Filter
             filtered_ts = FilteredTimeseries(query_result_map[ts_id.fqid],
-                                             FilterQualifier[oper_str],
+                                             FilterQualifier(oper_str),
                                              constant)
 
             # Stepify
@@ -93,7 +101,9 @@ class TemporalState(object):
             t_window_obj_list.append(stepified_ts.get_stepified_time_windows())
 
         intersect = IntersectTimeseries(t_window_obj_list)
-        self.__intersect_result_t_win = intersect.result()
+        self.__intersect_result_t_win = intersect.result
 
         # Does it make sense to add this here ?
         # return self.__get_time_spent_in_state()
+
+        return self.get_time_spent_in_state()

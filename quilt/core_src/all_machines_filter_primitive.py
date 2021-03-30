@@ -45,7 +45,7 @@ import operator
 class FilterQualifier(Enum):
     GREATERTHAN = ">"
     GREATERTHAN_EQUAL = ">="
-    LESSERTHAN = "<>"
+    LESSERTHAN = "<"
     LESSERTHAN_EQUAL = "<="
     EQUALS = "=="
 
