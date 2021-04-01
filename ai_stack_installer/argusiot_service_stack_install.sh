@@ -69,6 +69,7 @@ cp ${ROOT_DIR}/opentsdb.conf-reference /etc/opentsdb/opentsdb.conf
 cd $HOME/hbase-${AI_HBASE_VERSION}/
 export HBASE_HOME=`pwd`
 ${ROOT_DIR}/create_opentsdb_hbase_tables.sh
+${ROOT_DIR}/enable_tsdb_table_compression.sh
 
 echo "Waiting... to ensure that OpenTSDB tables creation succeeds !"
 sleep 5
