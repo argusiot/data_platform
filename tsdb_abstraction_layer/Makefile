@@ -13,11 +13,15 @@ code_coverage:
 	python3 -m coverage run -m --branch --source=. pytest -v tests && \
 	python3 -m coverage report -m
 
+build_package:
+	python3 setup.py bdist_wheel
+	echo "A distributable wheel file is generated under dist/"
+
 install:
-	pip3 install .
+	python3 -m pip install dist/argustal-*.whl
 
 uninstall:
-	pip3 uninstall argus-tal
+	pip3 uninstall argustal
 
 clean:
-	rm -rf argus_tal.egg-info build dist
+	rm -rf argustal.egg-info build dist
