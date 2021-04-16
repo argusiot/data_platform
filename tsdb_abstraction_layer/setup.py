@@ -13,6 +13,7 @@ setup(
     version='0.1.0',
     description='Timeseries Abstraction Layer for ArgusIoT',
     long_description=readme,
+    install_requires=['wheel'],
     author='Parag Panse',
     author_email='paragpm@argusanalytics.io',
     url='https://github.com/argusiot/data_platform',
