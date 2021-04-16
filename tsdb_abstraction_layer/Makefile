@@ -18,6 +18,7 @@ build_package:
 	echo "A distributable wheel file is generated under dist/"
 
 install:
+	make build_package
 	python3 -m pip install dist/argustal-*.whl
 
 uninstall:
