@@ -8,8 +8,8 @@ import os
 import json
 
 # FIXME: We're cheating a little here until we've sorted out how to
-# package applique_infra (i.e. inside argus_tal or separately outside).
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../applique_infra')))
+# package argus_quilt (i.e. inside argus_tal or separately outside).
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../argus_quilt')))
 from state_set_processor_builder import StateSetProcessorBuilder
 from argus_tal.timeseries_id import TimeseriesID
 
@@ -23,7 +23,7 @@ class SetProcessorBuilder_Tests(unittest.TestCase):
 
       this_dir = os.path.dirname(os.path.realpath(__file__))
       schema_file_path = os.path.join( \
-          this_dir, '../applique_infra/SCHEMA_DEFN_state_set.json')
+          this_dir, '../argus_quilt/SCHEMA_DEFN_state_set.json')
 
       # o_u_t = Object_Under_Test
       self.__o_u_t = StateSetProcessorBuilder(schema_file_path, "http://ignore")
