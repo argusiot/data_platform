@@ -4,4 +4,8 @@
 Product requirement driving Quilt and Applique development:
 https://docs.google.com/document/d/1FiHxbkZ98A6GeOkCLY65IxueMRLmzkU9W-ABq4fnZm4/edit#heading=h.i6x73f5bbkch
 
-<Add note on code organization>
+Directory organization:
+  - argus_quilt : The core Quilt code and Applique infra code.
+  - poc: Initila proof-of-concept that was used to develop Quilt
+  - tests: All class unit tests
+  - integration_tests: Integration test for all applique
