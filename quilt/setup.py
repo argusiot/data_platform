@@ -18,5 +18,7 @@ setup(
     author_email='paragpm@argusanalytics.io',
     url='https://github.com/argusiot/data_platform',
     license=license,
-    packages=find_packages(exclude=('integration_tests', 'poc', 'tests'))
+    packages=find_packages(exclude=('integration_tests', 'poc', 'tests')),
+    include_package_data=True,  # This packages data files referenced
+                                # by MANIFEST.in !
 )

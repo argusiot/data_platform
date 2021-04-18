@@ -25,3 +25,7 @@ uninstall:
 clean:
 	rm -rf argusquilt.egg-info build dist
 
+
+integration_test:
+	cd integration_tests ; python3 it_main.py
+
