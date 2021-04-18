@@ -55,4 +55,4 @@
             "metric" : "applique_infra_out",
             "tags" : { "machine" : "xyz", "state_label" : "PLACEHOLDER" }
         }
-    }
+}

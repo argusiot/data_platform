@@ -9,11 +9,13 @@
 
  .... DONE ...
 
-2. Install packages:  <=== HERE
+2. Install packages:
 Intall argus_tal
 Install argus_quilt
 
 3. Write state specification file:
+ - Wrote my_first_applique_for_wcpl.py
+ - Write off_on_producing_states.json <== HERE
 
 4. Run code on AWS
 
