@@ -1,0 +1,19 @@
+1. Upgrade AWS to Python 3.7:
+ sudo apt update
+ sudo apt install python3.7
+ sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.6 1
+ sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.7 2
+ update-alternatives --list python3
+ update-alternatives --config python3
+ python3 --version
+
+ .... DONE ...
+
+2. Install packages:  <=== HERE
+Intall argus_tal
+Install argus_quilt
+
+3. Write state specification file:
+
+4. Run code on AWS
+
