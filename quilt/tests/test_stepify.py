@@ -22,9 +22,9 @@ from collections import OrderedDict
 from json import loads
 from unittest.mock import Mock, patch
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../argus_quilt')))
-from filter_primitive import FilteredTimeseries, FilterQualifier
-from stepify import Stepify
+from .context import argus_quilt
+from argus_quilt.filter_primitive import FilteredTimeseries, FilterQualifier
+from argus_quilt.stepify import Stepify
 from argus_tal import timeseries_id as ts_id
 from argus_tal import query_api
 from argus_tal import basic_types as bt

@@ -11,10 +11,9 @@ import os
 import uuid
 import sys
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../core_src')))
-from filter_primitive import FilterQualifier, FilteredTimeseries
-from stepify import Stepify
-from intersect_primitive import IntersectTimeseries
+from .filter_primitive import FilterQualifier, FilteredTimeseries
+from .stepify import Stepify
+from .intersect_primitive import IntersectTimeseries
 
 class TemporalState(object):
     '''

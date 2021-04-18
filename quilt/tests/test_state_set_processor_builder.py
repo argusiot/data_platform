@@ -7,10 +7,8 @@ import sys
 import os
 import json
 
-# FIXME: We're cheating a little here until we've sorted out how to
-# package argus_quilt (i.e. inside argus_tal or separately outside).
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../argus_quilt')))
-from state_set_processor_builder import StateSetProcessorBuilder
+from .context import argus_quilt
+from argus_quilt.state_set_processor_builder import StateSetProcessorBuilder
 from argus_tal.timeseries_id import TimeseriesID
 
 import unittest

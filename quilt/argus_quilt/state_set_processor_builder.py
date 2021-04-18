@@ -34,8 +34,8 @@
 '''
 
 from argus_tal.timeseries_id import TimeseriesID
-from temporal_state import TemporalState
-from state_set_processor import StateSetProcessor
+from .temporal_state import TemporalState
+from .state_set_processor import StateSetProcessor
 
 import json
 import jsonschema

@@ -10,3 +10,18 @@ code_coverage_vagrant_friendly_html:
 	echo "Browser link: file:///Users/ppanse/my-Vagrant-VMs/<this_VM_dir>/htmlcov/index.html"
 test:
 	python3 -m pytest -s -v tests
+
+build_package:
+	python3 setup.py bdist_wheel
+	echo "A distributable wheel file is generated under dist/"
+
+install:
+	make build_package
+	python3 -m pip install dist/argusquilt-*.whl
+
+uninstall:
+	pip3 uninstall argusquilt
+
+clean:
+	rm -rf argusquilt.egg-info build dist
+

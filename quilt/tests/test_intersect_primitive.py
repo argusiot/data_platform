@@ -26,9 +26,9 @@
 import os
 import sys
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../argus_quilt')))
-from intersect_primitive import IntersectTimeseries as ITim
-from time_windows import TimeWindowSequence
+from .context import argus_quilt
+from argus_quilt.intersect_primitive import IntersectTimeseries as ITim
+from argus_quilt.time_windows import TimeWindowSequence
 
 '''
 from argus_tal import timeseries_id as ts_id
