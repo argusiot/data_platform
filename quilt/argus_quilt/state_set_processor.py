@@ -19,17 +19,19 @@ from argus_tal import basic_types as bt
 
 
 class StateSetProcessor(object):
-    def __init__(self, name, temporal_state_obj_list, tsdb_url):
+    def __init__(self, name, temporal_state_obj_list,
+                 tsdb_hostname_or_ip, tsdb_port):
 
         self.__name = str(name)
 
         # List of temporal state objects.
         self.__temporal_state_obj_list = temporal_state_obj_list
 
-        # TSDB URL to be used for doing -- reading & writing to the TSDB
+        # Used for connecting to the TSDB to R/W:
         #   - reads are done to query data for temporal state computation.
         #   - writes are done to write the state computation result.
-        self.__tsdb_url = tsdb_url
+        self.__tsdb_hostname_or_ip = tsdb_hostname_or_ip
+        self.__tsdb_port_num = tsdb_port
 
         # Optimization:
         # Collect all the timeseries IDs in a set. Later when we peridiocally
@@ -65,7 +67,7 @@ class StateSetProcessor(object):
 
     def getTimeSeriesData(self, list_ts_ids, start_timestamp, end_timestamp):
         foo = query_api.QueryApi(
-            "34.221.154.248", 4242,
+            self.__tsdb_hostname_or_ip, self.__tsdb_port_num,
             start_timestamp, end_timestamp,
             list_ts_ids,
             bt.Aggregator.NONE,
@@ -80,7 +82,8 @@ class StateSetProcessor(object):
         return result_map
 
     def push_data(self, timestamp, metric, state, value):
-        url = 'http://34.221.154.248:4242/api/put'
+        url = 'http://%s:%d/api/put' % (self.__tsdb_hostname_or_ip,
+                                        self.__tsdb_port_num)
         headers = {'content-type': 'application/json'}
         datapoint = {}
         datapoint['metric'] = metric

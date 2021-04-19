@@ -12,8 +12,7 @@ def main():
 
     with pkg_resources.path( \
             "argus_quilt", "SCHEMA_DEFN_state_set.json") as schema_file:
-        builder = StateSetProcessorBuilder( \
-            schema_file, "http://34.221.154.248:4242/api/put")
+        builder = StateSetProcessorBuilder(schema_file, "34.221.154.248", 4242)
         __location__ = os.path.realpath(os.path.join(os.getcwd(),
                                         os.path.dirname(__file__)))
         with open(os.path.join(__location__, "sample_input.json")) as file:

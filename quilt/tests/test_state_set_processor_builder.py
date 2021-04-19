@@ -24,7 +24,10 @@ class SetProcessorBuilder_Tests(unittest.TestCase):
           this_dir, '../argus_quilt/SCHEMA_DEFN_state_set.json')
 
       # o_u_t = Object_Under_Test
-      self.__o_u_t = StateSetProcessorBuilder(schema_file_path, "http://ignore")
+      self.__o_u_t = StateSetProcessorBuilder(schema_file_path,
+                     "ignored_host", 1000) # From UT POV, a host and port_number
+                                           # params are reqd. Actual values are
+                                           # ignored.
 
       test_data_file = os.path.join(
           this_dir, "test_data/applique_infra_state_set_testdata.json")
