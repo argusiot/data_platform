@@ -1,3 +1,8 @@
+To run Quilt the host needs a min Python version of 3.7.
+
+Following are the steps followed to run the first applique on the AWS
+server which has the production data for Wilson Cables Pvt Ltd (WCPL).
+
 1. Upgrade AWS to Python 3.7:
  sudo apt update
  sudo apt install python3.7
@@ -7,15 +12,14 @@
  update-alternatives --config python3
  python3 --version
 
- .... DONE ...
-
 2. Install packages:
 Intall argus_tal
 Install argus_quilt
 
-3. Write state specification file:
- - Wrote my_first_applique_for_wcpl.py
- - Write off_on_producing_states.json <== HERE
+3. Wrote the following files:
+ - An applique: first_wcpl_applique.py
+ - State specificiation: quilt_test_state_v1_definition.json
 
-4. Run code on AWS
+4. Run code on AWS as follows:
+python3 first_wcpl_applique.py
 
