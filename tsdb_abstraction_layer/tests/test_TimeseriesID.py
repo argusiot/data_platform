@@ -26,6 +26,8 @@ class TimeseriesID_Tests(unittest.TestCase):
         tsid2 = argus_tal.timeseries_id.TimeseriesID( \
                 "metric_foo",  {"tag1":"value1", "tag2":"val"})
         self.assertEqual(tsid1.fqid, tsid2.fqid)
+        self.assertEqual(hash(tsid1), tsid1.fqid)
+        self.assertEqual(hash(tsid2), tsid2.fqid)
 
     def test_NO_wildcard_astrisk(self):
       try:
