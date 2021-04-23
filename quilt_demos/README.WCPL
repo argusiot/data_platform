@@ -13,12 +13,19 @@ server which has the production data for Wilson Cables Pvt Ltd (WCPL).
  python3 --version
 
 2. Install packages:
-Intall argus_tal
-Install argus_quilt
+Intall argus_tal     : python3 -m pip install argustal-0.1.0-py3-none-any.whl
+Install argus_quilt  : python3 -m pip install argusquilt-0.1.0-py3-none-any.whl
 
-3. Wrote the following files:
+Above .whl packages were generated from the git repo as follows:
+  cd data_platform/tsdb_abstraction_layer
+  make build_package  (generated .whl package is under dist/)
+  cd data_platform/quilt
+  make build_package  (genreated .whl package is under dist/)
+
+3. Authored the following files:
  - An applique: first_wcpl_applique.py
  - State specificiation: quilt_test_state_v1_definition.json
+Code now lives under cd data_platform/quilt_demos
 
 4. Run code on AWS as follows:
 python3 first_wcpl_applique.py
