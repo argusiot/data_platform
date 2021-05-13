@@ -17,7 +17,6 @@ from argus_tal import timestamp as ts
 from argus_tal import basic_types as bt
 
 
-
 class StateSetProcessor(object):
     def __init__(self, name, temporal_state_obj_list, tsdb_url):
 
@@ -88,22 +87,37 @@ class StateSetProcessor(object):
         datapoint['value'] = value
         datapoint['tags'] = {}
         datapoint['tags']['state'] = state
-        response = requests.post(url, data=json.dumps(datapoint), headers=headers)
-        return response, datapoint['timestamp']
+        # response = requests.post(url, data=json.dumps(datapoint), headers=headers)
+        # return response, datapoint['timestamp']
 
     def one_shot(self, start_time, end_time, output_granularity_in_sec):
 
         current_time = start_time
         while current_time < end_time:
             start_timestamp = ts.Timestamp(current_time)
-            end_timestamp = ts.Timestamp(current_time+output_granularity_in_sec)
+            end_timestamp = ts.Timestamp(current_time + output_granularity_in_sec)
             result_map = self.getTimeSeriesData(list(self.__read_tsids), start_timestamp, end_timestamp)
+
+            min_ending_time_set = set()
+            for key, value in result_map.items():
+                t = value.get_max_key()
+                min_ending_time_set.add(t)
+
+            min_end_ts = min(min_ending_time_set)
+            end_timestamp = ts.Timestamp(min_end_ts)
+            result_map = self.getTimeSeriesData(list(self.__read_tsids), start_timestamp, end_timestamp)
+
             for t_state in self.__temporal_state_obj_list:
-                time_spent = t_state.do_computation(result_map)
-                print(time_spent)
-                self.push_data(current_time+output_granularity_in_sec, t_state.write_tsid.metric_id,
-                               t_state.write_tsid.filters.get('state_label'), time_spent)
-            current_time += output_granularity_in_sec
+                try:
+                    time_spent = t_state.do_computation(result_map)
+                    print(time_spent)
+                    self.push_data(end_timestamp, t_state.write_tsid.metric_id,
+                                   t_state.write_tsid.filters.get('state_label'), time_spent)
+                except ValueError as e:
+                    print(e)
+                    self.push_data(end_timestamp, t_state.write_tsid.metric_id,
+                                   'SystemError', min_end_ts - current_time)
+            current_time = min_end_ts
         return
 
     '''

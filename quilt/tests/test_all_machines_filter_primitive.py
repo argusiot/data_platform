@@ -235,6 +235,22 @@ class FilterPrimitive_Tests(unittest.TestCase):
             filtered_result = FilteredTimeseries(test_timeseries, FilterQualifier.GREATERTHAN, 100)
             return filtered_result
 
+    def mock_filter_series_helper_temp(self, t1, t2):
+        with patch('argus_tal.query_api.requests') as mock_tsdb:
+            mock_tsdb.get.side_effect = self.mocked_requests_get
+
+            self.__setup_testcase_data(
+                t1, t2,
+                self.__tsdb_ip,
+                self.__tsdb_port,
+                self.__test_timeseries_ts_id)
+
+            start_timestamp = ts.Timestamp(t1)
+            end_timestamp = ts.Timestamp(t2)
+            test_timeseries = getTimeSeriesData(self.__test_timeseries_ts_id, start_timestamp, end_timestamp)
+            filtered_result = FilteredTimeseries(test_timeseries, FilterQualifier.EQUALS, 17.9)
+            return filtered_result
+
     def testFilterCriterion(self):
         filter_criterion_func = filtering_criterion_ops[FilterQualifier.LESSERTHAN]
         self.assertTrue(filter_criterion_func(99, 100))
@@ -468,3 +484,13 @@ class FilterPrimitive_Tests(unittest.TestCase):
         filtered_result = self.mock_filter_series_helper(1587947403, 1587948690)
         self.assertTrue(filtered_result.is_value_filtered_out(110))
         self.assertFalse(filtered_result.is_value_filtered_out(90))
+
+    def testSingleElement(self):
+        with self.assertRaises(ValueError) as context:
+            self.mock_filter_series_helper(1587948206, 1587948213)
+
+            self.assertTrue('Single datapoint present system error' in str(context.exception))
+
+    def testDoubleElement(self):
+        # Uses Case 1 dataset
+        filtered_result = self.mock_filter_series_helper_temp(1587948206, 1587948218)
