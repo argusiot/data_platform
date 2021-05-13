@@ -6,7 +6,7 @@
             *all* the supplied objects had 'fired'.
 '''
 
-from all_machines_time_windows import TimeWindowSequence
+from .time_windows import TimeWindowSequence
 from collections import deque
 from enum import Enum
 

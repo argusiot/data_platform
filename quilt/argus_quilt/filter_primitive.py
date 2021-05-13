@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 '''
-    all_machines_filter_primitive.py
+    filter_primitive.py
     Use case(s): COMMON_INFRA
     This is a common filter class for all machine analysis.
 

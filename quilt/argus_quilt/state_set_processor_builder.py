@@ -34,14 +34,15 @@
 '''
 
 from argus_tal.timeseries_id import TimeseriesID
-from temporal_state import TemporalState
-from state_set_processor import StateSetProcessor
+from .temporal_state import TemporalState
+from .state_set_processor import StateSetProcessor
 
 import json
 import jsonschema
 
 class StateSetProcessorBuilder(object):
-    def __init__(self, state_set_json_schema_file_path, tsdb_source_url):
+    def __init__(self, state_set_json_schema_file_path,
+                 tsdb_hostname_or_ip, tsdb_port):
         # From the POV of state set processor construction, this class is
         # stateless.
         self.__build_success_count = 0
@@ -50,7 +51,8 @@ class StateSetProcessorBuilder(object):
         # Should the TSDB source be supplied to the builder in the constructor
         # or should should it come in the JSON request.
         #                          Not clear !!
-        self.__tsdb_url = tsdb_source_url
+        self.__tsdb_hostname_or_ip = tsdb_hostname_or_ip
+        self.__tsdb_port_num = tsdb_port
 
         self.__state_set_json_schema = None
         with open(state_set_json_schema_file_path, 'r') as file:
@@ -140,4 +142,5 @@ class StateSetProcessorBuilder(object):
         self.__build_success_count += 1
         return StateSetProcessor(new_request["name"],
                                  temporal_state_obj_list,
-                                 self.__tsdb_url)
+                                 self.__tsdb_hostname_or_ip,
+                                 self.__tsdb_port_num)

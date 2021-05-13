@@ -4,7 +4,7 @@ import os
 
 # FIXME: We're cheating a little here until we've sorted out how to 
 # package machine_analytics (i.e. inside argus_tal or separately outside).
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../core_src')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../poc')))
 from extruder_machine_states_calculator import ExtruderMachineStateCalculator
 from all_machines_common_base import ComputationMode
 from argus_tal import timeseries_id as ts_id

@@ -72,7 +72,7 @@ import sys
 
 # FIXME: We're cheating a little here until we've sorted out how to
 # package machine_analytics (i.e. inside argus_tal or separately outside).
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../core_src')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../poc')))
 from common_power_state_calculator import PowerStateCalculator
 from all_machines_common_base import ComputationMode
 from argus_tal import basic_types as bt

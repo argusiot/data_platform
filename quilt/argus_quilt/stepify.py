@@ -21,8 +21,8 @@
      https://docs.google.com/presentation/d/15EnUsMb4w9Xwg26iMBw8uNcUB_Sd5uAqXQWmie3X60s
 '''
 
-from all_machines_filter_primitive import FilteredTimeseries
-from all_machines_time_windows import TimeWindowSequence
+from .filter_primitive import FilteredTimeseries
+from .time_windows import TimeWindowSequence
 
 
 class Stepify(object):
