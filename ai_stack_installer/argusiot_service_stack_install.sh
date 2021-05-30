@@ -94,8 +94,11 @@ wget https://dl.grafana.com/oss/release/grafana_${AI_GRAFANA_VERSION}_amd64.deb
 cd ..
 sudo dpkg -i Downloads/grafana_${AI_GRAFANA_VERSION}_amd64.deb 
 
+# Update grafana.ini
+sudo cp ${ROOT_DIR}/grafana.ini-reference /etc/grafana/grafana.ini
+
 # Change the new user addition email tempate
-sudo cp ${ROOT_DIR}/new_user_invite.html-reference $HOME/usr/share/grafana/public/emails
+sudo cp ${ROOT_DIR}/new_user_invite.html-reference /usr/share/grafana/public/emails/new_user_invite.html
 
 # To start grafana
 sudo /bin/systemctl start grafana-server
@@ -129,9 +132,13 @@ sudo wg
 echo "!!!!!! Installation almost complete !!!!"
 echo ""
 echo "To complete installation:"
-echo "REMINDER: Override domain & root_url in grafana.ini with actual values"
+echo "REMINDER: 1) Override domain grafana.ini with actual value"
 echo "EXAMPLE: domain = ec2-44-241-74-152.us-west-2.compute.amazonaws.com"
-echo "EXAMPLE: root_url = http://ec2-44-241-74-152.us-west-2.compute.amazonaws.com:3000/"
+echo ""
+echo "REMINDER: 2) Does SMTP config need to be changed ?"
+echo "REMINDER:    SMTP is currently configured to use demoguy@argus... !"
+echo ""
+echo "REMINDER: 3) admin, please change org name after 1st login !"
 echo ""
 echo "REMINDER: Restart grafana after overriding"
 echo ""
