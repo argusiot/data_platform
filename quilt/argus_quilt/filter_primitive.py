@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 '''
-    all_machines_filter_primitive.py
+    filter_primitive.py
     Use case(s): COMMON_INFRA
     This is a common filter class for all machine analysis.
 
@@ -45,7 +45,7 @@ import operator
 class FilterQualifier(Enum):
     GREATERTHAN = ">"
     GREATERTHAN_EQUAL = ">="
-    LESSERTHAN = "<>"
+    LESSERTHAN = "<"
     LESSERTHAN_EQUAL = "<="
     EQUALS = "=="
 
@@ -186,34 +186,39 @@ class FilteredTimeseries(object):
                     # Value meets criterion to not get filtered out, hence include as is in result set.
                     result_dict.update({key: value})
 
-        # Pass 2 - Compress non-boundary markers
         items = list(result_dict.items())
-        prev_key, prev_value = items[0]
-        cur_index = 1
-        end = len(items)
-        while cur_index < end - 1:
-            if isinstance(prev_value, FilteredTimeseries.Marker) \
-                    and isinstance(items[cur_index][1], FilteredTimeseries.Marker) \
-                    and isinstance(items[cur_index + 1][1], FilteredTimeseries.Marker):
-                result_dict.pop(items[cur_index][0])
-            prev_key, prev_value = items[cur_index]
-            cur_index += 1
+        if len(items) == 1:
+            raise ValueError('Single datapoint present system error')
+        else:
+            # Pass 2 - Compress non-boundary markers
+            prev_key, prev_value = items[0]
+            cur_index = 1
+            end = len(items)
+            while cur_index < end - 1:
+                if isinstance(prev_value, FilteredTimeseries.Marker) \
+                        and isinstance(items[cur_index][1], FilteredTimeseries.Marker) \
+                        and isinstance(items[cur_index + 1][1], FilteredTimeseries.Marker):
+                    result_dict.pop(items[cur_index][0])
+                prev_key, prev_value = items[cur_index]
+                cur_index += 1
 
-        # PASS 3 - Marker Fixup
-        items = list(result_dict.items())
-        for cur_index, (key, value) in enumerate(result_dict.items()):
-            if isinstance(value, FilteredTimeseries.Marker):
-                if value.get_marker_type() is FilteredTimeseries.MarkerTypes.INIT:
-                    value.set_next_key(items[cur_index + 1][0])
-                    value.set_next_element(items[cur_index + 1][1])
-                if value.get_marker_type() is FilteredTimeseries.MarkerTypes.NORMAL:
-                    value.set_next_key(items[cur_index + 1][0])
-                    value.set_next_element(items[cur_index + 1][1])
-                    value.set_prev_key(items[cur_index - 1][0])
-                    value.set_prev_element(items[cur_index - 1][1])
-                if value.get_marker_type() is FilteredTimeseries.MarkerTypes.EXIT:
-                    value.set_prev_key(items[cur_index - 1][0])
-                    value.set_prev_element(items[cur_index - 1][1])
+            # PASS 3 - Marker Fixup
+            items = list(result_dict.items())
+            for cur_index, (key, value) in enumerate(result_dict.items()):
+                if isinstance(value, FilteredTimeseries.Marker):
+                    if value.get_marker_type() is FilteredTimeseries.MarkerTypes.INIT:
+                        value.set_next_key(items[cur_index + 1][0])
+                        value.set_next_element(items[cur_index + 1][1])
+                    if value.get_marker_type() is FilteredTimeseries.MarkerTypes.NORMAL:
+                        value.set_next_key(items[cur_index + 1][0])
+                        value.set_next_element(items[cur_index + 1][1])
+                        value.set_prev_key(items[cur_index - 1][0])
+                        value.set_prev_element(items[cur_index - 1][1])
+                    if value.get_marker_type() is FilteredTimeseries.MarkerTypes.EXIT:
+                        value.set_prev_key(items[cur_index - 1][0])
+                        value.set_prev_element(items[cur_index - 1][1])
+
+
 
         self.__filtered_dict = result_dict
 

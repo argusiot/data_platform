@@ -1,0 +1,52 @@
+{
+    "name": "extruder_states",
+    "uuid": "xxxxxxxxxxxxxxx",
+    "state_definitions" : [
+       {
+          "label" : "state1",
+          "expression" : [
+             ["timeseries1", ">", 100],
+             ["timeseries2", "<", 125.5]
+          ],
+          "expression_operator" : "AND"
+       },
+       {
+          "label" : "state2",
+          "expression" : [
+             ["timeseries1", ">", 100],
+             ["timeseries2", ">=", 125.5]
+          ],
+          "expression_operator" : "AND"
+       },
+       {
+          "label" : "state3",
+          "expression" : [
+             ["timeseries1", "<=", 100],
+             ["timeseries2", ">=", 125.5]
+          ],
+          "expression_operator" : "AND"
+       }
+    ],
+    "input_timeseries" : {
+       "timeseries1" : {
+           "metric": "foo",
+           "tags" : {
+               "key1" : "value1"
+           }
+       },
+     "timeseries2" : {
+           "metric": "bar",
+           "tags" : {
+               "key2" : "value5"
+           }
+       }
+    },
+    "output_timeseries_template" : {
+        "metric" : "foobar",
+        "tags" : {
+           "machine" : "xyz",
+           "state_label" : "PLACEHOLDER"
+        }
+    }
+}
+

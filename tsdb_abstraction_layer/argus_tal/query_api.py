@@ -87,7 +87,7 @@ class QueryApi(object):
 
     # To store the HTTP response code (for ease of debuggability).
     self.__http_response_code = 0
-                                      
+
     # Expected tags in the response received (per timeseries)
     self.__tags_expected_in_response = ["aggregateTags", "dps", \
                                         "metric", "tags"]
@@ -102,7 +102,7 @@ class QueryApi(object):
     error = 0
     response = requests.get(self.__url)
     self.__http_response_code = response.status_code
-    
+
     # FIXME: Add handling of all HTPP error types.
     if response.status_code < 200 or response.status_code > 299:
       # log error.
@@ -114,11 +114,22 @@ class QueryApi(object):
     except ValueError:
       # log error
       return -2  # JSON response could not be decoded
-      
+
     return error
 
   def get_result_set(self):
     return self.__tsdd_obj_list
+
+  '''
+     This method makes the result processing very convenient.
+
+     It returns the result as a map/dictionary. The map is indexed by the FQID
+     of the timeseries_id and the value is the query result data dict object.
+  '''
+  def get_result_map(self):
+    # tsid.fqid -> tsdd (i.e. query result object)
+    return { \
+        tsdd.get_timeseries_id().fqid: tsdd for tsdd in self.__tsdd_obj_list}
 
   @property
   def http_status_code(self):

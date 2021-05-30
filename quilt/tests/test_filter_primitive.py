@@ -119,8 +119,8 @@ import sys
 from collections import OrderedDict
 from json import loads
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
-from all_machines_filter_primitive import FilteredTimeseries, FilterQualifier, filtering_criterion_ops
+from .context import argus_quilt
+from argus_quilt.filter_primitive import FilteredTimeseries, FilterQualifier, filtering_criterion_ops
 from argus_tal import timeseries_id as ts_id
 from argus_tal import query_api
 from argus_tal import basic_types as bt
@@ -167,7 +167,7 @@ class FilterPrimitive_Tests(unittest.TestCase):
 
         # Step 1:
         this_dir = os.path.dirname(os.path.realpath(__file__))
-        file_path = os.path.join(this_dir, 'test_data.json')
+        file_path = os.path.join(this_dir, 'test_data/quilt_core_testdata.json')
         with open(file_path, 'r') as dataFile:
             data = dataFile.read()
         raw_dict = loads(data, object_pairs_hook=OrderedDict)
@@ -233,6 +233,22 @@ class FilterPrimitive_Tests(unittest.TestCase):
             end_timestamp = ts.Timestamp(t2)
             test_timeseries = getTimeSeriesData(self.__test_timeseries_ts_id, start_timestamp, end_timestamp)
             filtered_result = FilteredTimeseries(test_timeseries, FilterQualifier.GREATERTHAN, 100)
+            return filtered_result
+
+    def mock_filter_series_helper_temp(self, t1, t2):
+        with patch('argus_tal.query_api.requests') as mock_tsdb:
+            mock_tsdb.get.side_effect = self.mocked_requests_get
+
+            self.__setup_testcase_data(
+                t1, t2,
+                self.__tsdb_ip,
+                self.__tsdb_port,
+                self.__test_timeseries_ts_id)
+
+            start_timestamp = ts.Timestamp(t1)
+            end_timestamp = ts.Timestamp(t2)
+            test_timeseries = getTimeSeriesData(self.__test_timeseries_ts_id, start_timestamp, end_timestamp)
+            filtered_result = FilteredTimeseries(test_timeseries, FilterQualifier.EQUALS, 17.9)
             return filtered_result
 
     def testFilterCriterion(self):
@@ -468,3 +484,13 @@ class FilterPrimitive_Tests(unittest.TestCase):
         filtered_result = self.mock_filter_series_helper(1587947403, 1587948690)
         self.assertTrue(filtered_result.is_value_filtered_out(110))
         self.assertFalse(filtered_result.is_value_filtered_out(90))
+
+    def testSingleElement(self):
+        with self.assertRaises(ValueError) as context:
+            self.mock_filter_series_helper(1587948206, 1587948213)
+
+            self.assertTrue('Single datapoint present system error' in str(context.exception))
+
+    def testDoubleElement(self):
+        # Uses Case 1 dataset
+        filtered_result = self.mock_filter_series_helper_temp(1587948206, 1587948218)

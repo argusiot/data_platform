@@ -75,6 +75,29 @@ class QueryApi_Tests(unittest.TestCase):
                               mock_get.call_args_list)
 
     @mock.patch('requests.get', side_effect=mocked_requests_get)
+    def test_single_metric_query_response_as_map(self, mock_get):
+      host, port, metric, query_filters, aggregator, start, end = \
+        hh.get_dummy_query_params()
+      expected_dps = hh.get_sorted_datapoints()
+
+      input_tsid = ts_id.TimeseriesID(metric, query_filters)
+      api = query_api.QueryApi(host, port, start, end, [input_tsid], aggregator)
+      retval = api.populate_ts_data()  # FIXME: I'm conflicted whether to use
+                                       # exceptions or return value here !!
+      self.assertTrue(retval == 0)  # eok
+
+      # Data population was successful... good ! Now we can peek/poke at the
+      # result set.
+      tsdd_map = api.get_result_map()
+      self.assertEqual(len(tsdd_map.keys()), 1)  # Expect 1 object in the map
+      self.__verify_tsdd_result_obj(tsdd_map[input_tsid.fqid],
+                                    input_tsid, expected_dps)
+
+      # Assert that our mocked method was called with the right parameters
+      self.assertIn(mock.call(hh.get_url_for_dummy_query_params()), \
+                              mock_get.call_args_list)
+
+    @mock.patch('requests.get', side_effect=mocked_requests_get)
     def test_unknown_metric_query_404_response(self, mock_get):
       host, port, IGNORED, query_filters, aggregator, start, end = \
         hh.get_dummy_query_params()

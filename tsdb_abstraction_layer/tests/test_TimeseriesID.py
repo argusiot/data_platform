@@ -13,12 +13,6 @@ class TimeseriesID_Tests(unittest.TestCase):
       metric_id = "metric_foo"
       filters = {"tag1":"value1", "tag2":"value2"}
 
-      # Expected output values.
-      # The has value below comes with PYTHONHASHSEED=0
-      # e.g. PYTHONHASHSEED=0 pytest -v test_TimeseriesID.py
-      expected_hash_value = "75ccd00f7feaafe8476f79ca3e9a07011183cf3dcab8497fd"\
-                            "6081ef928f7184e"
-
       # Get a TimeseriesID object.
       tsid = argus_tal.timeseries_id.TimeseriesID(metric_id, filters)
 
@@ -26,10 +20,14 @@ class TimeseriesID_Tests(unittest.TestCase):
       self.assertEqual(tsid.metric_id, metric_id)  # Metric id must match
       self.assertEqual(filters, tsid.filters)
 
-      # FIXME: Enable this assert, once we understand why PYTHONHASHSEED=0 is
-      # being ignored on CircleCI !!
-      # self.assertEqual(tsid.fqid, expected_hash_value) # FQ timeseries id is a
-                                                        # hash value. Verify it!
+    def test_fqid_stability(self):
+        tsid1 = argus_tal.timeseries_id.TimeseriesID( \
+               "metric_foo",  {"tag1":"value1", "tag2":"val"})
+        tsid2 = argus_tal.timeseries_id.TimeseriesID( \
+                "metric_foo",  {"tag1":"value1", "tag2":"val"})
+        self.assertEqual(tsid1.fqid, tsid2.fqid)
+        self.assertEqual(hash(tsid1), tsid1.fqid)
+        self.assertEqual(hash(tsid2), tsid2.fqid)
 
     def test_NO_wildcard_astrisk(self):
       try:
