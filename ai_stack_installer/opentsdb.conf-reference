@@ -40,6 +40,9 @@ tsd.core.auto_create_metrics = True
 # Full path to a directory containing plugins for OpenTSDB
 tsd.core.plugin_path = /usr/share/opentsdb/plugins
 
+# Randomize metric assignment
+tsd.core.uid.random_metrics=true
+
 # --------- STORAGE ----------
 # Whether or not to enable data compaction in HBase, default is True
 #tsd.storage.enable_compaction = true

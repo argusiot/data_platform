@@ -45,17 +45,29 @@ esac
 # they expect can confuse them in some cases.  So rename the variable.
 hbh=$HBASE_HOME
 unset HBASE_HOME
+
+echo =====================================================================
+echo                We create the OpenTSDB tables in 2 steps.
+echo =====================================================================
+echo ; echo
+echo Step 1 of 2 ....create 'tsdb' table as split-regions
+echo ; echo
+# We first create the tsdb table. Its setup as split regions to allow efficient
+# writes.
+$hbh/bin/hbase org.apache.hadoop.hbase.util.RegionSplitter tsdb UniformSplit -c 256 -f t
+
+echo ; echo
+echo Step 2 of 2 ....create remaining table using hbase shell
+echo ; echo
+# Then we create the remaining tables.
 exec "$hbh/bin/hbase" shell <<EOF
 create '$UID_TABLE',
   {NAME => 'id', COMPRESSION => '$COMPRESSION', BLOOMFILTER => '$BLOOMFILTER', DATA_BLOCK_ENCODING => '$DATA_BLOCK_ENCODING'},
   {NAME => 'name', COMPRESSION => '$COMPRESSION', BLOOMFILTER => '$BLOOMFILTER', DATA_BLOCK_ENCODING => '$DATA_BLOCK_ENCODING'}
 
-create '$TSDB_TABLE',
-  {NAME => 't', VERSIONS => 1, COMPRESSION => '$COMPRESSION', BLOOMFILTER => '$BLOOMFILTER', DATA_BLOCK_ENCODING => '$DATA_BLOCK_ENCODING'}
-  
 create '$TREE_TABLE',
   {NAME => 't', VERSIONS => 1, COMPRESSION => '$COMPRESSION', BLOOMFILTER => '$BLOOMFILTER', DATA_BLOCK_ENCODING => '$DATA_BLOCK_ENCODING'}
-  
+
 create '$META_TABLE',
   {NAME => 'name', COMPRESSION => '$COMPRESSION', BLOOMFILTER => '$BLOOMFILTER', DATA_BLOCK_ENCODING => '$DATA_BLOCK_ENCODING'}
 EOF
