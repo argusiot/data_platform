@@ -103,6 +103,12 @@ sudo cp ${ROOT_DIR}/new_user_invite.html-reference /usr/share/grafana/public/ema
 # To start grafana
 sudo /bin/systemctl start grafana-server
 
+# Install Grafana plug-ins we rely upon
+sudo grafana-cli plugins install grafana-piechart-panel
+sudo grafana-cli plugins install agenty-flowcharting-panel
+sudo /bin/systemctl restart grafana-server
+
+
 # To start Grafana on reboot
 sudo /bin/systemctl daemon-reload
 sudo /bin/systemctl enable grafana-server
