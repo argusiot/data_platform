@@ -10,7 +10,7 @@ with open('LICENSE') as f:
 
 setup(
     name='argustal',
-    version='0.1.0',
+    version='0.1.1',
     description='Timeseries Abstraction Layer for ArgusIoT',
     long_description=readme,
     install_requires=['wheel'],
