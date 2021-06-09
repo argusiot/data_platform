@@ -5,6 +5,7 @@
 import json
 import os
 import sys
+import time
 
 import argus_quilt
 import importlib.resources as pkg_resources
@@ -24,17 +25,9 @@ def main():
             state_set_json_schema = json.load(file)
         processor = builder.build(state_set_json_schema)
 
-        # Start: Apr 16 00:00:00 SGT -> Apr 15 16:00:00 GMT -> 1618502400
-        # End:   Apr 18 00:00:00 SGT -> Apr 17 16:00:00 GMT -> 1618675200
-        # start = 1618502400
-        # end = 1618675200
-        # Trouble at:
-        #  - 1618559280  ....skipped by resuming at 1618559310
-        #  - 1618645410
-        #  - 1618645440  ....skipped by resuming at 1618645470
-        start = 1618502400
-        end = 1618675200
-        computation_window_in_sec = 30
+        computation_window_in_sec = 43200
+        end = int(time.time())
+        start = end - computation_window_in_sec
         processor.one_shot(start, end, computation_window_in_sec)
 
 
