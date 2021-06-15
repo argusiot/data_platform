@@ -20,7 +20,7 @@ def main():
         __location__ = os.path.realpath(os.path.join(os.getcwd(),
                                         os.path.dirname(__file__)))
         with open(os.path.join(__location__, \
-                  "quilt_test_state_v1_definition.json")) as file:
+                  "quilt_test_state_v1_definition_ulfs.json")) as file:
             state_set_json_schema = json.load(file)
         processor = builder.build(state_set_json_schema)
 
