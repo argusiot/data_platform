@@ -16,7 +16,7 @@ def main():
 
     with pkg_resources.path( \
             "argus_quilt", "SCHEMA_DEFN_state_set.json") as schema_file:
-        builder = StateSetProcessorBuilder(schema_file, "192.168.1.146", 4242)
+        builder = StateSetProcessorBuilder(schema_file, "localhost", 4242)
         __location__ = os.path.realpath(os.path.join(os.getcwd(),
                                         os.path.dirname(__file__)))
         with open(os.path.join(__location__, \
@@ -33,8 +33,8 @@ def main():
         #  - 1618645410
         #  - 1618645440  ....skipped by resuming at 1618645470
         start = 1613199661
-        end = 1613201460
-        computation_window_in_sec = 300
+        end = 1613203260
+        computation_window_in_sec = 30
         processor.one_shot(start, end, computation_window_in_sec)
 
 
