@@ -220,14 +220,12 @@ class IntersectTimeseries(object):
         # shorten name for readability
         TWindow = IntersectTimeseries.TimeWindowId
 
-        # Collects the cummulative intersection result for the computation
-        # thus far. Also becomes the 'final result' when the computation
-        # terminates.
-        result = []
-
         tws1_q = deque(twin_series_obj_list[0].get_time_windows())
         for tws_idx in range(1, len(twin_series_obj_list)):
             tws2_q = deque(twin_series_obj_list[tws_idx].get_time_windows())
+
+            # Collects the result of intersection between tws1 & tws2.
+            result = []
             while tws1_q and tws2_q:
                 window1 = tws1_q.popleft()
                 window2 = tws2_q.popleft()
@@ -237,7 +235,8 @@ class IntersectTimeseries(object):
                 # Process l_residue -- do nothing i.e. discard it.
 
                 # Process overlap: Append to result
-                result.append(overlap)
+                if overlap != None:
+                  result.append(overlap)
 
                 # Process r_residue:
                 # re-insert the time residual time window to the head of the
@@ -253,10 +252,12 @@ class IntersectTimeseries(object):
                 else:
                     assert(False)  # Should never happen
 
-            # Store result as the input #1 for next iteration.
-            tws1_q = result
+            # result from this iteration becomes tws1_q for next iteration.
+            # Thus the result propgates through iterations comparing result of
+            # previous intersections with current tws.
+            tws1_q = deque(result)
 
-        return TimeWindowSequence(result)
+        return TimeWindowSequence(list(tws1_q))
 
 
     @property
