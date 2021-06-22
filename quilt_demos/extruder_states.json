@@ -1,0 +1,113 @@
+{
+        "name": "extruder_states",
+        "uuid": "xxxxxxxxxxxxxxx",
+        "state_definitions" : [
+            {
+               "label" : "POWER_OFF",
+               "expression" : [
+                 ["machine_power", "<", 1],
+                 ["melt_temperature", "<=", 200]
+               ],
+               "expression_operator" : "AND"
+            },
+            {
+               "label" : "PRODUCING",
+               "expression" : [
+                 ["machine_power", "==", 1],
+                 ["melt_temperature", ">=", 115],
+                 ["screw_speed", ">=", 10],
+                 ["line_speed", ">=", 5]
+               ],
+               "expression_operator" : "AND"
+            },
+            {
+               "label" : "IDLING2",
+               "expression" : [
+                 ["machine_power", "==", 1],
+                 ["melt_temperature", ">=", 115],
+                 ["screw_speed", "<", 10]
+               ],
+               "expression_operator" : "AND"
+            },
+            {
+               "label" : "PURGING",
+               "expression" : [
+                 ["machine_power", "==", 1],
+                 ["melt_temperature", ">=", 115],
+                 ["screw_speed", ">=", 10],
+                 ["line_speed", "<", 5]
+               ],
+               "expression_operator" : "AND"
+            },
+            {
+               "label" : "IDLING1",
+               "expression" : [
+                 ["machine_power", "==", 1],
+                 ["melt_temperature", "<", 115]
+               ],
+               "expression_operator" : "AND"
+            }
+        ],
+        "input_timeseries" : [
+            {
+                "ts_name" : "melt_temperature",
+                "ts_defn" : {
+                    "metric": "machine.sensor.melt_temperature",
+                    "tags" : {
+		               "machine_type": "EXTRUDER",
+			       "unit": "deg_C",
+			       "shift_id": "1",
+			       "port_num": "1",
+			       "industry": "WIRE_AND_CABLE_MANUFACTURING",
+			       "machine_name" : "90mm_extruder"
+		             }
+                }
+            },
+            {
+                "ts_name" : "machine_power",
+                "ts_defn" : {
+                    "metric": "machine.sensor.machine_powerOn_state",
+                    "tags" : {
+		               "machine_type": "EXTRUDER",
+			       "unit": "Binary",
+			       "shift_id": "1",
+			       "port_num": "5",
+			       "industry": "WIRE_AND_CABLE_MANUFACTURING",
+			       "machine_name" : "90mm_extruder"
+		             }
+                }
+            },
+            {
+                "ts_name" : "screw_speed",
+                "ts_defn" : {
+                    "metric": "machine.sensor.screw_speed",
+                    "tags" : {
+		               "machine_type": "EXTRUDER",
+			       "unit": "RPM",
+			       "shift_id": "1",
+			       "port_num": "3",
+			       "industry": "WIRE_AND_CABLE_MANUFACTURING",
+			       "machine_name" : "90mm_extruder"
+		             }
+                }
+            },
+            {
+                "ts_name" : "line_speed",
+                "ts_defn" : {
+                    "metric": "machine.sensor.line_speed",
+                    "tags" : {
+		               "machine_type": "EXTRUDER",
+			       "unit": "meters_per_sec",
+			       "shift_id": "1",
+			       "port_num": "4",
+			       "industry": "WIRE_AND_CABLE_MANUFACTURING",
+			       "machine_name" : "90mm_extruder"
+		             }
+                }
+            }
+        ],
+        "output_timeseries_template" : {
+            "metric" : "quilt.extruder_states_v1",
+            "tags" : { "machine" : "90mm_extruder", "state_label" : "PLACEHOLDER" }
+        }
+}

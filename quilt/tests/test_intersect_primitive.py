@@ -242,11 +242,58 @@ class IntersectTimeseries_Tests(unittest.TestCase):
     def test_2SeriesWith_N_WindowSequencesInEach(self):
         pass
 
+    def test_3SeriesWith_1WindowSequencesInEach(self):
+        #----------------------------------------------------------------
+        #   1  2  3  4  5  6  7  8  9  10  11  12  13  14  15  16  17  18
+        #         S1                   S1'
+        #   S2                S2'
+        #            S3                     S3'
+        #            R        R'
+        series1 = TimeWindowSequence([(3, 10)])
+        series2 = TimeWindowSequence([(1, 7)])
+        series3 = TimeWindowSequence([(4, 11)])
+        expected_result = TimeWindowSequence([(4, 7)])
+        intersect = ITim([series1, series2, series3])
+        actual_result = intersect.result
+        self.assertEqual(expected_result.get_time_windows(),
+                             actual_result.get_time_windows())
+
     def test_3SeriesWith_2WindowSequencesInEach(self):
-        pass
+        #----------------------------------------------------------------
+        #   1  2  3  4  5  6  7  8  9  10  11  12  13  14  15  16  17  18
+        #         S1                   S1' s1                  s1'
+        #   S2                S2'              s2                       s2'
+        #            S3                     S3's3              s3'
+        #            R        R'               r               r'
+        series1 = TimeWindowSequence([(3, 10),(11,16)])
+        series2 = TimeWindowSequence([(1, 7),(12,18)])
+        series3 = TimeWindowSequence([(4, 11),(12,16)])
+        expected_result = TimeWindowSequence([(4, 7),(12,16)])
+        intersect = ITim([series1, series2, series3])
+        actual_result = intersect.result
+        self.assertEqual(expected_result.get_time_windows(),
+                             actual_result.get_time_windows())
 
     def test_3SeriesWith_3WindownSequencesInEach(self):
         pass
 
     def test_3SeriesWith_N_WindowSequencesInEach(self):
         pass
+
+    def test_4SeriesWith_2WindowSequencesInEach(self):
+        #----------------------------------------------------------------
+        #   1  2  3  4  5  6  7  8  9  10  11  12  13  14  15  16  17  18
+        #         S1                   S1' s1                  s1'
+        #   S2                S2'              s2                       s2'
+        #            S3                     S3's3              s3'
+        #         S4          S4'   s4             s4'
+        #            R        R'               r   r'
+        series1 = TimeWindowSequence([(3, 10),(11,16)])
+        series2 = TimeWindowSequence([(1, 7),(12,18)])
+        series3 = TimeWindowSequence([(4, 11),(12,16)])
+        series4 = TimeWindowSequence([(3, 7),(9,13)])
+        expected_result = TimeWindowSequence([(4, 7),(12,13)])
+        intersect = ITim([series1, series2, series3, series4])
+        actual_result = intersect.result
+        self.assertEqual(expected_result.get_time_windows(),
+                             actual_result.get_time_windows())
