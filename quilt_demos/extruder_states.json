@@ -3,22 +3,29 @@
         "uuid": "xxxxxxxxxxxxxxx",
         "state_definitions" : [
             {
+               "label" : "POWER_OFF",
+               "expression" : [
+                 ["machine_power", "<", 1],
+                 ["melt_temperature", "<=", 200]
+               ],
+               "expression_operator" : "AND"
+            },
+            {
                "label" : "PRODUCING",
                "expression" : [
                  ["machine_power", "==", 1],
                  ["melt_temperature", ">=", 115],
                  ["screw_speed", ">=", 10],
-                 ["line_speed", ">=", 15]
+                 ["line_speed", ">=", 5]
                ],
                "expression_operator" : "AND"
             },
             {
-               "label" : "IDLING",
+               "label" : "IDLING2",
                "expression" : [
                  ["machine_power", "==", 1],
-                 ["melt_temperature", "<", 115],
-                 ["screw_speed", ">=", 0],
-                 ["line_speed", ">=", 0]
+                 ["melt_temperature", ">=", 115],
+                 ["screw_speed", "<", 10]
                ],
                "expression_operator" : "AND"
             },
@@ -26,17 +33,17 @@
                "label" : "PURGING",
                "expression" : [
                  ["machine_power", "==", 1],
-                 ["melt_temperature", "<", 115],
-                 ["screw_speed", ">", 10],
-                 ["line_speed", ">", 0]
+                 ["melt_temperature", ">=", 115],
+                 ["screw_speed", ">=", 10],
+                 ["line_speed", "<", 5]
                ],
                "expression_operator" : "AND"
             },
             {
-               "label" : "POWER_OFF",
+               "label" : "IDLING1",
                "expression" : [
-                 ["machine_power", "<", 1],
-                 ["melt_temperature", "<=", 200]
+                 ["machine_power", "==", 1],
+                 ["melt_temperature", "<", 115]
                ],
                "expression_operator" : "AND"
             }
@@ -76,7 +83,7 @@
                     "metric": "machine.sensor.screw_speed",
                     "tags" : {
 		               "machine_type": "EXTRUDER",
-			       "unit": "Binary",
+			       "unit": "RPM",
 			       "shift_id": "1",
 			       "port_num": "3",
 			       "industry": "WIRE_AND_CABLE_MANUFACTURING",
@@ -90,7 +97,7 @@
                     "metric": "machine.sensor.line_speed",
                     "tags" : {
 		               "machine_type": "EXTRUDER",
-			       "unit": "Binary",
+			       "unit": "meters_per_sec",
 			       "shift_id": "1",
 			       "port_num": "4",
 			       "industry": "WIRE_AND_CABLE_MANUFACTURING",
