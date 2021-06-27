@@ -43,6 +43,10 @@ tsd.core.plugin_path = /usr/share/opentsdb/plugins
 # Randomize metric assignment
 tsd.core.uid.random_metrics=true
 
+# To allow Variable & Templating in Grafana we enable:
+# Reference: https://grafana.com/docs/grafana/latest/datasources/opentsdb/
+tsd.core.meta.enable_realtime_ts = True
+
 # --------- STORAGE ----------
 # Whether or not to enable data compaction in HBase, default is True
 #tsd.storage.enable_compaction = true
