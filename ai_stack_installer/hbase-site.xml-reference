@@ -23,11 +23,11 @@
 <configuration>
   <property>
     <name>hbase.rootdir</name>
-    <value>file:///home/vagrant/hbase-operational-state/hbase</value>
+    <value>file:///data/argusiot/hbase</value>
   </property>
   <property>
     <name>hbase.zookeeper.property.dataDir</name>
-    <value>/home/vagrant/hbase-operational-state/zookeeper</value>
+    <value>/data/argusiot/zookeeper</value>
   </property>
   <property>
     <name>hbase.unsafe.stream.capability.enforce</name>
