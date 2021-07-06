@@ -32,7 +32,6 @@ sudo apt-get --assume-yes install openjdk-8-jdk-headless # Optional - to get jps
 # export JAVA_HOME=/usr
 cp ${ROOT_DIR}/hbase-env.sh-reference hbase-${AI_HBASE_VERSION}/conf/hbase-env.sh
 
-mkdir ~/hbase-operational-state
 mv hbase-${AI_HBASE_VERSION}/conf/hbase-site.xml hbase-${AI_HBASE_VERSION}/conf/hbase-site.xml-orig
 cp ${ROOT_DIR}/hbase-site.xml-reference hbase-${AI_HBASE_VERSION}/conf/hbase-site.xml
 
