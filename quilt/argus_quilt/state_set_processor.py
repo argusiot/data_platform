@@ -105,8 +105,12 @@ class StateSetProcessor(object):
         y_intercept = (m * x_intercept) + c
         return y_intercept
 
-    def build_sync_interpolated_data(self, start_timestamp, end_timestamp, periodicity):
-        tsdd_map = self.getTimeSeriesData(list(self.__read_tsids), start_timestamp, end_timestamp)
+    # NOTE!! Time from Epoch currently at second level granularity
+    def build_sync_interpolated_data(self, start_time, end_time, periodicity):
+        additional_query_window = 30
+        pseudo_start_timestamp = ts.Timestamp(start_time - additional_query_window)
+        pseudo_end_timestamp = ts.Timestamp(end_time + additional_query_window)
+        tsdd_map = self.getTimeSeriesData(list(self.__read_tsids), pseudo_start_timestamp, pseudo_end_timestamp)
         result_map = {}
 
         for fqid, tsdd in tsdd_map.items():
@@ -114,28 +118,30 @@ class StateSetProcessor(object):
             tsid = tsdd.get_timeseries_id()
             prev_element = (0, 0)
             for cur_index, (key, value) in enumerate(tsdd):
-                if cur_index == 0:  # Filling gap between start_time and first available datapoint
-                    if key == start_timestamp.value:
-                        data_points.update({key: value})
-                    else:
-                        # TBD Note:No Interpolation possible for the start gap
-                        data_points.update({key: value})
-                elif cur_index == len(tsdd) - 1:  # Filling gap between end_time and last available datapoint
-                    if key == end_timestamp.value:
-                        data_points.update({key: value})
-                    else:
-                        # TBD Note:No Interpolation possible for the end gap
-                        data_points.update({key: value})
-                else:  # Interpolate all other elements as per periodicity
+                if cur_index == 0 and key > start_time:
+                    data_points.update({key: value})
+                    prev_element = (key, value)
+                    continue
+                elif key < start_time:
+                    prev_element = (key, value)
+                    continue
+                else:
                     if key - prev_element[0] == periodicity:
                         data_points.update({key: value})
                     else:
                         required_key = prev_element[0] + periodicity
+                        if required_key > end_time:
+                            break
+                        if required_key < start_time:
+                            required_key = start_time
                         while required_key < key:
                             data_points.update(
                                 {required_key: self.__calculate_y_intercept(prev_element, (key, value), required_key)})
                             required_key += periodicity
-                        data_points.update({key: value})
+                            if required_key > end_time:
+                                break
+                        if required_key < end_time or key == end_time:
+                            data_points.update({key: value})
                 prev_element = (key, value)
 
             updated_tsdd = TimeseriesDataDict(tsid, data_points)
@@ -144,23 +150,11 @@ class StateSetProcessor(object):
         return result_map
 
     def one_shot(self, start_time, end_time, output_granularity_in_sec):
-        total_missed_time = 0  # Temporary test variable
+        total_missed_time = 0.0  # Temporary test variable
         current_time = start_time
         while current_time < end_time:
             current_period_end_time = current_time + output_granularity_in_sec
-            start_timestamp = ts.Timestamp(current_time)
-            end_timestamp = ts.Timestamp(current_period_end_time)
-            result_map = self.build_sync_interpolated_data(start_timestamp, end_timestamp, 1)
-            # result_map = self.getTimeSeriesData(list(self.__read_tsids), start_timestamp, end_timestamp)
-            #
-            #
-            # min_ending_time_set = set()
-            # for key, value in result_map.items():
-            #     t = value.get_max_key()
-            #     min_ending_time_set.add(t)
-            #
-            # min_end_ts = min(min_ending_time_set)
-            # end_timestamp = ts.Timestamp(min_end_ts)
+            result_map = self.build_sync_interpolated_data(current_time, current_period_end_time, 1)
             # result_map = self.getTimeSeriesData(list(self.__read_tsids), start_timestamp, end_timestamp)
 
             time_spent_list = []
@@ -170,8 +164,6 @@ class StateSetProcessor(object):
                     time_spent = t_state.do_computation(result_map)
                     time_spent_list.append((t_state.write_tsid.metric_id,
                                             t_state.write_tsid.filters.get('state_label'), time_spent))
-                    # self.push_data(min_end_ts, t_state.write_tsid.metric_id,
-                    #                t_state.write_tsid.filters.get('state_label'), time_spent)
                 except ValueError as e:
                     print(e)
                     print("ERROR: Processing Start:" + str(current_time) + " End:" + str(current_period_end_time))
@@ -184,8 +176,8 @@ class StateSetProcessor(object):
                 total_time = current_period_end_time - current_time
                 for element in time_spent_list:
                     self.push_data(current_period_end_time, element[0], element[1], element[2])
-                    total_time -= int(element[2])
-                if total_time != 0:
+                    total_time -= float(element[2])
+                if total_time != 0.0:
                     print("STATE ERROR: Time unaccounted for between Start:" + str(current_time) + " End:" + str(
                         current_period_end_time))
                     total_missed_time += total_time
