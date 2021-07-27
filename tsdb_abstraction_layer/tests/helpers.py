@@ -8,6 +8,10 @@ from argus_tal import timestamp as ts
 from argus_tal import basic_types as bt
 import random
 
+##############################################################################
+#                                 Query testing
+##############################################################################
+
 def get_dummy_query_params():
   return "172.1.1.1", 4242, "some_metric", {"filter1":"value1"}, \
           bt.Aggregator.NONE, ts.Timestamp('1234510'), ts.Timestamp('1234570')
@@ -161,3 +165,29 @@ def get_arbit_key_and_value():
   return (key_list[arb_k_idx-1], sorted_test_data[key_list[arb_k_idx-1]]), \
          (key_list[arb_k_idx], sorted_test_data[key_list[arb_k_idx]]), \
          (key_list[arb_k_idx+1], sorted_test_data[key_list[arb_k_idx+1]])
+
+
+##############################################################################
+#                                 Write testing
+##############################################################################
+def get_write_url():
+  return "http://172.1.1.1:4242/api/put"
+
+def get_dummy_write_params():
+        # IP address, port,   metric_id,      filter_tags,   timestamp, value
+  return "172.1.1.1", 4242, "some_metric", {"filter1":"value1"}, 9999, 3.14
+
+def get_dummy_post_data():
+  # This string being constructed and returned is very space sensitive.
+  # Its constructed to match the POST request. Touch the space settings with
+  # utmost care.
+  return '{"metric": "some_metric", ' + \
+          '"timestamp": 9999, ' + \
+          '"value": 3.14, ' + \
+          '"tags": {' + \
+             '"filter1": "value1"' + \
+          '}' + \
+         '}'
+
+def get_dummy_post_headers():
+  return {'content-type': 'application/json'}
