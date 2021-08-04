@@ -6,6 +6,7 @@
 import sys
 import os
 import json
+import jsonschema
 
 from .context import argus_quilt
 from argus_quilt.state_set_processor_builder import StateSetProcessorBuilder
@@ -19,19 +20,26 @@ class SetProcessorBuilder_Tests(unittest.TestCase):
   def __init__(self, *args, **kwargs):
       super(SetProcessorBuilder_Tests, self).__init__(*args, **kwargs)
 
-      this_dir = os.path.dirname(os.path.realpath(__file__))
-      schema_file_path = os.path.join( \
-          this_dir, '../argus_quilt/SCHEMA_DEFN_state_set.json')
+      self.__this_dir = os.path.dirname(os.path.realpath(__file__))
+      self.__schema_file_path = os.path.join( \
+          self.__this_dir, '../argus_quilt/SCHEMA_DEFN_state_set.json')
 
       # o_u_t = Object_Under_Test
-      self.__o_u_t = StateSetProcessorBuilder(schema_file_path,
+      self.__o_u_t = StateSetProcessorBuilder(self.__schema_file_path,
                      "ignored_host", 1000) # From UT POV, a host and port_number
                                            # params are reqd. Actual values are
                                            # ignored.
 
+      '''
+      This JSON file has all the {good | bad} state specifications in a single
+      JSON file. This is purely for convenience. The JSON specs are accessible
+      under:
+          json spec 1: self.__test_data["minimum_state_set_defn"]
+          json spec 2: self.__test_data["1_series_2_state_set_defn"]
+          ...
+      '''
       test_data_file = os.path.join(
-          this_dir, "test_data/applique_infra_state_set_testdata.json")
-
+          self.__this_dir, "test_data/all_test_appliques.json")
       with open(test_data_file, 'r') as dataFile:
           self.__test_data = json.load(dataFile)
 
@@ -111,3 +119,15 @@ class SetProcessorBuilder_Tests(unittest.TestCase):
       self.assertEqual(write_tsid.filters["state_label"],
                        state_defns[1].state_label) # Verify PLACEHOLDER fix-up
 
+
+  def testValidateOnly__state_defn_with_GOOD_query_params(self):
+      self.__o_u_t.validate_request(self.__test_data["state_defn_with_GOOD_query_params"])
+
+  def testValidateOnly__state_defn_with_BAD_query_params(self):
+      try:
+          self.__o_u_t.validate_request(self.__test_data["state_defn_with_BAD_query_params"])
+
+      # We expect to get a validation error because the BAD state defn doesn't have the
+      # 'msec_response' defined in the global query parameters section.
+      except jsonschema.exceptions.ValidationError:
+          pass

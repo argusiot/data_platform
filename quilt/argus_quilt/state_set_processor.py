@@ -22,7 +22,7 @@ from argus_tal.timeseries_datadict import LookupQualifier, TimeseriesDataDict
 
 class StateSetProcessor(object):
     def __init__(self, name, temporal_state_obj_list,
-                 tsdb_hostname_or_ip, tsdb_port):
+                 tsdb_hostname_or_ip, tsdb_port, flag_msec_query_response):
 
         self.__name = str(name)
 
@@ -34,6 +34,9 @@ class StateSetProcessor(object):
         #   - writes are done to write the state computation result.
         self.__tsdb_hostname_or_ip = tsdb_hostname_or_ip
         self.__tsdb_port_num = tsdb_port
+
+        # Flag to control the granularity at which we want the response to be
+        self.__flag_msec_response = flag_msec_query_response
 
         # Optimization:
         # Collect all the timeseries IDs in a set. Later when we peridiocally
@@ -73,7 +76,7 @@ class StateSetProcessor(object):
             start_timestamp, end_timestamp,
             list_ts_ids,
             bt.Aggregator.NONE,
-            False,
+            flag_ms_response=self.__flag_msec_response
         )
 
         rv = foo.populate_ts_data()

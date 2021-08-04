@@ -66,6 +66,16 @@
                 "$ref" : "#/definitions/state_defn"
             }
         },
+	"query_params" : {
+            "type" : "object",
+	    "properties" : {
+	        "msec_response" : {
+                    "type" : "boolean",
+	            "default": false
+		}
+	    },
+            "required" : ["msec_response"]
+	},
         "input_timeseries" : {
             "type" : "array",
             "items": {
