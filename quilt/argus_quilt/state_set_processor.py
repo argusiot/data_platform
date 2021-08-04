@@ -22,7 +22,7 @@ from argus_tal.timeseries_datadict import LookupQualifier, TimeseriesDataDict
 
 class StateSetProcessor(object):
     def __init__(self, name, temporal_state_obj_list,
-                 tsdb_hostname_or_ip, tsdb_port):
+                 tsdb_hostname_or_ip, tsdb_port, additional_query_window=30):
 
         self.__name = str(name)
 
@@ -34,6 +34,8 @@ class StateSetProcessor(object):
         #   - writes are done to write the state computation result.
         self.__tsdb_hostname_or_ip = tsdb_hostname_or_ip
         self.__tsdb_port_num = tsdb_port
+
+        self.__additional_query_window = additional_query_window
 
         # Optimization:
         # Collect all the timeseries IDs in a set. Later when we peridiocally
@@ -83,7 +85,7 @@ class StateSetProcessor(object):
 
         return result_map
 
-    def push_data(self, timestamp, metric, state, value):
+    def __push_data(self, timestamp, metric, state, value):
         url = 'http://%s:%d/api/put' % (self.__tsdb_hostname_or_ip,
                                         self.__tsdb_port_num)
         headers = {'content-type': 'application/json'}
@@ -105,11 +107,58 @@ class StateSetProcessor(object):
         y_intercept = (m * x_intercept) + c
         return y_intercept
 
+    '''
+    Objective:
+    ----------
+    Perform interpolation of data points to fill gaps in provided timeseries.
+    
+    Input:
+    ------
+    Start time, end time and periodicity. The timeseries ids are accessed from class
+    level variables.
+    
+    Return:
+    -------
+    Output time series with data points present for each second(or the periodicity 
+    requested) in the time window.
+    
+    Method:
+    -------
+    Consider periodicity requested by user is 1 second and the start and end time 
+    is 30 seconds apart (i.e window = 30sec). To which we pad the additional_time_window
+    before and after the start, end timestamps. This enables us to gather data points in the
+    90 second range to perform meaningful interpolation for the entire 30sec window requested.
+
+    Below are few cases which we will encounter:
+    
+    Each * represents a data point being present at that time
+    Case a: 
+           Time: 0 --------------- 30
+           Data: * *    *   *       *
+    Case b: 
+           Time: 0 --------------- 30
+           Data: *    *      *      
+    Case c: 
+           Time: 0 --------------- 30
+           Data:     *   *    *     *
+    Case d: 
+           Time: 0 --------------- 30
+           Data:      *    *   *  
+    Case e: 
+           Time: 0 --------------- 30
+           Data:      *    
+    Case f: 
+           Time: 0 --------------- 30
+           Data:         
+    
+    TBD: Further explanation of interpolation and variable states.
+
+    '''
+
     # NOTE!! Time from Epoch currently at second level granularity
-    def build_sync_interpolated_data(self, start_time, end_time, periodicity):
-        additional_query_window = 30
-        pseudo_start_timestamp = ts.Timestamp(start_time - additional_query_window)
-        pseudo_end_timestamp = ts.Timestamp(end_time + additional_query_window)
+    def __build_sync_interpolated_data(self, start_time, end_time, periodicity):
+        pseudo_start_timestamp = ts.Timestamp(start_time - self.__additional_query_window)
+        pseudo_end_timestamp = ts.Timestamp(end_time + self.__additional_query_window)
         tsdd_map = self.getTimeSeriesData(list(self.__read_tsids), pseudo_start_timestamp, pseudo_end_timestamp)
         result_map = {}
 
@@ -154,7 +203,7 @@ class StateSetProcessor(object):
         current_time = start_time
         while current_time < end_time:
             current_period_end_time = current_time + output_granularity_in_sec
-            result_map = self.build_sync_interpolated_data(current_time, current_period_end_time, 1)
+            result_map = self.__build_sync_interpolated_data(current_time, current_period_end_time, 1)
             # result_map = self.getTimeSeriesData(list(self.__read_tsids), start_timestamp, end_timestamp)
 
             time_spent_list = []
@@ -168,15 +217,15 @@ class StateSetProcessor(object):
                     print(e)
                     print("ERROR: Processing Start:" + str(current_time) + " End:" + str(current_period_end_time))
                     error = True
-                    self.push_data(current_period_end_time, t_state.write_tsid.metric_id,
+                    self.__push_data(current_period_end_time, t_state.write_tsid.metric_id,
                                    'SystemError', current_period_end_time - current_time)
                     break
 
             if not error:
                 total_time = current_period_end_time - current_time
                 for element in time_spent_list:
-                    self.push_data(current_period_end_time, element[0], element[1], element[2])
-                    total_time -= float(element[2])
+                    self.__push_data(current_period_end_time, element[0], element[1], element[2])
+                    total_time -= (element[2])
                 if total_time != 0.0:
                     print("STATE ERROR: Time unaccounted for between Start:" + str(current_time) + " End:" + str(
                         current_period_end_time))

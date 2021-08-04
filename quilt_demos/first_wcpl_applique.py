@@ -26,7 +26,7 @@ def main():
 
         computation_window_in_sec = 30
         end = int(time.time())
-        start = end - 43200
+        start = end - 12 * 60 * 60
 
         # start = 1618502400
         # end = 1618675200
