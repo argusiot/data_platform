@@ -56,10 +56,10 @@
                     "tags" : {
 		               "machine_type": "EXTRUDER",
 			       "unit": "deg_C",
-			       "shift_id": "1",
 			       "port_num": "1",
-			       "industry": "WIRE_AND_CABLE_MANUFACTURING",
-			       "machine_name" : "90mm_extruder"
+			       "machine_name" : "90mm_extruder",
+			       "machine_location" : "SIN",
+			       "machine_site" : "WCPL-1"
 		             }
                 }
             },
@@ -70,10 +70,10 @@
                     "tags" : {
 		               "machine_type": "EXTRUDER",
 			       "unit": "Binary",
-			       "shift_id": "1",
 			       "port_num": "5",
-			       "industry": "WIRE_AND_CABLE_MANUFACTURING",
-			       "machine_name" : "90mm_extruder"
+			       "machine_name" : "90mm_extruder",
+			       "machine_location" : "SIN",
+			       "machine_site" : "WCPL-1"
 		             }
                 }
             },
@@ -84,10 +84,10 @@
                     "tags" : {
 		               "machine_type": "EXTRUDER",
 			       "unit": "RPM",
-			       "shift_id": "1",
 			       "port_num": "3",
-			       "industry": "WIRE_AND_CABLE_MANUFACTURING",
-			       "machine_name" : "90mm_extruder"
+			       "machine_name" : "90mm_extruder",
+			       "machine_location" : "SIN",
+			       "machine_site" : "WCPL-1"
 		             }
                 }
             },
@@ -98,10 +98,10 @@
                     "tags" : {
 		               "machine_type": "EXTRUDER",
 			       "unit": "meters_per_sec",
-			       "shift_id": "1",
 			       "port_num": "4",
-			       "industry": "WIRE_AND_CABLE_MANUFACTURING",
-			       "machine_name" : "90mm_extruder"
+			       "machine_name" : "90mm_extruder",
+			       "machine_location" : "SIN",
+			       "machine_site" : "WCPL-1"
 		             }
                 }
             }

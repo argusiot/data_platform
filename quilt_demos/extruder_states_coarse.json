@@ -3,7 +3,7 @@
         "uuid": "xxxxxxxxxxxxxxx",
         "state_definitions" : [
             {
-               "label" : "TestStateV1_ON_Producing",
+               "label" : "ON_Producing",
                "expression" : [
                  ["machine_power", "==", 1],
                  ["melt_temperature", ">=", 115]
@@ -11,7 +11,7 @@
                "expression_operator" : "AND"
             },
             {
-               "label" : "TestStateV1_ON_Overhead",
+               "label" : "ON_Overhead",
                "expression" : [
                  ["machine_power", "==", 1],
                  ["melt_temperature", "<", 115]
@@ -19,7 +19,7 @@
                "expression_operator" : "AND"
             },
             {
-               "label" : "TestStateV1_MachineOFF",
+               "label" : "Power_OFF",
                "expression" : [
                  ["machine_power", "<", 1],
                  ["melt_temperature", "<=", 200]
@@ -35,10 +35,10 @@
                     "tags" : {
 		               "machine_type": "EXTRUDER",
 			       "unit": "deg_C",
-			       "shift_id": "1",
 			       "port_num": "1",
-			       "industry": "WIRE_AND_CABLE_MANUFACTURING",
-			       "machine_name" : "90mm_extruder"
+			       "machine_name" : "90mm_extruder",
+			       "machine_location" : "SIN",
+			       "machine_site" : "WCPL-1"
 		             }
                 }
             },
@@ -49,10 +49,10 @@
                     "tags" : {
 		               "machine_type": "EXTRUDER",
 			       "unit": "Binary",
-			       "shift_id": "1",
 			       "port_num": "5",
-			       "industry": "WIRE_AND_CABLE_MANUFACTURING",
-			       "machine_name" : "90mm_extruder"
+			       "machine_name" : "90mm_extruder",
+			       "machine_location" : "SIN",
+			       "machine_site" : "WCPL-1"
 		             }
                 }
             }
