@@ -16,50 +16,39 @@ from . import timeseries_datadict as tsdd
 from . import timeseries_id as ts_id
 
 '''
-1. Input:
-   1a) a FQ timeseries (metric_id + tags).
-       No '*' permitted in request.
-   1b) aggregators e.g. rate
-   1c) Query sets aggregation by 'none'.
-2. Convert each timeseries from the response to into a collection of
-   TimeseriesData objects.
+Example usage:
+    # We need at least 1 timeseries id. The QueryAPI object can accept a list
+    # of such objects.
+    ts_id = Timeseries_ID("metric_foo", {'tag1' : 'value1})
 
-Example:
-  1) populate_timeseries_data usage (with single response object):
-     --------------------------------------------------------------
-    Query to retrieve data values expecting a single response object:
-    query = QueryApi()
-    metric_id = "machine.sensor.melt_temperature"
-    filtering_tags = {'machine_name' : '65mm_extruder', 'port_number' : 1}
-    try:
-      query.populate_ts_data(metric_id,
-                             filtering_tags,
-                             DATA_VALUE,  # We want actual data in the response.
-                             Timestamp(1590776274005),  # start time.
-                             Timestamp(1591121874005))  # end time.
+    # Multiple options to create the QueryAPI object, based on:
+    #  1) You want data (as written)
+    #  2) You want rate
+    #  3) You want data but at millisecond granularity
+    #  4) You want rate but at millisecond granularity
 
-      # Get a list of TimeseriesData objects back
-      ts_data = query.result_list()
+    # Using hostname
+    q_api_obj = QueryApi("www.foo.bar", 4242, start_ts_obj, end_ts_obj,
+                         [ts_id1], Aggregator.NONE)
+    # OR, using IP address
+    q_api_obj = QueryApi("10.121.32.1", 4242, start_ts_obj, end_ts_obj,
+                         [ts_id1, ts_id2], Aggregator.NONE)
 
-      # In this example we expect the result set to contain exactly 1 object.
-      assert(len(ts_data) == 1)
+    # Querying for rate instead of data
+    q_api_obj = QueryApi("10.121.32.1", 4242, start_ts_obj, end_ts_obj,
+                         [ts_id1, ts_id2], Aggregator.NONE,
+                         flag_compute_rate=True)
 
-      ts_result_obj = ts_data[0]
-
-      # Expect that the metric & filtering tags in the response to match input.
-      assert((metric_id, filtering_tags) == ts_result_obj.get_identifier())
-
-      # Cool ...now we're ready to use ts_result_obj. See documentation above
-      # TimeseriesData class to see usage idioms.
-
-    except <fill_in_later>:
-      print("Query failed !")
+    # Querying for data at millisecond granularity.
+    q_api_obj = QueryApi("10.121.32.1", 4242, start_ts_obj, end_ts_obj,
+                         [ts_id1, ts_id2], Aggregator.NONE,
+                         flag_millisecond=True)
 
 '''
 class QueryApi(object):
-  def __init__(self, http_host, http_port, start_time, end_time, tsid_list, \
-               aggregator_type, flag_compute_rate=False, \
-               tsdb_platform=basic_types.Tsdb.OPENTSDB):
+  def __init__(self, http_host, http_port, start_time, end_time, tsid_list,
+               aggregator_type, flag_compute_rate=False,
+               flag_ms_response=False, tsdb_platform=basic_types.Tsdb.OPENTSDB):
     self.__tsdb_platform = tsdb_platform
 
     # This will validate and raise an exception if any of the parameters are
@@ -75,12 +64,14 @@ class QueryApi(object):
                                                 # caller supplied list.
     self.__aggregator = aggregator_type
     self.__flag_compute_rate = flag_compute_rate
+    self.__flag_millsecond_response = flag_ms_response
     self.__start_time = start_time
     self.__end_time = end_time
-    self.__url = qurlgen.url(self.__tsdb_platform, \
-            self.__http_host, self.__http_port, \
-            self.__start_time, self.__end_time, self.__aggregator, \
-            self.__tsid_list, flag_compute_rate=self.__flag_compute_rate)
+    self.__url = qurlgen.url(self.__tsdb_platform,
+            self.__http_host, self.__http_port,
+            self.__start_time, self.__end_time, self.__aggregator,
+            self.__tsid_list, flag_compute_rate=self.__flag_compute_rate,
+            flag_ms_response=self.__flag_millsecond_response)
 
     # List of TimeseriesDataDict objects for each timeseries returned.
     self.__tsdd_obj_list = []
