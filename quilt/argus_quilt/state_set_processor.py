@@ -112,6 +112,19 @@ class StateSetProcessor(object):
         tsdd_map = self.getTimeSeriesData(list(self.__read_tsids), start_timestamp, end_timestamp)
         result_map = {}
 
+        # FIXME: This is a short term hack and needs more thoughts. We assume
+        # that if data is being requested at msec granularity, then:
+        # a) there is no data loss
+        # b) data across different timeseries is synchronized
+        # ....hence we don't need to run build_sync_interpolated_data() and
+        # simply return the query response as is.
+        if self.__flag_msec_response:
+            for fqid, tsdd in tsdd_map.items():
+                tsid = tsdd.get_timeseries_id()
+                result_map.update({tsid.fqid: tsdd})
+            return result_map
+
+
         for fqid, tsdd in tsdd_map.items():
             data_points = OrderedDict()
             tsid = tsdd.get_timeseries_id()

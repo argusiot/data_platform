@@ -1,0 +1,67 @@
+{
+        "name": "extruder_states",
+        "uuid": "xxxxxxxxxxxxxxx",
+        "state_definitions" : [
+            {
+               "label" : "ON_Producing",
+               "expression" : [
+                 ["machine_power", "==", 1],
+                 ["melt_temperature", ">=", 115]
+               ],
+               "expression_operator" : "AND"
+            },
+            {
+               "label" : "ON_Overhead",
+               "expression" : [
+                 ["machine_power", "==", 1],
+                 ["melt_temperature", "<", 115]
+               ],
+               "expression_operator" : "AND"
+            },
+            {
+               "label" : "Power_OFF",
+               "expression" : [
+                 ["machine_power", "<", 1],
+                 ["melt_temperature", "<=", 200]
+               ],
+               "expression_operator" : "AND"
+            }
+        ],
+	"query_params" : {
+	    "msec_response": true
+	},
+        "input_timeseries" : [
+            {
+                "ts_name" : "melt_temperature",
+                "ts_defn" : {
+                    "metric": "machine.sensor.melt_temperature",
+                    "tags" : {
+		               "machine_type": "EXTRUDER",
+			       "unit": "deg_C",
+			       "port_num": "1",
+			       "machine_name" : "90mm_extruder",
+			       "machine_location" : "SIN",
+			       "machine_site" : "WCPL-1"
+		             }
+                }
+            },
+                      {
+                "ts_name" : "machine_power",
+                "ts_defn" : {
+                    "metric": "machine.sensor.machine_powerOn_state",
+                    "tags" : {
+		               "machine_type": "EXTRUDER",
+			       "unit": "Binary",
+			       "port_num": "5",
+			       "machine_name" : "90mm_extruder",
+			       "machine_location" : "SIN",
+			       "machine_site" : "WCPL-1"
+		             }
+                }
+            }
+        ],
+        "output_timeseries_template" : {
+            "metric" : "quilt.extruder_states_coarse_msec",
+            "tags" : { "machine" : "90mm_extruder", "state_label" : "PLACEHOLDER" }
+        }
+}
