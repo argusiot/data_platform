@@ -15,96 +15,18 @@
                 ["SW_thickness", ">", 0.99995]
             ],
             "expression_operator" : "AND"
-        },
-        {
-            "label" : "LGood_Plate_Thick_NE",
-            "expression" : [
-                ["NE_thickness", "<=", 0.99995],
-                ["NE_thickness", ">",  0.99990]
-            ],
-            "expression_operator" : "AND"
-        },
-        {
-            "label" : "LGood_Plate_Thick_SE",
-            "expression" : [
-                ["SE_thickness", "<=", 0.99995],
-                ["SE_thickness", ">",  0.99990]
-            ],
-            "expression_operator" : "AND"
-        },
-        {
-            "label" : "LGood_Plate_Thick_NW",
-            "expression" : [
-                ["NW_thickness", "<=", 0.99995],
-                ["NW_thickness", ">",  0.99990]
-            ],
-            "expression_operator" : "AND"
-        },
-        {
-            "label" : "LGood_Plate_Thick_SW",
-            "expression" : [
-                ["SW_thickness", "<=", 0.99995],
-                ["SW_thickness", ">",  0.99990]
-            ],
-            "expression_operator" : "AND"
-        },
-        {
-            "label" : "HGood_Plate_Thick_NE",
-            "expression" : [
-                ["NE_thickness", "<",  1.00010],
-                ["NE_thickness", ">=", 1.00005]
-            ],
-            "expression_operator" : "AND"
-        },
-        {
-            "label" : "HGood_Plate_Thick_SE",
-            "expression" : [
-                ["SE_thickness", "<",  1.00010],
-                ["SE_thickness", ">=", 1.00005]
-            ],
-            "expression_operator" : "AND"
-        },
-        {
-            "label" : "HGood_Plate_Thick_NW",
-            "expression" : [
-                ["NW_thickness", "<",  1.00010],
-                ["NW_thickness", ">=", 1.00005]
-            ],
-            "expression_operator" : "AND"
-        },
-        {
-            "label" : "HGood_Plate_Thick_SW",
-            "expression" : [
-                ["SW_thickness", "<",  1.00010],
-                ["SW_thickness", ">=", 1.00005]
-            ],
-            "expression_operator" : "AND"
-        },
-        {
-            "label" : "Bad_Plate_Thick_All",
-            "expression" : [
-                ["NE_thickness", ">=", 1.00010],
-                ["NE_thickness", "<=", 0.99990],
-                ["SE_thickness", ">=", 1.00010],
-                ["SE_thickness", "<=", 0.99990],
-                ["NW_thickness", ">=", 1.00010],
-                ["NW_thickness", "<=", 0.99990],
-                ["SW_thickness", ">=", 1.00010],
-                ["SW_thickness", "<=", 0.99990]
-            ],
-            "expression_operator" : "AND"
         }
     ],
     "input_timeseries" : [
         {
-            "ts_name" : "NE_thickness",
-            "ts_defn" : {
+	    "ts_name" : "NE_thickness",
+	    "ts_defn" : {
                 "metric": "poc.v3.ne.plate.thickness.n9-5",
                 "tags" : {
-                    "machine_id": "106-5",
-                    "unit": "inch"
+		    "machine_id": "106-5",
+		    "unit": "inch"
                 }
-            }
+	    }
         },
         {
             "ts_name" : "SE_thickness",
