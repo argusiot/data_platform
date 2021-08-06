@@ -144,7 +144,7 @@ class StateSetProcessor(object):
         return result_map
 
     def one_shot(self, start_time, end_time, output_granularity_in_sec):
-        total_missed_time = 0  # Temporary test variable
+        total_missed_time = 0.0  # Temporary test variable
         current_time = start_time
         while current_time < end_time:
             current_period_end_time = current_time + output_granularity_in_sec
@@ -184,10 +184,21 @@ class StateSetProcessor(object):
                 total_time = current_period_end_time - current_time
                 for element in time_spent_list:
                     self.push_data(current_period_end_time, element[0], element[1], element[2])
-                    total_time -= int(element[2])
+                    total_time -= element[2]
+                # Save the total time value in a special state ts, that can be used
+                # as a representation of gaps or overlaps of the user defined states.
+                # As a special case this time series would represent the "else"
+                # bucket, i.e. the time the system spends in a state not defined by
+                # the specified states.
+                self.push_data(current_period_end_time,
+                               t_state.write_tsid.metric_id, "__OtherState",
+                               total_time)
                 if total_time != 0:
-                    print("STATE ERROR: Time unaccounted for between Start:" + str(current_time) + " End:" + str(
-                        current_period_end_time))
+                  #  print("STATE ERROR: Time unaccounted for between Start:" + str(current_time) + " End:" + str(
+                  #      current_period_end_time))
+                    print(f"STATE ERROR: Time mismatch in window: Start: "
+                          f"{current_time} End: {current_period_end_time} "
+                          f"tdiff = {total_time}")
                     total_missed_time += total_time
             current_time = current_period_end_time
         return
