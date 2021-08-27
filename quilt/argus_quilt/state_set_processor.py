@@ -22,7 +22,9 @@ from argus_tal.timeseries_datadict import LookupQualifier, TimeseriesDataDict
 
 class StateSetProcessor(object):
     def __init__(self, name, temporal_state_obj_list,
-                 tsdb_hostname_or_ip, tsdb_port, flag_msec_query_response):
+                 tsdb_hostname_or_ip, tsdb_port, flag_msec_query_response,
+                 flag_interpolation_needed=True,
+                 additional_query_window=30):
 
         self.__name = str(name)
 
@@ -35,8 +37,44 @@ class StateSetProcessor(object):
         self.__tsdb_hostname_or_ip = tsdb_hostname_or_ip
         self.__tsdb_port_num = tsdb_port
 
-        # Flag to control the granularity at which we want the response to be
+        # Flag to control the response time granularity.
+        #
+        # Default OpenTSDB query response is with seconds timestamp. This flag
+        # allows us to change that to get a millisecond timestamp response.
         self.__flag_msec_response = flag_msec_query_response
+
+        '''
+        High level flag to control whether interpolation is enabled or not.
+
+        This is a slighly short term solution and needs more thoughts. There
+        are two conditions that control the behaviour of this flag.
+
+        Firstly:
+            We assume that if data is being requested at msec granularity, then
+            no interpolation is needed BECAUSE:
+             a) there is no data loss
+             b) data across different timeseries is already synchronized
+
+        Secondly:
+            Our interpolation logic assumes a "+1" increment in time (see the
+            relevant assert in __build_sync_interpolated_data()). As a result
+            naiively running interpolation on millisec granularity responses
+            causes data explosion.
+
+        Hence if msec query response is enabled, we simply turn off
+        interpolation.
+        '''
+        if self.__flag_msec_response:
+            self.__flag_interpolation_enabled = False
+        else:
+            self.__flag_interpolation_enabled = True
+
+        # To support interpolation.
+        # If we want data to be interpolated at a fixed 'period' sometimes we
+        # may need to pad the query window with a little extra time before and
+        # after the requested query window. This additional_query_window
+        # determines how much that extra padding should be.
+        self.__additional_query_window = additional_query_window
 
         # Optimization:
         # Collect all the timeseries IDs in a set. Later when we peridiocally
@@ -86,7 +124,7 @@ class StateSetProcessor(object):
 
         return result_map
 
-    def push_data(self, timestamp, metric, state, value):
+    def __push_data(self, timestamp, metric, state, value):
         url = 'http://%s:%d/api/put' % (self.__tsdb_hostname_or_ip,
                                         self.__tsdb_port_num)
         headers = {'content-type': 'application/json'}
@@ -108,50 +146,129 @@ class StateSetProcessor(object):
         y_intercept = (m * x_intercept) + c
         return y_intercept
 
-    def build_sync_interpolated_data(self, start_timestamp, end_timestamp, periodicity):
-        tsdd_map = self.getTimeSeriesData(list(self.__read_tsids), start_timestamp, end_timestamp)
+    '''
+    Objective:
+    ----------
+    Perform interpolation of data points to fill gaps in provided timeseries.
+
+    Input:
+    ------
+    Start time, end time and periodicity. The timeseries ids are accessed from class
+    level variables.
+
+    Return:
+    -------
+    Output time series with data points present for each second(or the periodicity 
+    requested) in the time window.
+
+    Method:
+    -------
+    Consider periodicity requested by user is 1 second and the start and end time 
+    is 30 seconds apart (i.e window = 30sec). To which we pad the additional_time_window
+    before and after the start, end timestamps. This enables us to gather data points in the
+    90 second range to perform meaningful interpolation for the entire 30sec window requested.
+
+    Below are few cases which we will encounter:
+
+    Each * represents a data point being present at that time
+    Case a: Data point present at start & end time stamps. Arbitrary data points
+            in the middle.
+           Time: 0 --------------- 30
+           Data: * *    *   *       *
+    Case b: Data point present at the start AND NOT at the end time stamp.
+            Arbitrary data points in the middle.
+           Time: 0 --------------- 30
+           Data: *    *      *
+    Case c: NO data point present at the start time stamp but data point
+            present at the end. Arbitrary data points in the middle.
+           Time: 0 --------------- 30
+           Data:     *   *    *     *
+    Case d: NO data points at the start and end, but arbitary data points
+            (more than 1 present in between).
+           Time: 0 --------------- 30
+           Data:      *    *   *
+    Case e: NO data points at the start and end, AND exactly 1 data point
+            present in somewhere in between.
+           Time: 0 --------------- 30
+           Data:      *
+    Case f: No data present anywhere in the time window.
+           Time: 0 --------------- 30
+           Data:
+    '''
+    # NOTE!! Time from Epoch currently at second level granularity
+    def __build_sync_interpolated_data(self, start_time, end_time, periodicity):
+
+        # IMPORTANT: This code has been written to work for any value of
+        # priodicity, BUT has been tested for only the value of 1. Until we
+        # do that, we keep this assert to protect ourselves.
+        assert periodicity == 1, "Only periodicity of 1 is supported"
+
+        pseudo_start_timestamp = ts.Timestamp(start_time - self.__additional_query_window)
+        pseudo_end_timestamp = ts.Timestamp(end_time + self.__additional_query_window)
+        tsdd_map = self.getTimeSeriesData(list(self.__read_tsids),
+                                          pseudo_start_timestamp,
+                                          pseudo_end_timestamp)
         result_map = {}
 
-        # FIXME: This is a short term hack and needs more thoughts. We assume
-        # that if data is being requested at msec granularity, then:
-        # a) there is no data loss
-        # b) data across different timeseries is synchronized
-        # ....hence we don't need to run build_sync_interpolated_data() and
-        # simply return the query response as is.
-        if self.__flag_msec_response:
+        # If interpolation is not requested, we're done here. Lets build
+        # result_map and return.
+        if not self.__flag_interpolation_enabled:
             for fqid, tsdd in tsdd_map.items():
                 tsid = tsdd.get_timeseries_id()
                 result_map.update({tsid.fqid: tsdd})
             return result_map
 
+        # Looks like interpolation is needed...let the fun begin !
 
+        # We got a query response from getTimeSeriesData(). We're now going to
+        # process the query results for interpolation and guarantee that
+        # a datapoint exists at the requested periodicty.
         for fqid, tsdd in tsdd_map.items():
             data_points = OrderedDict()
             tsid = tsdd.get_timeseries_id()
-            prev_element = (0, 0)
+
+            '''
+            This loop below is interpolating data between prev_element
+            current element, where current element is represented by
+            (key, value).
+
+            Points to note:
+            1) It is guaranteed that for any timestamp (greater than start time
+            and) less than prev_element the property of data being iterpolated
+            at the requested periodicty is true.
+            2) Nothing interesting happens until we encounter the first
+            (key, value) where the key is larger than the requested start_time.
+            '''
+            prev_element = (0, 0)   # (time, value)
             for cur_index, (key, value) in enumerate(tsdd):
-                if cur_index == 0:  # Filling gap between start_time and first available datapoint
-                    if key == start_timestamp.value:
-                        data_points.update({key: value})
-                    else:
-                        # TBD Note:No Interpolation possible for the start gap
-                        data_points.update({key: value})
-                elif cur_index == len(tsdd) - 1:  # Filling gap between end_time and last available datapoint
-                    if key == end_timestamp.value:
-                        data_points.update({key: value})
-                    else:
-                        # TBD Note:No Interpolation possible for the end gap
-                        data_points.update({key: value})
-                else:  # Interpolate all other elements as per periodicity
+                # Note: cur_index is only used to identify the first element.
+                if cur_index == 0 and key > start_time:
+                    # First element needs special handling.
+                    data_points.update({key: value})
+                    prev_element = (key, value)
+                    continue
+                elif key < start_time:  # Skipping until we get to start_time.
+                    prev_element = (key, value)
+                    continue
+                else:
+                    # The fun begins here ...we've found a data point where
+                    # timestamp (i.e. key) is larger than start_time....
                     if key - prev_element[0] == periodicity:
                         data_points.update({key: value})
                     else:
                         required_key = prev_element[0] + periodicity
+                        if required_key > end_time:
+                            break
+                        if required_key < start_time:
+                            required_key = start_time
                         while required_key < key:
                             data_points.update(
                                 {required_key: self.__calculate_y_intercept(prev_element, (key, value), required_key)})
                             required_key += periodicity
-                        data_points.update({key: value})
+                            if required_key > end_time:
+                                break
+                        if required_key < end_time or key == end_time:
+                            data_points.update({key: value})
                 prev_element = (key, value)
 
             updated_tsdd = TimeseriesDataDict(tsid, data_points)
@@ -160,24 +277,11 @@ class StateSetProcessor(object):
         return result_map
 
     def one_shot(self, start_time, end_time, output_granularity_in_sec):
-        total_missed_time = 0  # Temporary test variable
+        total_missed_time = 0.0
         current_time = start_time
         while current_time < end_time:
             current_period_end_time = current_time + output_granularity_in_sec
-            start_timestamp = ts.Timestamp(current_time)
-            end_timestamp = ts.Timestamp(current_period_end_time)
-            result_map = self.build_sync_interpolated_data(start_timestamp, end_timestamp, 1)
-            # result_map = self.getTimeSeriesData(list(self.__read_tsids), start_timestamp, end_timestamp)
-            #
-            #
-            # min_ending_time_set = set()
-            # for key, value in result_map.items():
-            #     t = value.get_max_key()
-            #     min_ending_time_set.add(t)
-            #
-            # min_end_ts = min(min_ending_time_set)
-            # end_timestamp = ts.Timestamp(min_end_ts)
-            # result_map = self.getTimeSeriesData(list(self.__read_tsids), start_timestamp, end_timestamp)
+            result_map = self.__build_sync_interpolated_data(current_time, current_period_end_time, 1)
 
             time_spent_list = []
             error = False
@@ -186,22 +290,20 @@ class StateSetProcessor(object):
                     time_spent = t_state.do_computation(result_map)
                     time_spent_list.append((t_state.write_tsid.metric_id,
                                             t_state.write_tsid.filters.get('state_label'), time_spent))
-                    # self.push_data(min_end_ts, t_state.write_tsid.metric_id,
-                    #                t_state.write_tsid.filters.get('state_label'), time_spent)
                 except ValueError as e:
                     print(e)
                     print("ERROR: Processing Start:" + str(current_time) + " End:" + str(current_period_end_time))
                     error = True
-                    self.push_data(current_period_end_time, t_state.write_tsid.metric_id,
+                    self.__push_data(current_period_end_time, t_state.write_tsid.metric_id,
                                    'SystemError', current_period_end_time - current_time)
                     break
 
             if not error:
                 total_time = current_period_end_time - current_time
                 for element in time_spent_list:
-                    self.push_data(current_period_end_time, element[0], element[1], element[2])
-                    total_time -= int(element[2])
-                if total_time != 0:
+                    self.__push_data(current_period_end_time, element[0], element[1], element[2])
+                    total_time -= (element[2])
+                if total_time != 0.0:
                     print("STATE ERROR: Time unaccounted for between Start:" + str(current_time) + " End:" + str(
                         current_period_end_time))
                     total_missed_time += total_time
