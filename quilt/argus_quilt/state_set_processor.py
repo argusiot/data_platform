@@ -18,11 +18,12 @@ from argus_tal import query_api
 from argus_tal import timestamp as ts
 from argus_tal import basic_types as bt
 from argus_tal.timeseries_datadict import LookupQualifier, TimeseriesDataDict
+from argus_tal.write import WriteApi
 
 
 class StateSetProcessor(object):
     def __init__(self, name, temporal_state_obj_list,
-                 tsdb_hostname_or_ip, tsdb_port):
+                 tsdb_hostname_or_ip, tsdb_port, system_err_ts_id_obj):
 
         self.__name = str(name)
 
@@ -34,6 +35,10 @@ class StateSetProcessor(object):
         #   - writes are done to write the state computation result.
         self.__tsdb_hostname_or_ip = tsdb_hostname_or_ip
         self.__tsdb_port_num = tsdb_port
+
+        # This state is used to account for system errors during a Quilt
+        # computation.
+        self.__system_err_ts_id_obj = system_err_ts_id_obj
 
         # Optimization:
         # Collect all the timeseries IDs in a set. Later when we peridiocally
@@ -82,19 +87,6 @@ class StateSetProcessor(object):
         result_map = foo.get_result_map()
 
         return result_map
-
-    def push_data(self, timestamp, metric, state, value):
-        url = 'http://%s:%d/api/put' % (self.__tsdb_hostname_or_ip,
-                                        self.__tsdb_port_num)
-        headers = {'content-type': 'application/json'}
-        datapoint = {}
-        datapoint['metric'] = metric
-        datapoint['timestamp'] = timestamp
-        datapoint['value'] = value
-        datapoint['tags'] = {}
-        datapoint['tags']['state'] = state
-        response = requests.post(url, data=json.dumps(datapoint), headers=headers)
-        return response, datapoint['timestamp']
 
     def __calculate_y_intercept(self, p1_coordinates, p2_coordinates, x_intercept):
         x1, y1 = p1_coordinates
@@ -168,22 +160,21 @@ class StateSetProcessor(object):
             for t_state in self.__temporal_state_obj_list:
                 try:
                     time_spent = t_state.do_computation(result_map)
-                    time_spent_list.append((t_state.write_tsid.metric_id,
-                                            t_state.write_tsid.filters.get('state_label'), time_spent))
-                    # self.push_data(min_end_ts, t_state.write_tsid.metric_id,
-                    #                t_state.write_tsid.filters.get('state_label'), time_spent)
+                    time_spent_list.append((t_state.write_tsid, time_spent))
                 except ValueError as e:
                     print(e)
                     print("ERROR: Processing Start:" + str(current_time) + " End:" + str(current_period_end_time))
                     error = True
-                    self.push_data(current_period_end_time, t_state.write_tsid.metric_id,
-                                   'SystemError', current_period_end_time - current_time)
+                    WriteApi.timeseries(current_period_end_time,
+                        self.__system_err_ts_id_obj,
+                        current_period_end_time - current_time)
                     break
 
             if not error:
                 total_time = current_period_end_time - current_time
                 for element in time_spent_list:
-                    self.push_data(current_period_end_time, element[0], element[1], element[2])
+                    ts_id, value = element
+                    WriteApi.timeseries(current_period_end_time, ts_id, value)
                     total_time -= int(element[2])
                 if total_time != 0:
                     print("STATE ERROR: Time unaccounted for between Start:" + str(current_time) + " End:" + str(
@@ -224,3 +215,14 @@ class StateSetProcessor(object):
     # production code.
     def _get_temporal_obj_list(self):
         return self.__temporal_state_obj_list
+
+    # This method is meant to be used for testing only. Should NOT be used in
+    # production code.
+    # RESUME: ADD UNIT TEST FOR THIS
+    # RESUME: ADD UNIT TEST FOR THIS
+    # RESUME: ADD UNIT TEST FOR THIS
+    # RESUME: ADD UNIT TEST FOR THIS
+    # RESUME: ADD UNIT TEST FOR THIS
+    # RESUME: ADD UNIT TEST FOR THIS
+    def _get_system_error_obj_id(self):
+        return self.__system_err_ts_id_obj

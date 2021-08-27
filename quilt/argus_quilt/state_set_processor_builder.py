@@ -75,7 +75,8 @@ class StateSetProcessorBuilder(object):
        Iterate over state definitions to construct:
          2a) output ts_id object (for each state)
          2b) a list of TemporalState objects using 2a & #1
-    3. Use #2 to construct the StateSetProcessor object
+    3. Construct a system_err_ts_id to record 'SystemError' state.
+    4. Use #2 & #3 to construct the StateSetProcessor object
 
     To understand the format of new_request, please see
     sample_state_set_provisioning_request.json
@@ -139,8 +140,18 @@ class StateSetProcessorBuilder(object):
             temporal_state_obj_list.append(TemporalState( \
                 state_label, state_expr_list, out_ts_id_obj))
 
+        '''
+        3. Construct a system_err_ts_id to record 'SystemError' state.
+
+           This is a special timeseries_id that has the same metric as that
+           defined in the output metric section, but the state is an internal
+           state called "SystemError"
+        '''
+        temp_tags = dict(output_tag_template)
+        temp_tags["state_label"] = 'SystemError'
+        system_err_ts_id_obj = TimeseriesID(output_metric, temp_tags)
+
         self.__build_success_count += 1
-        return StateSetProcessor(new_request["name"],
-                                 temporal_state_obj_list,
+        return StateSetProcessor(new_request["name"], temporal_state_obj_list,
                                  self.__tsdb_hostname_or_ip,
-                                 self.__tsdb_port_num)
+                                 self.__tsdb_port_num, system_err_ts_id_obj)
