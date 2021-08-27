@@ -111,17 +111,17 @@ class StateSetProcessor(object):
     Objective:
     ----------
     Perform interpolation of data points to fill gaps in provided timeseries.
-    
+
     Input:
     ------
     Start time, end time and periodicity. The timeseries ids are accessed from class
     level variables.
-    
+
     Return:
     -------
     Output time series with data points present for each second(or the periodicity 
     requested) in the time window.
-    
+
     Method:
     -------
     Consider periodicity requested by user is 1 second and the start and end time 
@@ -130,51 +130,83 @@ class StateSetProcessor(object):
     90 second range to perform meaningful interpolation for the entire 30sec window requested.
 
     Below are few cases which we will encounter:
-    
+
     Each * represents a data point being present at that time
-    Case a: 
+    Case a: Data point present at start & end time stamps. Arbitrary data points
+            in the middle.
            Time: 0 --------------- 30
            Data: * *    *   *       *
-    Case b: 
+    Case b: Data point present at the start AND NOT at the end time stamp.
+            Arbitrary data points in the middle.
            Time: 0 --------------- 30
-           Data: *    *      *      
-    Case c: 
+           Data: *    *      *
+    Case c: NO data point present at the start time stamp but data point
+            present at the end. Arbitrary data points in the middle.
            Time: 0 --------------- 30
            Data:     *   *    *     *
-    Case d: 
+    Case d: NO data points at the start and end, but arbitary data points
+            (more than 1 present in between).
            Time: 0 --------------- 30
-           Data:      *    *   *  
-    Case e: 
+           Data:      *    *   *
+    Case e: NO data points at the start and end, AND exactly 1 data point
+            present in somewhere in between.
            Time: 0 --------------- 30
-           Data:      *    
-    Case f: 
+           Data:      *
+    Case f: No data present anywhere in the time window.
            Time: 0 --------------- 30
-           Data:         
-    
+           Data:
+
     TBD: Further explanation of interpolation and variable states.
 
     '''
-
     # NOTE!! Time from Epoch currently at second level granularity
     def __build_sync_interpolated_data(self, start_time, end_time, periodicity):
+
+        # IMPORTANT: This code has been written to work for any value of
+        # priodicity, BUT has been tested for only the value of 1. Until we
+        # do that, we keep this assert to protect ourselves.
+        assert periodicity == 1, "Only periodicity of 1 is supported"
+
         pseudo_start_timestamp = ts.Timestamp(start_time - self.__additional_query_window)
         pseudo_end_timestamp = ts.Timestamp(end_time + self.__additional_query_window)
-        tsdd_map = self.getTimeSeriesData(list(self.__read_tsids), pseudo_start_timestamp, pseudo_end_timestamp)
+        tsdd_map = self.getTimeSeriesData(list(self.__read_tsids),
+                                          pseudo_start_timestamp,
+                                          pseudo_end_timestamp)
         result_map = {}
 
+        # We got a query response from getTimeSeriesData(). We're now going to
+        # process the query results for interpolation and guarantee that
+        # a datapoint exists at the requested periodicty.
         for fqid, tsdd in tsdd_map.items():
             data_points = OrderedDict()
             tsid = tsdd.get_timeseries_id()
-            prev_element = (0, 0)
+
+            '''
+            This loop below is interpolating data between prev_element
+            current element, where current element is represented by
+            (key, value).
+
+            Points to note:
+            1) It is guaranteed that for any timestamp (greater than start time
+            and) less than prev_element the property of data being iterpolated
+            at the requested periodicty is true.
+            2) Nothing interesting happens until we encounter the first
+            (key, value) where the key is larger than the requested start_time.
+            '''
+            prev_element = (0, 0)   # (time, value)
             for cur_index, (key, value) in enumerate(tsdd):
+                # Note: cur_index is only used to identify the first element.
                 if cur_index == 0 and key > start_time:
+                    # First element needs special handling.
                     data_points.update({key: value})
                     prev_element = (key, value)
                     continue
-                elif key < start_time:
+                elif key < start_time:  # Skipping until we get to start_time.
                     prev_element = (key, value)
                     continue
                 else:
+                    # The fun begins here ...we've found a data point where
+                    # timestamp (i.e. key) is larger than start_time....
                     if key - prev_element[0] == periodicity:
                         data_points.update({key: value})
                     else:
