@@ -231,12 +231,11 @@ class StateSetProcessor(object):
         return result_map
 
     def one_shot(self, start_time, end_time, output_granularity_in_sec):
-        total_missed_time = 0.0  # Temporary test variable
+        total_missed_time = 0.0
         current_time = start_time
         while current_time < end_time:
             current_period_end_time = current_time + output_granularity_in_sec
             result_map = self.__build_sync_interpolated_data(current_time, current_period_end_time, 1)
-            # result_map = self.getTimeSeriesData(list(self.__read_tsids), start_timestamp, end_timestamp)
 
             time_spent_list = []
             error = False

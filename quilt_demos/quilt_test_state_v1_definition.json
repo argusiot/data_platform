@@ -58,7 +58,7 @@
             }
         ],
         "output_timeseries_template" : {
-            "metric" : "quilt.test_state_v1_addn_interpolated",
+            "metric" : "quilt.test_state_v1",
             "tags" : { "machine" : "90mm_extruder", "state_label" : "PLACEHOLDER" }
         }
 }
