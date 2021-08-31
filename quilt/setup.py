@@ -10,7 +10,7 @@ with open('LICENSE') as f:
 
 setup(
     name='argusquilt',
-    version='0.1.2',
+    version='0.1.3',
     description='Argus Quilt: Stitch timeseries to develop appliqe',
     long_description=readme,
     install_requires=['jsonschema'],

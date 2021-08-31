@@ -1,0 +1,41 @@
+##############################################################################
+# Makefile.quilt_deployment_workflows
+#
+# To use: cp Makefile.quilt_deployment_workflows <your_host>/Makefile
+# i.e. rename it as Makefile before using
+#
+# Description:
+# This ia a feeble attempt to capture all the typical commands needed for Quilt
+# deployment on the service node where Quilt for customer data is being run
+#
+# This is a handy Makefile to be used on the target hosts where Quilt and TAL
+# are being deployed. This Makefile is NOT meant for the host development
+# machine.
+#
+##############################################################################
+
+QUILT_LATEST_RELEASE:=0.1.3
+TAL_LATEST_RELEASE:=0.1.2
+
+QUILT_WHL:=argusquilt-${QUILT_LATEST_RELEASE}-py3-none-any.whl
+TAL_WHL:=argustal-${TAL_LATEST_RELEASE}-py3-none-any.whl
+
+uninstall_quilt:
+	pip3 uninstall argusquilt
+
+uninstall_tal:
+	pip3 uninstall argustal
+
+uninstall_all:
+	pip3 uninstall argus*
+
+install_quilt:
+	python3 -m pip install ${QUILT_WHL}
+
+install_tal:
+	python3 -m pip install ${TAL_WHL}
+
+install_all:
+	make install_tal
+	make install_quilt
+	python3 -m pip list --format=columns | grep argus

@@ -75,7 +75,9 @@ class StateSetProcessorBuilder(object):
        Iterate over state definitions to construct:
          2a) output ts_id object (for each state)
          2b) a list of TemporalState objects using 2a & #1
-    3. Use #2 to construct the StateSetProcessor object
+    3. If any optional global query params have been supplied e.g.millisec
+       query response, pick those options up.
+    4. Use #2 & #3 to construct the StateSetProcessor object
 
     To understand the format of new_request, please see
     sample_state_set_provisioning_request.json
@@ -139,8 +141,16 @@ class StateSetProcessorBuilder(object):
             temporal_state_obj_list.append(TemporalState( \
                 state_label, state_expr_list, out_ts_id_obj))
 
+        '''
+        3. Pull out any optional query parameters.
+        '''
+        flag_msec_query_resp = False
+        if "query_params" in new_request.keys():
+            flag_msec_query_resp = new_request["query_params"]["msec_response"]
+
         self.__build_success_count += 1
         return StateSetProcessor(new_request["name"],
                                  temporal_state_obj_list,
                                  self.__tsdb_hostname_or_ip,
-                                 self.__tsdb_port_num)
+                                 self.__tsdb_port_num,
+                                 flag_msec_query_resp)

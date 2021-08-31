@@ -18,6 +18,7 @@ build_package:
 	echo "A distributable wheel file is generated under dist/"
 
 install:
+	make clean
 	make build_package
 	python3 -m pip install dist/argustal-*.whl
 
@@ -26,3 +27,11 @@ uninstall:
 
 clean:
 	rm -rf argustal.egg-info build dist
+
+release_for_parag_env:
+	# /quilt_deployment/ is a local directory mounted into Vagrant which
+	# stores released files. This becomes a 'poor man's artefactory'
+	# release.
+	make clean
+	make build_package
+	cp dist/argustal-*.whl /quilt_deployment/

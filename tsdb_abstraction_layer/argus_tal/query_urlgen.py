@@ -16,6 +16,7 @@ from . import basic_types as bt
 tsdb_queryurl_templates = {
   bt.Tsdb.OPENTSDB: {
     'base_url': "http://%s:%d/api/query?start=%s&end=%s",
+    'base_url_with_ms': "http://%s:%d/api/query?start=%s&end=%s&ms=true",
     'metric_suburl': "&m=%s:%s{%s}",
     'metric_suburl_with_rate': "&m=%s:rate:%s{%s}"
   }
@@ -38,15 +39,19 @@ def filters_to_str(q_filters):
    - Construct metric suburl pieces from the timeseries IDs.
    - Combine base URL and metric suburls into a single fully qualified URL.
 '''
-def url(tsdb_type, host, tcpport, start_time, end_time, \
-        query_aggregator, tsid_list, flag_compute_rate=False):
+def url(tsdb_type, host, tcpport, start_time, end_time, query_aggregator,
+        tsid_list, flag_compute_rate=False, flag_ms_response=False):
 
   # point to TSDB specific templates.
   templates = tsdb_queryurl_templates[tsdb_type]
 
-  # Construct base URL --
-  base_url = templates['base_url'] % (host, tcpport, \
-                                      start_time.value, end_time.value)
+  # Select the base URL template. We use different template based on whether
+  # millisecond response is requested by the caller (or not).
+  if flag_ms_response:
+      url_template = templates['base_url_with_ms']
+  else:
+      url_template = templates['base_url']
+  base_url = url_template % (host, tcpport, start_time.value, end_time.value)
 
   # For brevity, suburl = surl
 

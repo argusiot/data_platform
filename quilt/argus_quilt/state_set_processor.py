@@ -22,7 +22,9 @@ from argus_tal.timeseries_datadict import LookupQualifier, TimeseriesDataDict
 
 class StateSetProcessor(object):
     def __init__(self, name, temporal_state_obj_list,
-                 tsdb_hostname_or_ip, tsdb_port, additional_query_window=30):
+                 tsdb_hostname_or_ip, tsdb_port, flag_msec_query_response,
+                 flag_interpolation_needed=True,
+                 additional_query_window=30):
 
         self.__name = str(name)
 
@@ -35,6 +37,43 @@ class StateSetProcessor(object):
         self.__tsdb_hostname_or_ip = tsdb_hostname_or_ip
         self.__tsdb_port_num = tsdb_port
 
+        # Flag to control the response time granularity.
+        #
+        # Default OpenTSDB query response is with seconds timestamp. This flag
+        # allows us to change that to get a millisecond timestamp response.
+        self.__flag_msec_response = flag_msec_query_response
+
+        '''
+        High level flag to control whether interpolation is enabled or not.
+
+        This is a slighly short term solution and needs more thoughts. There
+        are two conditions that control the behaviour of this flag.
+
+        Firstly:
+            We assume that if data is being requested at msec granularity, then
+            no interpolation is needed BECAUSE:
+             a) there is no data loss
+             b) data across different timeseries is already synchronized
+
+        Secondly:
+            Our interpolation logic assumes a "+1" increment in time (see the
+            relevant assert in __build_sync_interpolated_data()). As a result
+            naiively running interpolation on millisec granularity responses
+            causes data explosion.
+
+        Hence if msec query response is enabled, we simply turn off
+        interpolation.
+        '''
+        if self.__flag_msec_response:
+            self.__flag_interpolation_enabled = False
+        else:
+            self.__flag_interpolation_enabled = True
+
+        # To support interpolation.
+        # If we want data to be interpolated at a fixed 'period' sometimes we
+        # may need to pad the query window with a little extra time before and
+        # after the requested query window. This additional_query_window
+        # determines how much that extra padding should be.
         self.__additional_query_window = additional_query_window
 
         # Optimization:
@@ -75,7 +114,7 @@ class StateSetProcessor(object):
             start_timestamp, end_timestamp,
             list_ts_ids,
             bt.Aggregator.NONE,
-            False,
+            flag_ms_response=self.__flag_msec_response
         )
 
         rv = foo.populate_ts_data()
@@ -155,9 +194,6 @@ class StateSetProcessor(object):
     Case f: No data present anywhere in the time window.
            Time: 0 --------------- 30
            Data:
-
-    TBD: Further explanation of interpolation and variable states.
-
     '''
     # NOTE!! Time from Epoch currently at second level granularity
     def __build_sync_interpolated_data(self, start_time, end_time, periodicity):
@@ -173,6 +209,16 @@ class StateSetProcessor(object):
                                           pseudo_start_timestamp,
                                           pseudo_end_timestamp)
         result_map = {}
+
+        # If interpolation is not requested, we're done here. Lets build
+        # result_map and return.
+        if not self.__flag_interpolation_enabled:
+            for fqid, tsdd in tsdd_map.items():
+                tsid = tsdd.get_timeseries_id()
+                result_map.update({tsid.fqid: tsdd})
+            return result_map
+
+        # Looks like interpolation is needed...let the fun begin !
 
         # We got a query response from getTimeSeriesData(). We're now going to
         # process the query results for interpolation and guarantee that

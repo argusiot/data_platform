@@ -1,0 +1,124 @@
+{
+    "minimum_state_set_defn" : {
+        "name": "extruder_states",
+        "uuid": "xxxxxxxxxxxxxxx",
+        "state_definitions" : [ ],
+        "input_timeseries" : [
+          {
+           "ts_name" : "timeseries1",
+           "ts_defn" : { "metric": "bar", "tags" : {} }
+          }
+        ],
+        "output_timeseries_template" : {
+          "metric":"foo", "tags" : {}
+        }
+    },
+
+    "1_series_2_state_set_defn" : {
+        "name": "trivial_state_set",
+        "uuid": "xxxxxxxxxxxxxxx",
+        "state_definitions" : [
+            {
+               "label" : "state1",
+               "expression" : [
+                  ["timeseries1", ">", 100]
+               ],
+               "expression_operator" : "AND"
+            },
+            {
+               "label" : "opposite_of_state1",
+               "expression" : [
+                  ["timeseries1", "<=", 100]
+               ],
+               "expression_operator" : "AND"
+            }
+        ],
+        "input_timeseries" : [
+            {
+                "ts_name" : "timeseries1",
+                "ts_defn" : {
+                    "metric": "foo",
+                    "tags" : { "key1" : "value1" }
+                }
+            }
+        ],
+        "output_timeseries_template" : {
+            "metric" : "foobar",
+            "tags" : { "machine" : "xyz", "state_label" : "PLACEHOLDER" }
+        }
+    },
+
+    "state_defn_with_GOOD_query_params" : {
+        "name": "trivial_state_set",
+        "uuid": "xxxxxxxxxxxxxxx",
+        "state_definitions" : [
+            {
+               "label" : "state1",
+               "expression" : [
+                  ["timeseries1", ">", 100]
+               ],
+               "expression_operator" : "AND"
+            },
+            {
+               "label" : "opposite_of_state1",
+               "expression" : [
+                  ["timeseries1", "<=", 100]
+               ],
+               "expression_operator" : "AND"
+            }
+        ],
+	"query_params" : {
+	    "msec_response": true
+	},
+        "input_timeseries" : [
+            {
+                "ts_name" : "timeseries1",
+                "ts_defn" : {
+                    "metric": "foo",
+                    "tags" : { "key1" : "value1" }
+                }
+            }
+        ],
+        "output_timeseries_template" : {
+            "metric" : "foobar",
+            "tags" : { "machine" : "xyz", "state_label" : "PLACEHOLDER" }
+        }
+    },
+
+    "state_defn_with_BAD_query_params" : {
+        "name": "trivial_state_set",
+        "uuid": "xxxxxxxxxxxxxxx",
+        "state_definitions" : [
+            {
+               "label" : "state1",
+               "expression" : [
+                  ["timeseries1", ">", 100]
+               ],
+               "expression_operator" : "AND"
+            },
+            {
+               "label" : "opposite_of_state1",
+               "expression" : [
+                  ["timeseries1", "<=", 100]
+               ],
+               "expression_operator" : "AND"
+            }
+        ],
+	"query_params" : {
+	},
+        "input_timeseries" : [
+            {
+                "ts_name" : "timeseries1",
+                "ts_defn" : {
+                    "metric": "foo",
+                    "tags" : { "key1" : "value1" }
+                }
+            }
+        ],
+        "output_timeseries_template" : {
+            "metric" : "foobar",
+            "tags" : { "machine" : "xyz", "state_label" : "PLACEHOLDER" }
+        }
+    }
+}
+

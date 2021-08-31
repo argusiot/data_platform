@@ -27,6 +27,10 @@ def mocked_requests_get(*args, **kwargs):
         return MockResponse(hh.get_truncated_json_response(), 200)
     elif args[0] == hh.get_url_for_dummy_query_params_with_rate():
         return MockResponse(hh.get_good_json_response_for_rate(), 200)
+    elif args[0] == hh.get_url_for_dummy_query_params_with_ms_response():
+        return MockResponse(hh.get_good_msec_json_response(), 200)
+    elif args[0] == hh.get_url_for_query_params_with_maxsize_64bits():
+        return MockResponse(hh.get_json_response_for_maxsize_on_64bit(), 200)
 
     return MockResponse(None, 404)
 
@@ -153,6 +157,54 @@ class QueryApi_Tests(unittest.TestCase):
 
       # Assert that our mocked method was called with the right parameters
       self.assertIn(mock.call(hh.get_url_for_dummy_query_params_with_rate()), \
+                              mock_get.call_args_list)
+
+    @mock.patch('requests.get', side_effect=mocked_requests_get)
+    def test_single_metric_query_with_millisecond_response(self, mock_get):
+      host, port, metric, query_filters, aggregator, start, end = \
+        hh.get_dummy_query_params_for_ms_response()
+      expected_dps = hh.get_sorted_datapoints_for_ms_response()
+
+      input_tsid = ts_id.TimeseriesID(metric, query_filters)
+      api = query_api.QueryApi(host, port, start, end, [input_tsid], aggregator,
+                               flag_ms_response=True)
+      retval = api.populate_ts_data()  # FIXME: I'm conflicted whether to use
+                                       # exceptions or return value here !!
+      self.assertTrue(retval == 0)  # eok
+
+      # Data population was successful... good ! Now we can peek/poke at the
+      # result set.
+      tsdd_list = api.get_result_set()
+      self.assertEqual(len(tsdd_list), 1)  # Expect exctly 1 object in the list.
+      self.__verify_tsdd_result_obj(tsdd_list[0], input_tsid, expected_dps)
+
+      # Assert that our mocked method was called with the right parameters
+      self.assertIn(mock.call(hh.get_url_for_dummy_query_params_with_ms_response()), \
+                              mock_get.call_args_list)
+
+    # This test case is to ensure that the largest signed 64bit number if
+    # returned in the query response, doesn't cause us to crash and burn.
+    @mock.patch('requests.get', side_effect=mocked_requests_get)
+    def test_single_metric_query_with_maxsize_64bits(self, mock_get):
+      host, port, metric, query_filters, aggregator, start, end = \
+        hh.get_query_params_for_maxsize_64bits()
+      expected_dps = hh.get_datapoints_for_maxsize_on_64bit()
+
+      input_tsid = ts_id.TimeseriesID(metric, query_filters)
+      api = query_api.QueryApi(host, port, start, end, [input_tsid], aggregator,
+                               flag_ms_response=True)
+      retval = api.populate_ts_data()  # FIXME: I'm conflicted whether to use
+                                       # exceptions or return value here !!
+      self.assertTrue(retval == 0)  # eok
+
+      # Data population was successful... good ! Now we can peek/poke at the
+      # result set.
+      tsdd_list = api.get_result_set()
+      self.assertEqual(len(tsdd_list), 1)  # Expect exctly 1 object in the list.
+      self.__verify_tsdd_result_obj(tsdd_list[0], input_tsid, expected_dps)
+
+      # Assert that our mocked method was called with the right parameters
+      self.assertIn(mock.call(hh.get_url_for_query_params_with_maxsize_64bits()), \
                               mock_get.call_args_list)
 
     #

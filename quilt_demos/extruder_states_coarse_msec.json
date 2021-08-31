@@ -3,7 +3,7 @@
         "uuid": "xxxxxxxxxxxxxxx",
         "state_definitions" : [
             {
-               "label" : "TestStateV1_ON_Producing",
+               "label" : "ON_Producing",
                "expression" : [
                  ["machine_power", "==", 1],
                  ["melt_temperature", ">=", 115]
@@ -11,7 +11,7 @@
                "expression_operator" : "AND"
             },
             {
-               "label" : "TestStateV1_ON_Overhead",
+               "label" : "ON_Overhead",
                "expression" : [
                  ["machine_power", "==", 1],
                  ["melt_temperature", "<", 115]
@@ -19,7 +19,7 @@
                "expression_operator" : "AND"
             },
             {
-               "label" : "TestStateV1_MachineOFF",
+               "label" : "Power_OFF",
                "expression" : [
                  ["machine_power", "<", 1],
                  ["melt_temperature", "<=", 200]
@@ -27,6 +27,9 @@
                "expression_operator" : "AND"
             }
         ],
+	"query_params" : {
+	    "msec_response": true
+	},
         "input_timeseries" : [
             {
                 "ts_name" : "melt_temperature",
@@ -35,10 +38,10 @@
                     "tags" : {
 		               "machine_type": "EXTRUDER",
 			       "unit": "deg_C",
-			       "shift_id": "1",
 			       "port_num": "1",
-			       "industry": "WIRE_AND_CABLE_MANUFACTURING",
-			       "machine_name" : "90mm_extruder"
+			       "machine_name" : "90mm_extruder",
+			       "machine_location" : "SIN",
+			       "machine_site" : "WCPL-1"
 		             }
                 }
             },
@@ -49,16 +52,16 @@
                     "tags" : {
 		               "machine_type": "EXTRUDER",
 			       "unit": "Binary",
-			       "shift_id": "1",
 			       "port_num": "5",
-			       "industry": "WIRE_AND_CABLE_MANUFACTURING",
-			       "machine_name" : "90mm_extruder"
+			       "machine_name" : "90mm_extruder",
+			       "machine_location" : "SIN",
+			       "machine_site" : "WCPL-1"
 		             }
                 }
             }
         ],
         "output_timeseries_template" : {
-            "metric" : "quilt.test_state_v1",
+            "metric" : "quilt.extruder_states_coarse_msec",
             "tags" : { "machine" : "90mm_extruder", "state_label" : "PLACEHOLDER" }
         }
 }
