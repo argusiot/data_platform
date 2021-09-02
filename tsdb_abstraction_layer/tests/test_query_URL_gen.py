@@ -97,5 +97,53 @@ class QueryURLGenerator_Tests(unittest.TestCase):
       "&m=none:machine.sensor.raw_melt_temperature{tag1=val1,tag2=val2,tag3=val3}" \
     )
 
+  def test_single_metric_url_with_millisecond_response(self):
+    url = qurlg.url(self.__tsdb_type, self.__host, self.__port, \
+                    self.__start_time, self.__end_time, \
+                    self.__query_agg, [self.__tsid1], flag_ms_response=True)
+    self.assertEqual( \
+      url, \
+      "http://34.221.154.248:4242/api/query?start=1592530632&end=1592530682" \
+      "&ms=true&m=none:machine.sensor.raw_melt_temperature{port_num=1}" \
+    )
+
+  def test_single_metric_url_with_millisecond_response_and_rate(self):
+    url = qurlg.url(self.__tsdb_type, self.__host, self.__port,
+                    self.__start_time, self.__end_time,
+                    self.__query_agg, [self.__tsid1],
+                    flag_ms_response=True, flag_compute_rate=True)
+    self.assertEqual( \
+      url, \
+      "http://34.221.154.248:4242/api/query?start=1592530632&end=1592530682" \
+      "&ms=true&m=none:rate:machine.sensor.raw_melt_temperature{port_num=1}" \
+    )
+
+  def test_multi_metric_url_with_millisecond_response(self):
+    url = qurlg.url(self.__tsdb_type, self.__host, self.__port, \
+                    self.__start_time, self.__end_time, \
+                    self.__query_agg, self.__tsid_list, flag_ms_response=True)
+    self.assertEqual( \
+      url, \
+      "http://34.221.154.248:4242/api/query?start=1592530632&end=1592530682" \
+      "&ms=true"
+      "&m=none:machine.sensor.raw_melt_temperature{port_num=1}" \
+      "&m=none:machine.sensor.raw_melt_pressure{port_num=1}" \
+      "&m=none:machine.sensor.raw_screw_speed{port_num=1}" \
+    )
+
+  def test_multi_metric_url_with_rate_and_millisecond_response(self):
+    url = qurlg.url(self.__tsdb_type, self.__host, self.__port,
+                    self.__start_time, self.__end_time,
+                    self.__query_agg, self.__tsid_list,
+                    flag_ms_response=True, flag_compute_rate=True)
+    self.assertEqual( \
+      url, \
+      "http://34.221.154.248:4242/api/query?start=1592530632&end=1592530682"
+      "&ms=true"
+      "&m=none:rate:machine.sensor.raw_melt_temperature{port_num=1}"
+      "&m=none:rate:machine.sensor.raw_melt_pressure{port_num=1}"
+      "&m=none:rate:machine.sensor.raw_screw_speed{port_num=1}"
+    )
+
 if __name__ == '__main__':
   unittest.main()

@@ -76,7 +76,9 @@ class StateSetProcessorBuilder(object):
          2a) output ts_id object (for each state)
          2b) a list of TemporalState objects using 2a & #1
     3. Construct a system_err_ts_id to record 'SystemError' state.
-    4. Use #2 & #3 to construct the StateSetProcessor object
+    4. If any optional global query params have been supplied e.g.millisec
+       query response, pick those options up.
+    5. Use #2, #3 & #4 to construct the StateSetProcessor object
 
     To understand the format of new_request, please see
     sample_state_set_provisioning_request.json
@@ -151,7 +153,16 @@ class StateSetProcessorBuilder(object):
         temp_tags["state_label"] = 'SystemError'
         system_err_ts_id_obj = TimeseriesID(output_metric, temp_tags)
 
+        '''
+        4. Pull out any optional query parameters.
+        '''
+        flag_msec_query_resp = False
+        if "query_params" in new_request.keys():
+            flag_msec_query_resp = new_request["query_params"]["msec_response"]
+
         self.__build_success_count += 1
         return StateSetProcessor(new_request["name"], temporal_state_obj_list,
                                  self.__tsdb_hostname_or_ip,
-                                 self.__tsdb_port_num, system_err_ts_id_obj)
+                                 self.__tsdb_port_num,
+                                 system_err_ts_id_obj,
+                                 flag_msec_query_resp)

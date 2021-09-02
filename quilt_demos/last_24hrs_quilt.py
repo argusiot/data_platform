@@ -38,8 +38,8 @@ def generate_quilt(quilt_run_description, state_spec_filepath):
         print("%s: run success" % log_str_prefix)
 
 def main():
-    generate_quilt("3 state quilt", "/home/ubuntu/quilt/quilt_test_state_v1_definition.json")
-    generate_quilt("4 state quilt", "/home/ubuntu/quilt/extruder_states.json")
+    generate_quilt("Coarse state quilt", "/home/ubuntu/quilt/appliques/extruder_states_coarse.json")
+    generate_quilt("Fine state quilt", "/home/ubuntu/quilt/appliques/extruder_states_fine.json")
 
 if __name__ == '__main__':
     main()

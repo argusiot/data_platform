@@ -16,8 +16,9 @@ build_package:
 	echo "A distributable wheel file is generated under dist/"
 
 install:
-	make build_package
-	python3 -m pip install dist/argusquilt-*.whl
+	make clean  # Ensure that all old wheel files are removed
+	make build_package  # Build new whl file
+	python3 -m pip install dist/argusquilt-*.whl  # Install wheel file
 
 uninstall:
 	pip3 uninstall argusquilt
@@ -29,3 +30,10 @@ clean:
 integration_test:
 	cd integration_tests ; python3 it_main.py
 
+release_for_parag_env:
+	# /quilt_deployment/ is a local directory mounted into Vagrant which
+	# stores released files. This becomes a 'poor man's artefactory'
+	# release.
+	make clean
+	make build_package
+	cp dist/argusquilt-*.whl /quilt_deployment/
