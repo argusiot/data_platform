@@ -143,7 +143,7 @@ class StateSetProcessorBuilder(object):
                 state_label, state_expr_list, out_ts_id_obj))
 
         '''
-        3. Construct a system_err_ts_id to record 'SystemError' state.
+        3a. Construct a system_err_ts_id to record 'SystemError' state.
 
            This is a special timeseries_id that has the same metric as that
            defined in the output metric section, but the state is an internal
@@ -152,6 +152,21 @@ class StateSetProcessorBuilder(object):
         temp_tags = dict(output_tag_template)
         temp_tags["state_label"] = 'SystemError'
         system_err_ts_id_obj = TimeseriesID(output_metric, temp_tags)
+
+        '''
+        3b. Construct an other_state_ts_id to record time discrepancies
+
+           This is a special special timeseries_id that has the same metric as
+           that defined in the output metric section, but the state is an
+           internal state called "__OtherState", that is used as a
+           representation of gaps or overlaps of the user defined states.
+           As a special case this time series would represent an "else"
+           bucket, i.e. the time the system spends in a state not defined by
+           the specified states.
+        '''
+        temp_tags = dict(output_tag_template)
+        temp_tags["state_label"] = '__OtherState'
+        other_state_ts_id = TimeseriesID(output_metric, temp_tags)
 
         '''
         4. Pull out any optional query parameters.
@@ -165,4 +180,5 @@ class StateSetProcessorBuilder(object):
                                  self.__tsdb_hostname_or_ip,
                                  self.__tsdb_port_num,
                                  system_err_ts_id_obj,
-                                 flag_msec_query_resp)
+                                 flag_msec_query_resp,
+                                 other_state_ts_id_obj = other_state_ts_id)

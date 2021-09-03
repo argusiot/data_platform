@@ -25,7 +25,7 @@ class StateSetProcessor(object):
     def __init__(self, name, temporal_state_obj_list,
                  tsdb_hostname_or_ip, tsdb_port, system_err_ts_id_obj,
                  flag_msec_query_response, flag_interpolation_needed=True,
-                 additional_query_window=30):
+                 additional_query_window=30, other_state_ts_id_obj=None):
 
         self.__name = str(name)
 
@@ -41,6 +41,10 @@ class StateSetProcessor(object):
         # This state is used to account for system errors during a Quilt
         # computation.
         self.__system_err_ts_id_obj = system_err_ts_id_obj
+
+        # This state is used to tally discrepancies in the time spent in
+        # defined states during a Quilt computation.
+        self.__other_state_ts_id_obj = other_state_ts_id_obj
 
         # Flag to control the response time granularity.
         #
@@ -296,9 +300,24 @@ class StateSetProcessor(object):
                     ts_id, value = element
                     WriteApi.timeseries(current_period_end_time, ts_id, value)
                     total_time -= int(element[2])
+
+                if self.__other_state_ts_id_obj:
+                    # Save the total time value in the __OtherState ts.
+                    # If this value is non-zero, it means that the user defined
+                    # states, doesn't describe all states that input series can
+                    # be in (total_time >0) or the user states overlap
+                    # (total_time <0).
+                    #  As a special case this time series would represent the
+                    # "else" bucket, i.e. the time the system spends in a state
+                    # not defined by the specified states.
+                    WriteApi.timeseries(current_period_end_time,
+                                        self.__other_state_ts_id_obj,
+                                        total_time)
+
                 if total_time != 0:
-                    print("STATE ERROR: Time unaccounted for between Start:" + str(current_time) + " End:" + str(
-                        current_period_end_time))
+                    print(f"STATE ERROR: Time mismatch in window: Start: "
+                          f"{current_time} End: {current_period_end_time} "
+                          f"tdiff = {total_time}")
                     total_missed_time += total_time
             current_time = current_period_end_time
         return
