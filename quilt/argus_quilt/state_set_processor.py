@@ -299,7 +299,7 @@ class StateSetProcessor(object):
                 for element in time_spent_list:
                     ts_id, value = element
                     WriteApi.timeseries(current_period_end_time, ts_id, value)
-                    total_time -= int(element[2])
+                    total_time -= value
 
                 if self.__other_state_ts_id_obj:
                     # Save the total time value in the __OtherState ts.
@@ -314,7 +314,7 @@ class StateSetProcessor(object):
                                         self.__other_state_ts_id_obj,
                                         total_time)
 
-                if total_time != 0:
+                if total_time != 0.0:
                     print(f"STATE ERROR: Time mismatch in window: Start: "
                           f"{current_time} End: {current_period_end_time} "
                           f"tdiff = {total_time}")
