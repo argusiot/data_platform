@@ -10,7 +10,7 @@
 # Document is visible to everyone in the ArgusIoT org.
 
 [Interface]
-Address = 192.168.40.254/24
+Address = 192.168.30.254/24
 ListenPort = 41194
 # PrivateKey = ADD_PRIVATE_KEY_HERE
  
