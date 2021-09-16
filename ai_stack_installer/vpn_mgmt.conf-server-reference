@@ -12,7 +12,6 @@
 [Interface]
 Address = 192.168.30.254/24
 ListenPort = 41194
-# PrivateKey = ADD_PRIVATE_KEY_HERE
- 
+PrivateKey = PLACEHOLDER_REPLACE_WITH_GENERATED_KEY
 
-# Add Peer below here and delete this line.
+# Add [Peer] enties below this line:

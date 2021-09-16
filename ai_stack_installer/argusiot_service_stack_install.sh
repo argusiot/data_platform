@@ -121,9 +121,16 @@ sudo apt-get --assume-yes install wireguard
 sudo su
 cd /etc/wireguard/
 umask 077
+
+# Genrate public and private keys for the VPN interface
 wg genkey | tee privatekey | wg pubkey > publickey
-cp ${ROOT_DIR}/vpn_data.conf-server-reference vpn_data.conf
-echo "PrivateKey = `cat privatekey`" >> vpn_data.conf
+
+# Genrate the vpn_data interface config file from the config template (aka
+# the reference file) by replacing the private key from the template with
+# actual value.
+placeholder_value="PrivateKey = PLACEHOLDER_REPLACE_WITH_GENERATED_KEY"
+actual_value="PrivateKey = `cat privatekey`"
+sed "s/$placeholder_value/$actual_value/g" ${ROOT_DIR}/vpn_data.conf-server-reference > vpn_data.conf
 
 sudo systemctl enable wg-quick@vpn_data   # to start Wireguard at boot time
 sudo systemctl start wg-quick@vpn_data   # launch it now

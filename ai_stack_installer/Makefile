@@ -8,7 +8,6 @@ FILE_LIST:= argusiot_service_stack_install.sh \
 			grafana.ini-reference \
 			new_user_invite.html-reference \
 			vpn_data.conf-server-reference \
-			vpn_mgmt.conf-server-reference
 
 installer_bundle:
 	mkdir -p output
