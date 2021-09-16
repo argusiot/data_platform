@@ -122,14 +122,14 @@ sudo su
 cd /etc/wireguard/
 umask 077
 wg genkey | tee privatekey | wg pubkey > publickey
-cp ${ROOT_DIR}/wg0.conf-server-reference wg0.conf
-echo "PrivateKey = `cat privatekey`" >> wg0.conf
+cp ${ROOT_DIR}/vpn_data.conf-server-reference vpn_data.conf
+echo "PrivateKey = `cat privatekey`" >> vpn_data.conf
 
-sudo systemctl enable wg-quick@wg0   # to start Wireguard at boot time
-sudo systemctl start wg-quick@wg0   # launch it now
+sudo systemctl enable wg-quick@vpn_data   # to start Wireguard at boot time
+sudo systemctl start wg-quick@vpn_data   # launch it now
 
 # Show current status
-sudo systemctl status wg-quick@wg0
+sudo systemctl status wg-quick@vpn_data
 sudo wg
 
 #====================
