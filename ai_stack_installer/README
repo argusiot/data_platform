@@ -1,15 +1,15 @@
 ArgusIoT service stack installer script.
 
-Currently script is only tested on Vagrant.
+Currently script is tested on both Vagrant & Server VMs(Win, ESXi) with Ubuntu.
 
-But it works reliably to install - Hbase, OpenTSDB & Grafana on Vagrant.
+It works reliably to install - Hbase, OpenTSDB & Grafana on Vagrant.
 
-Script will need some changes to reliably install on a new AWS instance. That
-will be taken up as a follow-up activity.
+Script will need some changes to reliably install on a new AWS instance.
+That will be taken up as a follow-up activity.
 
-To stand a service stack on a Vagrant VM involves 4 high level steps:
+To stand a service stack on a VM involves 4 high level steps:
 1. Creating an installer_bundle
-2. Copying the installer bundle to the shared directory of your Vagrant VM
+2. Copying the installer bundle to the shared directory of your VM
 3. Launching the VM
 4. Using the installer bundle inside the VM to create a new service stack
 
@@ -17,42 +17,46 @@ To stand a service stack on a Vagrant VM involves 4 high level steps:
 Detailed steps:
 ===============
 
-Clone the repositories:
------------------------
-mkdir argusiot ; cd argusiot
+Create your new Vagrant VM to start a new stack:
+------------------------------------------------
+If you're using Vagrant for VMs, argus_exporter repo already has a ready made
+Vagrantfile, that you can use, if you check out the repo from the host.
+This Vagrantfile creates a Ubuntu VM with /argusiot dir as a shared directory
+with the host.
+
+In the dir on the host where you plan to have your work root:
+
+mkdir argusiot; cd argusiot
 git clone https://github.com/argusiot/data_platform
 git clone https://github.com/argusiot/argus_exporter
 cd argus_exporter
 
-Create your new Vagrant VM to start a new stack:
-------------------------------------------------
 vagrant up
 vagrant ssh
 
+Clone the repositories (non-Vagrant VM):
+---------------------------------------
+# If it isn't already created on the vm:
+mkdir /argusiot 
+cd /argusiot
+git clone https://github.com/argusiot/data_platform
+git clone https://github.com/argusiot/argus_exporter
+
+
 To generate the service stack installer bundle:
 -----------------------------------------------
-cd /vagrant_argusiot
+cd /argusiot
 cd data_platform/ai_stack_installer
 make installer_bundle
-ls -l output/ai_stack_installer.tar.gz (expect to find this file)
+ls -l output/ai_stack_installer.tar.gz # expect to find this file
 
 Install the stack:
 ------------------
 cd ~/
-mkdir new_stack
-cd new_stack
-tar -xvf /vagrant_argusiot/data_platform/ai_stack_installer/output/ai_stack_installer.tar.gz
+mkdir new_stack ; cd new_stack
+tar -xvf /argusiot/data_platform/ai_stack_installer/output/ai_stack_installer.tar.gz
 
 sudo ./argusiot_service_stack_install.sh
-
-Note:
-
-If prompt gets stuck here:
-
-    root@ubuntu-bionic:/home/vagrant#   
-
-then type 'exit' for the script to exit out of su shell and continue.
-The su shell is only used for "manual" wireguard configs.
 
 
 Verification:
@@ -86,9 +90,10 @@ ifconfig enp0s8
 Adding data to OpenTSDB:
 ------------------------
 
-Use the virtual exporter to add data to the TSDB:
+Use the virtual exporter and importer to add data to the TSDB,
+see the README for the virtual exporter for eloquent ways to do this:
 
-/vagrant/iot_gw/virtual_exporter --ipaddr localhost your-compatible-csv-file.csv
+/argusiot/argus_exporter/iot_gw/virtual_exporter/README.md
 
 
 Accessing OpenTSDB viewer:
@@ -135,7 +140,7 @@ vagrant up
 vagrant ssh
 
 # Start OpenTSDB and ZooKeeper
-cd ~/hbase-1.4.13/
+cd /usr/share/hbase/hbase-1.4.13/
 sudo bin/start-hbase.sh
 sudo jps
 sudo service opentsdb restart
@@ -158,6 +163,6 @@ You can get the correct name by using shell completion (TAB-key) to get the righ
 To stop the OpenTSDB service (e.g. to restart with above steps):
 
 sudo service opentsdb stop
-cd ~/hbase-1.4.13/
+cd /usr/share/hbase/hbase-1.4.13/
 sudo bin/stop-hbase.sh
 sudo jps
