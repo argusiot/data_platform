@@ -42,7 +42,7 @@ Example usage:
     # Querying for data at millisecond granularity.
     q_api_obj = QueryApi("10.121.32.1", 4242, start_ts_obj, end_ts_obj,
                          [ts_id1, ts_id2], Aggregator.NONE,
-                         flag_millisecond=True)
+                         flag_ms_response=True)
 
 '''
 class QueryApi(object):
