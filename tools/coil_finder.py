@@ -42,8 +42,8 @@ def get_query_result_list(timeseries_id, start_time, end_time,
     serverip = "192.168.1.154"
     serverport = 4242
   
-    # Observe that timeseries_id is supplied as a list because can query multiple
-    # timeseries at the same time (for the same time window).
+    # Observe that timeseries_id is supplied as a list because can query 
+    # multiple timeseries at the same time (for the same time window).
     foo = query_api.QueryApi(
       serverip, serverport, 
       start_timestamp, end_timestamp,
@@ -55,8 +55,7 @@ def get_query_result_list(timeseries_id, start_time, end_time,
 
     rv = foo.populate_ts_data()
     if rv != 0:
-        timelog(show=(vb >= 2), t0=startTime,
-                msg=f"      t:{start_timestamp} - {end_timestamp}")
+        print(f"      t:{start_timestamp} - {end_timestamp}")
         assert rv == 0
 
     # The outcome of populate_ts_data() is available as a list of
@@ -75,12 +74,29 @@ def print_query_result(result_list, flag_compute_rate=False, vb=0):
         for kk, vv in result:
             print("\t%s->%d" % (kk, vv))
 
+def compare_coil_num(first_dp, last_dp):
+    # This function is a special compare functon for coil numbers.
+    # It makes the following assumptions:
+    #  1. coil numbers are strictly increasing by time, i.e. a later coil number
+    #     sample is either same value or larger.
+    #  2. coil numbers wrap around (reset) to 200000 after 499999.
+    # The comparison returns the diff between first_dp and last_dp,
+    # i.e. 0 for equal.
+    # If first is larger than last dp, wrap-around is assumed to have
+    # happened once between the 2, so 300000 is subtracted from first_dp before
+    # before calculating the diff.
+
+    if first_dp > last_dp:
+        return last_dp - (first_dp - 300000) 
+    else:
+        return last_dp - first_dp
+    
 def get_edge_dps (start_time, end_time=None, qw=10000, vb=0):
     # Return first and last dp in range, and the distance between them.
-
-    # query window is 10000ms.
-    qw = 10000
-
+    # Also returns the query results to avoid having to re-query same windows
+    # qw = query window size
+    # vb = debug verbosity
+    
     if end_time == None:
         end_time = start_time + qw
         dist = qw
@@ -88,7 +104,8 @@ def get_edge_dps (start_time, end_time=None, qw=10000, vb=0):
         dist = end_time - start_time
 
     if vb >=2:
-        print(f"   Start: {start_time}, End: {end_time}, Gap: {dist}, QW: {qw}")
+        print(f"   ged: Start: {start_time}, End: {end_time}, "
+              f"Gap: {dist}, QW: {qw}")
 
     timeseries_id = ts_id.TimeseriesID("poc.v3.coil.number",
                                        {"machine_id":"900-18"})
@@ -97,8 +114,7 @@ def get_edge_dps (start_time, end_time=None, qw=10000, vb=0):
         start_list = get_query_result_list(timeseries_id,
                                            start_time, end_time,
                                            flag_compute_rate=False)
-        last_coil_dp = start_list[-1].get_datapoint(end_time,
-                                                    LQ.NEAREST_LARGER_WEAK)
+        end_list = start_list
     else:  
         start_list = get_query_result_list(timeseries_id,
                                            start_time, start_time + qw,
@@ -106,38 +122,76 @@ def get_edge_dps (start_time, end_time=None, qw=10000, vb=0):
         end_list = get_query_result_list(timeseries_id,
                                          end_time - qw, end_time,
                                          flag_compute_rate=False)
-        if vb >=3:
-            print_query_result(end_list, flag_compute_rate=False)
-        if vb >=2:
-            print(f"end list = {len(end_list)}")
-        last_coil_dp = end_list[-1].get_datapoint(end_time,
-                                                  LQ.NEAREST_LARGER_WEAK)
 
-    if vb >=3:
+    if vb >= 4:
         print_query_result(start_list, flag_compute_rate=False)
+        print_query_result(end_list, flag_compute_rate=False)
 
     first_coil_dp = start_list[0].get_datapoint(start_time,
                                                 LQ.NEAREST_SMALLER_WEAK)
+    last_coil_dp = end_list[-1].get_datapoint(end_time,
+                                              LQ.NEAREST_LARGER_WEAK)
 
-    if vb >2:
-        print (f"    Coil: {first_coil_dp[1]} - {last_coil_dp[1]}")
-        print (f"    Time: {start_time} - {end_time}")
-        print (f"    Actual: {first_coil_dp[0]} - {last_coil_dp[0]}")
+    if vb > 2:
+        print (f"    ged: Coil: {first_coil_dp[1]} - {last_coil_dp[1]}")
+        print (f"    ged: Time: {start_time} - {end_time}")
+        print (f"    ged: Actual: {first_coil_dp[0]} - {last_coil_dp[0]}")
 
-    return { "first":first_coil_dp, "last":last_coil_dp, "dist":dist}
+    return {"first":first_coil_dp,
+            "last":last_coil_dp,
+            "dist":dist,
+            "startlst": start_list,
+            "endlst": end_list}
   
-  
+def get_center_dp (start_time, end_time=None, rel=0.5, qw=10000, vb=0):
+    # Return dp at relative location of the range, as well as the query result
+    # qw = query window size
+    # vb = debug verbosity
+    
+    if end_time == None:
+        end_time = start_time + qw
+        dist = qw
+    else:
+        dist = end_time - start_time
+
+    center_time = int(start_time + dist * rel)
+    q_start = int(center_time - qw/2)
+    q_end   = int(center_time + qw/2)
+
+    if vb >= 2:
+        print(f"   gcd: Start: {start_time}, End: {end_time}, "
+              f"Center: {center_time}")
+
+    timeseries_id = ts_id.TimeseriesID("poc.v3.coil.number",
+                                       {"machine_id":"900-18"})
+
+    center_list = get_query_result_list(timeseries_id,
+                                        q_start, q_end,
+                                        flag_compute_rate=False)
+
+    center_coil_dp = center_list[0].get_datapoint(center_time,
+                                                  LQ.NEAREST_SMALLER_WEAK)
+    
+    if vb >= 2:
+        print (f"    gcd: Coil: {center_coil_dp[1]}")
+        print (f"    gcd: Time: {q_start} / {center_time} / {q_end}")
+        print (f"    gcd: Actual: {center_coil_dp[0]}")
+
+    return {"center":center_coil_dp,
+            "centerlst": center_list}  
+
+
 def find_coil_num_time (coil_num, start_time, end_time, vb=0):
   
     # get first & last dp
-    edge_dps = get_edge_dps(start_time, end_time=end_time)
+    edge_dps = get_edge_dps(start_time, end_time=end_time, vb=vb)
 
     first_time, first_coil = edge_dps["first"]
     last_time, last_coil = edge_dps["last"]
 
     if vb >= 2:
-        print (f"  Coil: {coil_num}: {first_coil}-{last_coil}")
-        print (f"  Time: {start_time}-{end_time} "
+        print (f"  fcnt: Coil: {coil_num}: {first_coil}-{last_coil}")
+        print (f"  fcnt: Time: {start_time}-{end_time} "
                f"Actual: {first_time}-{last_time}")
 
     # check against edge dps
@@ -146,77 +200,132 @@ def find_coil_num_time (coil_num, start_time, end_time, vb=0):
     elif coil_num == last_coil:
         return True, last_time
 
-    if (coil_num < first_coil) or (coil_num > last_coil):
+    # Check if coil is in this time range, considering wrap-around, etc:
+    # Equivalent to if (coil_num < first_coil) or (coil_num > last_coil):
+    first2coil = compare_coil_num(first_coil, coil_num)
+    coil2last  = compare_coil_num(coil_num, last_coil)
+    first2last = compare_coil_num(first_coil, last_coil)
+    if (first2coil + coil2last) > first2last:
         return False, 0
 
-    # The coil num is somewhere in the range. Let's guess!
+    # The coil num is somewhere in the range. Let's find it!
 
-    coil_num_range = last_coil - first_coil
-    range_ratio = (coil_num - first_coil)/coil_num_range
+    relative_loc = first2coil/first2last
 
-    guess_time = first_time + (edge_dps["dist"] * range_ratio)
+    # guess_time = int(first_time + (edge_dps["dist"] * relative_loc))
 
-    guess_dps = get_edge_dps(guess_time, qw=1000)
+    guess_dps = get_center_dp(first_time, last_time, rel=relative_loc, vb=vb)
 
-    # Check last one first
-    guess_dp_time, guess_coil = guess_dps["last"]
+    guess_dp_time, guess_coil = guess_dps["center"]
+    hops=0
+    if vb >= 1:
+        print (f"  fcnt: Guess coil: {guess_coil}, "
+               f"guess time: {guess_dp_time}, "
+               f"hops: {hops}")
+    while guess_coil != coil_num:
+        # break if the coil is missing in the range, e.g. looking for coil 2
+        # when only 1 and 3 is there.
+        # FIXME: Right now stopping after theoretical max hops in 3 months.
+        hops += 1
+        if hops > 28:
+            print (f"Hops: {hops}, Guess coil: {guess_coil}")
+            break
+        
+        if coil_num < guess_coil:
+            # Searched coil num is the "left" portion
+            last_time = guess_dp_time
+            guess_dps = get_center_dp(first_time, last_time, vb=vb)
+            guess_dp_time, guess_coil = guess_dps["center"]
+        else:
+            # Searched coil num is the "right" portion
+            first_time = guess_dp_time
+            guess_dps = get_center_dp(first_time, last_time, vb=vb)
+            guess_dp_time, guess_coil = guess_dps["center"]
+
+        if vb >=1:
+            print (f"  fcnt: Guess coil: {guess_coil}, "
+                   f"guess time: {guess_dp_time},"
+                   f" hops: {hops}")
+
     if guess_coil == coil_num:
         return True, guess_dp_time
-
-    guess_dp_time, guess_coil = guess_dps["first"]
-    if guess_coil == coil_num:
-        return True, guess_dp_time
-    elif coil_num < guess_coil:
-        # Searched coil num is the "left" portion
-        return find_coil_num_time(coil_num, start_time, guess_dp_time)
     else:
-        # Searched coil num is the "right" portion
-        return find_coil_num_time(coil_num, guess_dp_time, end_time)
-  
-def find_coil_num_step (start_time, end_time):
+        return False, guess_dp_time
 
+
+def find_coil_num_range (coil_num, coil_time, qw=10000, vb=0):
+
+    # known center point
+    # find edge from centerpoint - half average coil number time to centerpoint
     # If there's an edge in interval:
-    #    split interval in 2.
-    #    if there's an edge in left interval split left interval
-    #    else if there's an edge in right interval split right interval
-    #    else return false
+    #    linear search the edge.
+    #
+    
+    start_time = coil_time - qw
+    end_time = coil_time
 
-    # dist = end_time - start_time  
-    # if dist < query_interval
-    #   get 1 query
-    #   get first dp @ start time
-    #   get last dp @ end time
-    # else 
-    #   get first query
-    #   get last query
-    #   get first dp @ start time in first range
-    #   get last dp @ end time in last range
+    found = False
+    hops = 0
+    while not found:
+        hops += 1
+        edge_dps = get_edge_dps(start_time, end_time, qw=qw, vb=vb)            
+        first_time, first_coil = edge_dps['first']
+        if first_coil == coil_num:
+            # No edge, move out
+            end_time = start_time
+            start_time -= qw
+        else:
+            found = True
 
-    # if first_dp.value==last_dp_value,
-    #   there is no edge in this interval
-    #   return false, 0
-    # else 
+    start_edge = 0
+    edge_window = edge_dps['startlst']
+    if vb >= 3:
+        print_query_result(edge_window, flag_compute_rate=False)
+    lookups = 0
+    for tstamp, cnum in edge_window[0]:
+        lookups += 1
+        if cnum == coil_num:
+            start_edge = tstamp
+            break
 
-    # get mid dp (first+dist DP)
+    if vb >= 2:
+        print(f"Starting edge is at: {start_edge}, "
+              f"hops: {hops}, lookups: {lookups}")
+          
+    # Trailing edge
+    start_time = coil_time
+    end_time = coil_time + qw
 
-    # if first..mid dp has an edge
-    #   return true, edge time
+    found = False
+    hops = 0
+    while not found:
+        hops += 1
+        edge_dps = get_edge_dps(start_time, end_time, qw=qw, vb=vb)            
+        last_time, last_coil = edge_dps['last']
+        if last_coil == coil_num:
+            # No edge, move out
+            start_time = end_time
+            end_time += qw
+        else:
+            found = True
 
-    # else if mid dp .. last has an edge
-    #   return true, edge time
-  
-    # if first_dp.value!=last_dp_value,
-    #    # There is an edge in the interval
-    #    if (return find_coil_num_edge(start_time, end_time-dist/2))
-    # else
-    #    # There is no edge in the interval
-    #    if start_time == end_time
-    #       return true
-    #    else
-    #       return false
-    #    return find_coil_num_edge(start_time
+    trail_edge = 0
+    edge_window = edge_dps['startlst']
+    if vb >= 3:
+        print_query_result(edge_window, flag_compute_rate=False)
+    lookups = 0
+    for tstamp, cnum in edge_window[0]:
+        lookups += 1
+        if cnum != coil_num:
+            break
+        else:
+            trail_edge = tstamp
 
-    return
+    if vb >= 2:
+        print(f"Trailing edge is at: {trail_edge}, "
+              f"hops: {hops}, lookups: {lookups}")
+
+    return start_edge, trail_edge
 
 def print_coil_number_window(start_time, end_time):
     # CHANGE HERE: Use coil_number metric & tags
@@ -281,11 +390,11 @@ def generate_coil_number_time_windows(start_time, end_time):
 def main():
 
     psr = argparse.ArgumentParser(description="Argus coil finder")
-    psr.add_argument("start_time", type=int,
+    psr.add_argument("--start_time", type=int, default=1617235320000,
                      help="First time stamp to search")
     psr.add_argument("--end_time", type=int, default=0,
                      help="First time stamp to search")
-    psr.add_argument("--coilcnt", type=int, default=10,
+    psr.add_argument("--coilcnt", type=int, default=1,
                      help="How many coil numbers to")
     psr.add_argument("--coilnum", type=int, default=0,
                      help="Which coil number to find")
@@ -299,25 +408,30 @@ def main():
 
     startTime = time.time()
     t0 = args.start_time
-    if args.end_time:
-        t1 = args.end_time
-    else:
-        t1 = t0 + 3600000
 
     if args.coilnum:
-        found, attime = find_coil_num_time(args.coilnum, t0, t1)
-
-        if found:
-            print (f"Found {args.coilnum} at {attime}.")
-            if vb >=2:
-                print_coil_number_window(attime, attime+1000)
+        if args.end_time:
+            t1 = args.end_time
         else:
-            print (f"Did not find {args.coilnum}.")
+            t1 = 1622505599000
+
+        for coilnum in range(args.coilnum, args.coilnum + args.coilcnt):
+            found, attime = find_coil_num_time(coilnum, t0, t1, vb=vb)
+
+            if found:
+                if vb >= 1:
+                    print (f"Found {coilnum} at {attime}.")
+                if vb >= 3:
+                    print_coil_number_window(attime, attime+1000)
+                coil_start, coil_end = find_coil_num_range(coilnum, attime,
+                                                           qw=100000, vb=vb)
+                print (f"Found {coilnum}: {coil_start} - {coil_end}.")
+            else:
+                print (f"Did not find {coilnum}.")
+
         print_epilogue(startTime, verbose = vb)
 
     else:
-        # CHANGE HERE: supply start time, end time e.g.
-        # generate_coil_number_time_windows(1618307351000,1618307371000)
         generate_coil_number_time_windows(t0,str(int(t0)+100))
 
     '''
