@@ -66,17 +66,21 @@ def get_query_result_as_df(tseries_id, start_time, end_time, result_col_name="re
 
    Return True if coil_num is consistent, False otherwise.
 '''
-def __is_coil_number_consistent(values_tsdd, coil_num, start_ts, end_ts):
-  incr_ms = 100
-  for cur_ts in range(int(start_ts), int(end_ts), incr_ms):
-      _, vv_s = values_tsdd.get_datapoint(cur_ts,
-                                           tsd.LookupQualifier.NEAREST_SMALLER)
-      _, vv_l = values_tsdd.get_datapoint(cur_ts,
-                                           tsd.LookupQualifier.NEAREST_LARGER)
-      if vv_s != coil_num and vv_l != coil_num:
-          print("[Err at %s]: Expected coil %s" % (str(cur_ts), str(coil_num)))
-          return False
-  return True
+def __audit_coil_number_index(time_ranges, coil_number_dict):
+    print("Auditing coil_number_dict")
+    print("Skipping time ranges audit i.e. ignoring gaps in time ranges.\n"
+          "As a result some audit failures may not be legitimate.")
+    failed_audit = 0
+    failed_coils = []
+    coil_number_list = list(coil_number_dict.items())
+    for ii in range(0, len(coil_number_list) - 1):
+        cur_coil, (cur_start, cur_end) = coil_number_list[ii]
+        next_coil, (next_start, next_end) = coil_number_list[ii + 1]
+        if cur_end != next_start:
+            failed_audit = failed_audit + 1
+            failed_coils.append(int(cur_coil))
+    print("Total coils: %d, Possible audit failures: %d\n" % (len(coil_number_dict), failed_audit))
+    print("List of failed coil IDs: %s" % str(cur_coil))
 
 
 '''
@@ -95,8 +99,7 @@ Side effects of this method:
   get updated as follows:
   coil_number_dict[coil_number] = (coil start, coil end)
 '''
-def process_time_window(coil_number_dict, coil_num_tracker, tseries_id,
-                        start_time, end_time, skip_coil_num_audit):
+def process_time_window(context, tseries_id, start_time, end_time):
     '''
     Step 1: Get value and rate query results for Coil number in supplied time window.
     '''
@@ -136,84 +139,73 @@ def process_time_window(coil_number_dict, coil_num_tracker, tseries_id,
         # to lookup values_tsdd and get the coil_number.
         _, coil_num = values_tsdd.get_datapoint(edges_df.iloc[ii]['timestamp'],
                                              tsd.LookupQualifier.EXACT_MATCH)
-
-        # When the tracker is unitialized, there's nothing after this to do.
-        if coil_num_tracker == -1.0:
-            coil_num_tracker = edges_df.iloc[ii]['timestamp']
-            continue
-
-        
-        coil_num_start_ts, coil_num_end_ts = (coil_num_tracker,
-                                              edges_df.iloc[ii]['timestamp'])
-        coil_num_tracker = edges_df.iloc[ii]['timestamp']
-        '''
-          Step 4: Audit that the the coil number is same over the following time
-                  range - [coil_num_start_ts, coil_num_end_ts)
-        '''
-        if skip_coil_num_audit:
-            coil_number_dict[coil_num] = (coil_num_start_ts, coil_num_end_ts)
-        elif __is_coil_number_consistent(values_tsdd, coil_num,
-                                       coil_num_start_ts, coil_num_end_ts):
-            # Step 5: Audit passed ! We can store results.
-            coil_number_dict[coil_num] = (coil_num_start_ts, coil_num_end_ts)
+        if context['coil_num_start_ts'] == -1.0:
+            context['coil_num_start_ts'] = edges_df.iloc[ii]['timestamp']
+            context['coil_num'] = coil_num
         else:
-            print("Ooops. Coil number %d failed time range audit %s %s" %
-                  (coil_num, coil_num_start_ts, coil_num_end_ts))
+            # Finish processing coil being tracked.
+            coil_num_start_ts, coil_num_end_ts = (context['coil_num_start_ts'],
+                                                  edges_df.iloc[ii]['timestamp'])
+            context['cn_dict'][coil_num] = (coil_num_start_ts, coil_num_end_ts)
 
-    # Returns:
-    #        the last time stamp for which edge was detected.
-    #        the coil_num tracker
-    if edges_df.iloc[-1]['timestamp'] == coil_num_start_ts:
-        print("Warning last time %d stamp same as first." % coil_num_start_ts)
-        return coil_num_end_ts, coil_num_tracker
-    else:
-        return edges_df.iloc[-1]['timestamp'], coil_num_tracker
+            # Start tracking next coil.
+            context['coil_num_start_ts'] = edges_df.iloc[ii]['timestamp']
+            context['coil_num'] = coil_num
+
+    # Returns: the last time stamp for which edge was detected.
+    return edges_df.iloc[-1]['timestamp']
 
 # start & end time are in seconds since epoch
-def generate_coil_number_idx(coil_number_dict, start_time, end_time, skip_coil_num_audit):
+def generate_coil_number_idx(coil_number_dict, start_time, end_time):
   tseries_id = ts_id.TimeseriesID("poc.v3.coil.number", {"machine_id":"900-18"})
-  delta = 86400
-  q_start = start_time
-  # We want a do..while loop here. In absence of that we achieve that result
-  # with this while True and using a 'break' inside on a condition.
-  coil_num_tracker = -1.0
+  delta = 86400 * 1000 # Milliseconds in a day
+  q_start = start_time * 1000
+  end_time = end_time * 1000
+
+  window_count = 1
+
+  # Setup the context here that will get used across call to process_time_window
+  context = {
+      'cn_dict': coil_number_dict,  # result: Stores coil number->(start, end)
+                                    #         as they are detected.
+                                    #
+      'coil_num_start_ts' : -1,     # tracker: Stores start timestamp for coil
+      'coil_num': -1                #          and associated coil number.
+  }
   while True:
       q_end = q_start + delta
-      print("Processing time range: %d %d" % (q_start, q_end))
-      tmp, coil_num_tracker = process_time_window(coil_number_dict,
-                                                  coil_num_tracker, tseries_id,
-                                                  q_start, q_end,
-                                                  skip_coil_num_audit)
-      next_start = tmp / 1000
-      if q_end > end_time:
+      print("\t[Window %d] Processing time range: %d %d upto %d" %
+              (window_count, q_start, q_end, end_time))
+      next_start = process_time_window(context, tseries_id, q_start, q_end)
+      if q_end >= end_time or next_start == q_start:
           break
       q_start = next_start
+      window_count = window_count + 1
 
   return
 
 def main():
-  parser = argparse.ArgumentParser(description='Generate the coil number index')
-  parser.add_argument('--skip_coil_number_audit', type=bool, help='Audit the coil numbers found in each time window', default=True)
-  args = parser.parse_args()
-
   # Stores the result
   coil_number_dict = OrderedDict()
 
   time_ranges = [
-              ("02-01-2021 00:00:00", "02-23-2021 06:00:00"),
-           #   ("02-24-2021 10:00:00", "04-14-2021 07:00:00"),
-           #   ("04-14-2021 13:00:00", "05-19-2021 03:00:00"),
-           #   ("05-19-2021 13:00:00", "05-31-2021 16:50:00"),
-          ]
-  print("Skipping coil number audit : %s" % args.skip_coil_number_audit)
+          ("02-01-2021 00:00:00", "02-01-2021 23:59:59"),    # skip 2/2-2/3
+          ("02-04-2021 00:00:00", "02-27-2021 23:59:59"),    # skip 2/28 & entire March
+          ("04-01-2021 00:00:00", "04-13-2021 23:59:59"),  # skip 4/14
+          ("04-15-2021 00:00:00", "04-27-2021 23:59:59"),  # skip 4/28
+          ("04-29-2021 00:00:00", "05-12-2021 23:59:59"),    # skip 5/13-5/19 -- 2 diff problems ...1 problem is that there's no change in coiler ID over entire range.
+          ("05-20-2021 00:00:00", "05-22-2021 23:59:59"),    # skip 5/22
+          ("05-24-2021 00:00:00", "05-31-2021 23:59:59"),
+      ]
   format_str = "%m-%d-%Y %H:%M:%S"
   for (start_time_str, end_time_str) in time_ranges:
       print("Generating coil number index from %s to %s" % (start_time_str,
                                                             end_time_str))
       generate_coil_number_idx(coil_number_dict,
           datetime.datetime.strptime(start_time_str, format_str).timestamp(),
-          datetime.datetime.strptime(end_time_str, format_str).timestamp(),
-          args.skip_coil_number_audit)
+          datetime.datetime.strptime(end_time_str, format_str).timestamp())
+
+  __audit_coil_number_index(time_ranges, coil_number_dict)
 
   pickle_file = "CoilNumberIndex.pickle"
   print("Picking coil number index into %s" % pickle_file)
@@ -221,7 +213,6 @@ def main():
   with open(pickle_file, 'wb') as handle:
     pickle.dump(coil_number_dict, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-  # Audit the picked file by doing a readback and verify
   with open(pickle_file, 'rb') as handle:
     tmp_cn_dict = pickle.load(handle)
 
