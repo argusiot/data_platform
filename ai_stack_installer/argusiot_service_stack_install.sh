@@ -3,7 +3,7 @@
 # Installer script for ArgusIoT Service Stack aka ai_service_stack
 #
 
-AI_HBASE_VERSION=1.4.13    # The Hbase version that works with OpenTSDB v2.4.0
+AI_HBASE_VERSION=1.4.14    # The Hbase version that works with OpenTSDB v2.4.0
 AI_OPENTSDB_VERSION=2.4.0   # last stable OpenTSDB release
 AI_GRAFANA_VERSION=7.3.2   # latest Grafana release
 AI_STACK_VERSION=1.0.2 # The version of this AI stack
