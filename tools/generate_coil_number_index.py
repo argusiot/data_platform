@@ -24,18 +24,19 @@ import pandas as pd
 import pickle
 
 '''
+   Helper method.
+
    Input: Single timeseries ID, start_time & end_time
-   Output: A single TimeseriesDataDict object
+   Output: A tuple: (TimeseriesDataDict, Dataframe). Both contain same data.
 '''
-def get_query_result_as_df(tseries_id, start_time, end_time, result_col_name="result",
-                     host="localhost", tcp_port=4242, rate_query=False, generate_df=False):
+def __query_and_get_result(tseries_id, start_time, end_time, tsdb_host, tsdb_port, rate_query=False):
   start_timestamp = ts.Timestamp(start_time)
   end_timestamp = ts.Timestamp(end_time)
 
   # Observe that tseries_id is supplied as a list because can query multiple
   # timeseries at the same time (for the same time window).
   value_query = query_api.QueryApi(
-          host, tcp_port,
+          tsdb_host, tsdb_port,
           start_timestamp, end_timestamp,
           [tseries_id],
           bt.Aggregator.NONE,
@@ -45,20 +46,11 @@ def get_query_result_as_df(tseries_id, start_time, end_time, result_col_name="re
   rv = value_query.populate_ts_data()
   assert rv == 0
 
-  value_result_list = value_query.get_result_set()
-  assert len(value_result_list) == 1
+  df_map = value_query.get_result_as_dataframes()
+  tsdd_map = value_query.get_result_map()
 
-  if generate_df:
-      tsdd_to_df_xform_dict = {'timestamp': [], result_col_name: []}
-      for kk,vv in value_result_list[0]:
-          tsdd_to_df_xform_dict['timestamp'].append(kk)
-          tsdd_to_df_xform_dict[result_col_name].append(vv)
-      result_as_df = pd.DataFrame.from_dict(tsdd_to_df_xform_dict)
-  else:
-      result_as_df = None
-
-  # Return the result as a TSDD object and also a dataframe.
-  return value_result_list[0], result_as_df
+  # Return tuple of results (TSDD object, dataframe).
+  return tsdd_map[tseries_id.fqid], df_map[tseries_id.fqid]
 
 
 '''
@@ -99,13 +91,15 @@ Side effects of this method:
   get updated as follows:
   coil_number_dict[coil_number] = (coil start, coil end)
 '''
-def process_time_window(context, tseries_id, start_time, end_time):
+def process_time_window(context, tsdb_host, tsdb_port, tseries_id,
+                        start_time, end_time):
     '''
     Step 1: Get value and rate query results for Coil number in supplied time window.
     '''
-    values_tsdd, values_df = get_query_result_as_df(tseries_id, start_time, end_time, generate_df=True)
-    rate_tsdd, rate_df = get_query_result_as_df(tseries_id, start_time, end_time,
-                                                rate_query=True, generate_df=True)
+    values_tsdd, values_df = __query_and_get_result(tseries_id,
+            start_time, end_time, tsdb_host, tsdb_port)
+    rate_tsdd, rate_df = __query_and_get_result(tseries_id,
+            start_time, end_time, tsdb_host, tsdb_port, rate_query=True)
     if len(values_tsdd) == 0:
         print("Skipping empty response")
         return end_time
@@ -156,7 +150,8 @@ def process_time_window(context, tseries_id, start_time, end_time):
     return edges_df.iloc[-1]['timestamp']
 
 # start & end time are in seconds since epoch
-def generate_coil_number_idx(coil_number_dict, start_time, end_time):
+def generate_coil_number_idx(coil_number_dict, tsdb_host, tsdb_port,
+                             start_time, end_time):
   tseries_id = ts_id.TimeseriesID("poc.v3.coil.number", {"machine_id":"900-18"})
   delta = 86400 * 1000 # Milliseconds in a day
   q_start = start_time * 1000
@@ -176,7 +171,8 @@ def generate_coil_number_idx(coil_number_dict, start_time, end_time):
       q_end = q_start + delta
       print("\t[Window %d] Processing time range: %d %d upto %d" %
               (window_count, q_start, q_end, end_time))
-      next_start = process_time_window(context, tseries_id, q_start, q_end)
+      next_start = process_time_window(context,
+              tsdb_host, tsdb_port, tseries_id, q_start, q_end)
       if q_end >= end_time or next_start == q_start:
           break
       q_start = next_start
@@ -185,6 +181,15 @@ def generate_coil_number_idx(coil_number_dict, start_time, end_time):
   return
 
 def main():
+  parser = argparse.ArgumentParser(description='Plot a cobble tail')
+  parser.add_argument('--TSDB_host', type=str, help='TSDB hostname or IP addr',
+                      default="localhost")
+  parser.add_argument('--TSDB_port', type=int, help="TSDB TCP por number",
+                      default=4242)
+  args = parser.parse_args()
+
+  print("Connecting to TSDB at %s:%d" % (args.TSDB_host, args.TSDB_port))
+
   # Stores the result
   coil_number_dict = OrderedDict()
 
@@ -202,6 +207,7 @@ def main():
       print("Generating coil number index from %s to %s" % (start_time_str,
                                                             end_time_str))
       generate_coil_number_idx(coil_number_dict,
+          args.TSDB_host, args.TSDB_port,
           datetime.datetime.strptime(start_time_str, format_str).timestamp(),
           datetime.datetime.strptime(end_time_str, format_str).timestamp())
 

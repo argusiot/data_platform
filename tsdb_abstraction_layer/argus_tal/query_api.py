@@ -14,6 +14,7 @@ from . import query_urlgen as qurlgen
 from . import basic_types
 from . import timeseries_datadict as tsdd
 from . import timeseries_id as ts_id
+import pandas as pd
 
 '''
 Example usage:
@@ -121,6 +122,31 @@ class QueryApi(object):
     # tsid.fqid -> tsdd (i.e. query result object)
     return { \
         tsdd.get_timeseries_id().fqid: tsdd for tsdd in self.__tsdd_obj_list}
+
+  '''
+      This method returns results as pandas Dataframes instead of TSDD objects.
+
+      The result is a returned as a map, where the timeseries FQID is an index
+      into the map and the value is the dataframe object.
+
+      Each dataframe contains 2 columns: "timestamp", "result".
+  '''
+  def get_result_as_dataframes(self):
+    # tsid.fqid -> tsdd converted into a dataframe
+    result_map = { }
+    for tsdd in self.__tsdd_obj_list:
+      # Convert TSDD object into a dataframe using DataFrame.from_dict(). That
+      # requires creating an temporary dictionary of the type shown by tmp_dict
+      # belo i.e. keys as column names and values as lists.
+      tmp_dict = {'timestamp': [], 'result': []}
+      for kk,vv in tsdd:
+          tmp_dict['timestamp'].append(kk)
+          tmp_dict['result'].append(vv)
+      df = pd.DataFrame.from_dict(tmp_dict)  # convert to dataframe
+      result_map[tsdd.get_timeseries_id().fqid] = df   # Save df in result_map
+    return result_map
+
+
 
   @property
   def http_status_code(self):

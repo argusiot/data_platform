@@ -56,6 +56,13 @@ class QueryApi_Tests(unittest.TestCase):
       result_dps = {kk:vv for kk, vv in tsdd_to_verify}
       self.assertEqual(result_dps, expected_dps) # verify data point
 
+    def __verify_dataframe_result(self, df, expected_dps):
+      # Construct a dps dict by iterating over the tsdd object. Verify it
+      # matches supplied datapoints.
+      result_dps = {df.iloc[ii]['timestamp']:df.iloc[ii]['result'] \
+                    for ii in range(len(df))}
+      self.assertEqual(result_dps, expected_dps) # verify data point
+
     @mock.patch('requests.get', side_effect=mocked_requests_get)
     def test_single_metric_query_response(self, mock_get):
       host, port, metric, query_filters, aggregator, start, end = \
@@ -96,6 +103,32 @@ class QueryApi_Tests(unittest.TestCase):
       self.assertEqual(len(tsdd_map.keys()), 1)  # Expect 1 object in the map
       self.__verify_tsdd_result_obj(tsdd_map[input_tsid.fqid],
                                     input_tsid, expected_dps)
+
+      # Assert that our mocked method was called with the right parameters
+      self.assertIn(mock.call(hh.get_url_for_dummy_query_params()), \
+                              mock_get.call_args_list)
+
+    @mock.patch('requests.get', side_effect=mocked_requests_get)
+    def test_single_metric_query_response_as_dataframe_map(self, mock_get):
+      host, port, metric, query_filters, aggregator, start, end = \
+        hh.get_dummy_query_params()
+      expected_dps = hh.get_sorted_datapoints()
+
+      input_tsid = ts_id.TimeseriesID(metric, query_filters)
+      api = query_api.QueryApi(host, port, start, end, [input_tsid], aggregator)
+      retval = api.populate_ts_data()  # FIXME: I'm conflicted whether to use
+                                       # exceptions or return value here !!
+      self.assertTrue(retval == 0)  # eok
+
+      # Data population was successful... good ! Now we can peek/poke at the
+      # dataframe result.
+      df_map = api.get_result_as_dataframes()
+      self.assertEqual(len(df_map), 1)  # Expect 1 object in the map
+      result_as_df = df_map[input_tsid.fqid]
+      self.assertTrue(len(result_as_df) == len(expected_dps))
+
+      # Verify datapoints in dataframe match expected values.
+      self.__verify_dataframe_result(result_as_df, expected_dps)
 
       # Assert that our mocked method was called with the right parameters
       self.assertIn(mock.call(hh.get_url_for_dummy_query_params()), \
