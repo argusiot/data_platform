@@ -6,10 +6,8 @@
 AI_HBASE_VERSION=1.4.14    # The Hbase version that works with OpenTSDB v2.4.0
 AI_OPENTSDB_VERSION=2.4.0   # last stable OpenTSDB release
 AI_GRAFANA_VERSION=7.3.2   # latest Grafana release
-AI_STACK_VERSION=1.0.2 # The version of this AI stack
 
 HBASE_DIR='/usr/share/hbase'
-AI_STACK_UTILS_DIR='$HBASE_DIR_ai_stack_utils-$AI_STACK_VERSION'
 
 # Assume that all the supporting files needed for the install are present in
 # current directory. User may override with a "-d <dir>".
