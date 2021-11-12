@@ -23,6 +23,7 @@ jobs:
           name: "Run TSDB Abstraction Layer (TAL) tests and code coverage"
           command: |
             cd tsdb_abstraction_layer
+            make init
             make code_coverage   # Runs tests & generates code coverage data.
             coverage html --directory=/tmp/htmlcov1  # Generate an html report.
       - run:

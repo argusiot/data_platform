@@ -6,3 +6,4 @@ pytest
 setuptools # To install argus_tal package itself
 coverage
 jsonschema
+pandas
