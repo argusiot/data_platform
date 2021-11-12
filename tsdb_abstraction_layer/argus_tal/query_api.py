@@ -136,8 +136,8 @@ class QueryApi(object):
     result_map = { }
     for tsdd in self.__tsdd_obj_list:
       # Convert TSDD object into a dataframe using DataFrame.from_dict(). That
-      # requires creating an temporary dictionary of the type shown by tmp_dict
-      # belo i.e. keys as column names and values as lists.
+      # requires creating a temporary dictionary of the type shown by tmp_dict
+      # below i.e. keys as column names and values as lists.
       tmp_dict = {'timestamp': [], 'result': []}
       for kk,vv in tsdd:
           tmp_dict['timestamp'].append(kk)
