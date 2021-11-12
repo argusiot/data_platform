@@ -14,7 +14,7 @@ from random import randint
 from time import sleep
 
 def push_data():
-  url = 'http://34.221.154.248:4242/api/put'
+  url = 'http://localhost:4242/api/put'
   headers = {'content-type': 'application/json'}
   datapoint = {}
   datapoint['metric'] = 'test_metric'

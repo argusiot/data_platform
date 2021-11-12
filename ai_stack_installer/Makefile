@@ -4,6 +4,7 @@ FILE_LIST:= argusiot_service_stack_install.sh \
 			drop_opentsdb_tables.sh \
 			enable_tsdb_table_compression.sh \
 			hbase-site.xml-reference \
+			http_post_using_json_simple_script.py \
 			opentsdb.conf-reference \
 			grafana.ini-reference \
 			new_user_invite.html-reference \

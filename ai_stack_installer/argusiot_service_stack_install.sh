@@ -3,16 +3,18 @@
 # Installer script for ArgusIoT Service Stack aka ai_service_stack
 #
 
-AI_HBASE_VERSION=1.4.13    # The Hbase version that works with OpenTSDB v2.4.0
+AI_HBASE_VERSION=1.4.14    # The Hbase version that works with OpenTSDB v2.4.0
 AI_OPENTSDB_VERSION=2.4.0   # last stable OpenTSDB release
 AI_GRAFANA_VERSION=7.3.2   # latest Grafana release
 
+HBASE_DIR='/usr/share/hbase'
+
 # Assume that all the supporting files needed for the install are present in
 # current directory. User may override with a "-d <dir>".
-ROOT_DIR=`pwd`
+BASE_DIR=`pwd`
 while getopts ":d:h" opt; do
   case $opt in
-    d) ROOT_DIR="$OPTARG"
+    d) BASE_DIR="$OPTARG"
     ;;
     h) echo "$0 [-d <dir>]" ; echo ""; exit
   esac
@@ -21,21 +23,26 @@ done
 #=====================
 # Download and install Hbase
 
-cd $HOME
-mkdir ~/Downloads ; cd Downloads
-wget https://downloads.apache.org/hbase/${AI_HBASE_VERSION}/hbase-${AI_HBASE_VERSION}-bin.tar.gz ; cd -
-tar -xvf Downloads/hbase-${AI_HBASE_VERSION}-bin.tar.gz 
+cd ${BASE_DIR}
+
+wget https://downloads.apache.org/hbase/${AI_HBASE_VERSION}/hbase-${AI_HBASE_VERSION}-bin.tar.gz ;
+
+echo "Creating ${HBASE_DIR} for HBase install"
+mkdir -p ${HBASE_DIR}
+cd ${HBASE_DIR}
+tar -xvf ${BASE_DIR}/hbase-${AI_HBASE_VERSION}-bin.tar.gz
 sudo apt-get --assume-yes update
 sudo apt-get --assume-yes install openjdk-8-jre-headless
 sudo apt-get --assume-yes install openjdk-8-jdk-headless # Optional - to get jps
 
 # export JAVA_HOME=/usr
-cp ${ROOT_DIR}/hbase-env.sh-reference hbase-${AI_HBASE_VERSION}/conf/hbase-env.sh
+cp ${BASE_DIR}/hbase-env.sh-reference ${HBASE_DIR}/hbase-${AI_HBASE_VERSION}/conf/hbase-env.sh
 
-mv hbase-${AI_HBASE_VERSION}/conf/hbase-site.xml hbase-${AI_HBASE_VERSION}/conf/hbase-site.xml-orig
-cp ${ROOT_DIR}/hbase-site.xml-reference hbase-${AI_HBASE_VERSION}/conf/hbase-site.xml
+mv ${HBASE_DIR}/hbase-${AI_HBASE_VERSION}/conf/hbase-site.xml ${HBASE_DIR}/hbase-${AI_HBASE_VERSION}/conf/hbase-site.xml-orig
+cp ${BASE_DIR}/hbase-site.xml-reference ${HBASE_DIR}/hbase-${AI_HBASE_VERSION}/conf/hbase-site.xml
 
-cd $HOME/hbase-${AI_HBASE_VERSION} ; bin/start-hbase.sh ; cd -
+cd ${HBASE_DIR}/hbase-${AI_HBASE_VERSION} ; bin/start-hbase.sh
+cd ${BASE_DIR}
 
 #Verify zookeeper has started:
 # Expect to see: “Zookeeper version: 3.4.10 . . . . <more stuff>"
@@ -47,17 +54,18 @@ rm /tmp/zookeeper_foo
 #=====================
 # Download and install OpenTSDB
 
+cd ${BASE_DIR}
 sudo apt-get --assume-yes install gnuplot
 sudo apt-get --assume-yes install autoconf
 sudo apt-get --assume-yes install python
-cd Downloads 
+
 wget https://github.com/OpenTSDB/opentsdb/releases/download/v${AI_OPENTSDB_VERSION}/opentsdb-${AI_OPENTSDB_VERSION}_all.deb
-cd -
-sudo dpkg -i Downloads/opentsdb-${AI_OPENTSDB_VERSION}_all.deb 
+
+sudo dpkg -i ${BASE_DIR}/opentsdb-${AI_OPENTSDB_VERSION}_all.deb
 
 # Copy OpenTSDB config
 mv /etc/opentsdb/opentsdb.conf /etc/opentsdb/opentsdb.conf-orig
-cp ${ROOT_DIR}/opentsdb.conf-reference /etc/opentsdb/opentsdb.conf 
+cp ${BASE_DIR}/opentsdb.conf-reference /etc/opentsdb/opentsdb.conf
 
 # Run script to create OpenTSDB tables
 
@@ -65,10 +73,10 @@ cp ${ROOT_DIR}/opentsdb.conf-reference /etc/opentsdb/opentsdb.conf
 # Current version of this script below ignores compression when creating tables.
 # Sort this out later.
 # ===========================================================================
-cd $HOME/hbase-${AI_HBASE_VERSION}/
+cd ${HBASE_DIR}/hbase-${AI_HBASE_VERSION}/
 export HBASE_HOME=`pwd`
-${ROOT_DIR}/create_opentsdb_hbase_tables.sh
-${ROOT_DIR}/enable_tsdb_table_compression.sh
+${BASE_DIR}/create_opentsdb_hbase_tables.sh
+${BASE_DIR}/enable_tsdb_table_compression.sh
 
 echo "Waiting... to ensure that OpenTSDB tables creation succeeds !"
 sleep 5
@@ -88,16 +96,15 @@ rm /tmp/opentsdb_foo
 #=====================
 # Download and install Grafana
 sudo apt-get install -y adduser libfontconfig1
-cd $HOME/Downloads/
+cd ${BASE_DIR}
 wget https://dl.grafana.com/oss/release/grafana_${AI_GRAFANA_VERSION}_amd64.deb
-cd ..
-sudo dpkg -i Downloads/grafana_${AI_GRAFANA_VERSION}_amd64.deb 
+sudo dpkg -i ${BASE_DIR}/grafana_${AI_GRAFANA_VERSION}_amd64.deb
 
 # Update grafana.ini
-sudo cp ${ROOT_DIR}/grafana.ini-reference /etc/grafana/grafana.ini
+sudo cp ${BASE_DIR}/grafana.ini-reference /etc/grafana/grafana.ini
 
 # Change the new user addition email tempate
-sudo cp ${ROOT_DIR}/new_user_invite.html-reference /usr/share/grafana/public/emails/new_user_invite.html
+sudo cp ${BASE_DIR}/new_user_invite.html-reference /usr/share/grafana/public/emails/new_user_invite.html
 
 # To start grafana
 sudo /bin/systemctl start grafana-server
@@ -118,25 +125,24 @@ sudo /bin/systemctl enable grafana-server
 # Download and install Wireguard
 
 sudo apt-get --assume-yes install wireguard
-sudo su
 cd /etc/wireguard/
 umask 077
 
-# Genrate public and private keys for the VPN interface
+# Generate public and private keys for the VPN interface
 wg genkey | tee privatekey | wg pubkey > publickey
 
-# Genrate the vpn_data interface config file from the config template (aka
+# Generate the vpn_data interface config file from the config template (aka
 # the reference file) by replacing the private key from the template with
 # actual value.
 placeholder_value="PrivateKey = PLACEHOLDER_REPLACE_WITH_GENERATED_KEY"
 actual_value="PrivateKey = `cat privatekey`"
-sed "s/$placeholder_value/$actual_value/g" ${ROOT_DIR}/vpn_data.conf-server-reference > vpn_data.conf
+sed "s/$placeholder_value/$actual_value/g" ${BASE_DIR}/vpn_data.conf-server-reference > vpn_data.conf
 
 sudo systemctl enable wg-quick@vpn_data   # to start Wireguard at boot time
 sudo systemctl start wg-quick@vpn_data   # launch it now
 
 # Show current status
-sudo systemctl status wg-quick@vpn_data
+sudo systemctl status wg-quick@vpn_data | cat
 sudo wg
 
 #====================
@@ -156,6 +162,3 @@ echo "REMINDER: Restart grafana after overriding"
 echo ""
 echo ""
 echo ""
-
-
-
