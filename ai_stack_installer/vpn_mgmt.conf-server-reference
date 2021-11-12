@@ -1,0 +1,17 @@
+###############################################################################
+# VPN configuration for the "mgmt" interface of an ArgusIoT server stack
+# deployment. Gateways would connect to the VPN interface defined in this 
+# config to be 'managed'. For example all the gateway management software
+# would run on this server.
+#
+# IP address scheme:
+# https://docs.google.com/document/d/1ixRnf9zCCYzs2b_uZNMbPA_izNkLdp-OVkvYh9EpIE0/edit#heading=h.22gp4qf5nwsi
+#
+# Document is visible to everyone in the ArgusIoT org.
+
+[Interface]
+Address = 192.168.30.254/24
+ListenPort = 41194
+PrivateKey = PLACEHOLDER_REPLACE_WITH_GENERATED_KEY
+
+# Add [Peer] enties below this line:

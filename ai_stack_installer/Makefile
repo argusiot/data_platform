@@ -7,7 +7,7 @@ FILE_LIST:= argusiot_service_stack_install.sh \
 			opentsdb.conf-reference \
 			grafana.ini-reference \
 			new_user_invite.html-reference \
-			wg0.conf-server-reference
+			vpn_data.conf-server-reference \
 
 installer_bundle:
 	mkdir -p output
