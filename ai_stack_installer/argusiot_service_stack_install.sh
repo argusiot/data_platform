@@ -5,7 +5,7 @@
 
 AI_HBASE_VERSION=1.4.14    # The Hbase version that works with OpenTSDB v2.4.0
 AI_OPENTSDB_VERSION=2.4.0   # last stable OpenTSDB release
-AI_GRAFANA_VERSION=7.3.2   # latest Grafana release
+AI_GRAFANA_VERSION=8.3.4   # latest Grafana release
 
 HBASE_DIR='/usr/share/hbase'
 
@@ -25,7 +25,7 @@ done
 
 cd ${BASE_DIR}
 
-wget https://downloads.apache.org/hbase/${AI_HBASE_VERSION}/hbase-${AI_HBASE_VERSION}-bin.tar.gz ;
+wget https://archive.apache.org/dist/hbase/${AI_HBASE_VERSION}/hbase-${AI_HBASE_VERSION}-bin.tar.gz ;
 
 echo "Creating ${HBASE_DIR} for HBase install"
 mkdir -p ${HBASE_DIR}
@@ -36,6 +36,8 @@ sudo apt-get --assume-yes install openjdk-8-jre-headless
 sudo apt-get --assume-yes install openjdk-8-jdk-headless # Optional - to get jps
 
 # export JAVA_HOME=/usr
+export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+
 cp ${BASE_DIR}/hbase-env.sh-reference ${HBASE_DIR}/hbase-${AI_HBASE_VERSION}/conf/hbase-env.sh
 
 mv ${HBASE_DIR}/hbase-${AI_HBASE_VERSION}/conf/hbase-site.xml ${HBASE_DIR}/hbase-${AI_HBASE_VERSION}/conf/hbase-site.xml-orig
@@ -95,29 +97,29 @@ rm /tmp/opentsdb_foo
 
 #=====================
 # Download and install Grafana
-sudo apt-get install -y adduser libfontconfig1
-cd ${BASE_DIR}
-wget https://dl.grafana.com/oss/release/grafana_${AI_GRAFANA_VERSION}_amd64.deb
-sudo dpkg -i ${BASE_DIR}/grafana_${AI_GRAFANA_VERSION}_amd64.deb
+# sudo apt-get install -y adduser libfontconfig1
+# cd ${BASE_DIR}
+# wget https://dl.grafana.com/oss/release/grafana_${AI_GRAFANA_VERSION}_amd64.deb
+# sudo dpkg -i ${BASE_DIR}/grafana_${AI_GRAFANA_VERSION}_amd64.deb
 
-# Update grafana.ini
-sudo cp ${BASE_DIR}/grafana.ini-reference /etc/grafana/grafana.ini
+# # Update grafana.ini
+# sudo cp ${BASE_DIR}/grafana.ini-reference /etc/grafana/grafana.ini
 
-# Change the new user addition email tempate
-sudo cp ${BASE_DIR}/new_user_invite.html-reference /usr/share/grafana/public/emails/new_user_invite.html
+# # Change the new user addition email tempate
+# sudo cp ${BASE_DIR}/new_user_invite.html-reference /usr/share/grafana/public/emails/new_user_invite.html
 
-# To start grafana
-sudo /bin/systemctl start grafana-server
+# # To start grafana
+# sudo /bin/systemctl start grafana-server
 
-# Install Grafana plug-ins we rely upon
-sudo grafana-cli plugins install grafana-piechart-panel
-sudo grafana-cli plugins install agenty-flowcharting-panel
-sudo /bin/systemctl restart grafana-server
+# # Install Grafana plug-ins we rely upon
+# sudo grafana-cli plugins install grafana-piechart-panel
+# sudo grafana-cli plugins install agenty-flowcharting-panel
+# sudo /bin/systemctl restart grafana-server
 
 
-# To start Grafana on reboot
-sudo /bin/systemctl daemon-reload
-sudo /bin/systemctl enable grafana-server
+# # To start Grafana on reboot
+# sudo /bin/systemctl daemon-reload
+# sudo /bin/systemctl enable grafana-server
 #=====================
 
 

@@ -14,6 +14,50 @@ To stand a service stack on a VM involves 5 high level steps:
 4. Using the installer bundle inside the VM to create a new service stack
 5. Verifying the stack is running, accepting data, and serving web UIs.
 
+Dockerized Stack Instructions:
+==============================
+
+These are the steps required to stand up a stack using Docker as a "VM"
+Kiran wrote these steps on 5/16/22; they should be executed from this directory
+
+Generate the service stack installer bundle:
+ 
+ make installer_bundle
+ ls -l output/
+ # expect to find this file: ai_stack_installer.tar.gz 
+
+Create the Docker containers for OpenTSDB and Grafana, and connect them
+via network bridge:
+ 
+ make init_stack
+
+At this point, you will be inside of the OpenTSDB container running bash
+Open a new terminal window and type the following:
+ 
+ docker network inspect argus
+ # expect to see 2 objects in the "Containers" field, one named
+ # "grafana" and one named "opentsdb"
+
+Take note of the IP Address assigned to the container named "opentsdb"
+We will configure Grafana later to target this address for data ingest
+
+Switch back to the bash terminal inside the OpenTSDB container, and type
+the following commands to run the installation script:
+ 
+ cd srv/installer
+ tar -xvf ai_stack_installer.tar.gz
+ sudo ./argusiot_service_stack_install.sh
+
+After a couple of minutes, the script should finish and OpenTSDB is running at
+the host's 4242 port; Grafana is running at the host's 3000 port. On a personal
+machine you would point your browser to:
+
+ http://localhost:4242 to manage OpenTSDB
+ http://localhost:3000 to manage Grafana
+
+That's it! For the purposes of working with Docker, you can ignore the rest of
+this README.
+
 
 Detailed steps:
 ===============
