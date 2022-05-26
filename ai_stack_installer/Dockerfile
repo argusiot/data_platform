@@ -11,4 +11,4 @@ COPY output/ai_stack_installer.tar.gz /srv/installer
 
 EXPOSE 4242
 
-CMD ["/bin/bash"]
+CMD cd /srv/installer ; tar -xvf ai_stack_installer.tar.gz ; sudo ./argusiot_service_stack_install_docker.sh ; /bin/bash

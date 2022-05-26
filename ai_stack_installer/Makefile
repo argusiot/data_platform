@@ -1,4 +1,5 @@
 FILE_LIST:= argusiot_service_stack_install.sh \
+			argusiot_service_stack_install_docker.sh \
 			hbase-env.sh-reference \
 			create_opentsdb_hbase_tables.sh \
 			drop_opentsdb_tables.sh \
@@ -24,3 +25,12 @@ init_stack:
 	docker build -f Dockerfile -t opentsdb .
 	docker run -ditp 3000:3000 --name grafana --network argus grafana/grafana-oss\:8.3.4-ubuntu
 	docker run -itp 4242:4242 --name opentsdb --network argus opentsdb
+
+close_stack:
+	docker stop opentsdb
+	docker stop grafana
+	docker container rm opentsdb
+	docker container rm grafana
+	docker rmi opentsdb
+	docker rmi grafana/grafana-oss:8.3.4-ubuntu
+	docker network rm argus
