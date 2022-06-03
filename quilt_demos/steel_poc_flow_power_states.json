@@ -1,0 +1,56 @@
+{
+    "name": "power_flow_states",
+    "uuid": "xxxxxxxxxxxxxxx",
+    "state_definitions" : [
+        {
+            "label" : "TestStateV1_ON_Producing",
+            "expression" : [
+                ["R2_power", ">", 5000],
+                ["descaler_flow", ">=", 300]
+            ],
+            "expression_operator" : "AND"
+        },
+        {
+            "label" : "TestStateV1_ON_Overhead",
+            "expression" : [
+                ["R2_power", ">", 5000],
+                ["descaler_flow", "<", 300]
+            ],
+            "expression_operator" : "AND"
+        },
+        {
+            "label" : "TestStateV1_MachineOFF",
+            "expression" : [
+                ["R2_power", "<=", 5000],
+                ["descaler_flow", "<", 300]
+            ],
+            "expression_operator" : "AND"
+        }
+    ],
+    "input_timeseries" : [
+        {
+            "ts_name" : "descaler_flow",
+            "ts_defn" : {
+                "metric": "poc.v3.f1.descale.chiller.header.flow",
+                "tags" : {
+                    "machine_id": "106-25",
+                    "unit": "gpm"
+                }
+            }
+        },
+        {
+            "ts_name" : "R2_power",
+            "ts_defn" : {
+                "metric": "poc.v3.r2.power.n9-33",
+                "tags" : {
+                    "machine_id": "106-33",
+                    "unit": "KW"
+                }
+            }
+        }
+    ],
+    "output_timeseries_template" : {
+        "metric" : "quilt.test_state_flow_power",
+        "tags" : { "machine" : "106", "state_label" : "PLACEHOLDER" }
+    }
+}
