@@ -124,7 +124,7 @@ class StateSetProcessor(object):
 
         return result_map
 
-    def __push_data(self, timestamp, metric, state, value):
+    def __push_data(self, timestamp, metric, state, value, tags):
         url = 'http://%s:%d/api/put' % (self.__tsdb_hostname_or_ip,
                                         self.__tsdb_port_num)
         headers = {'content-type': 'application/json'}
@@ -132,8 +132,8 @@ class StateSetProcessor(object):
         datapoint['metric'] = metric
         datapoint['timestamp'] = timestamp
         datapoint['value'] = value
-        datapoint['tags'] = {}
-        datapoint['tags']['state'] = state
+        datapoint['tags'] = tags
+        datapoint['tags']['state_label'] = state
         response = requests.post(url, data=json.dumps(datapoint), headers=headers)
         return response, datapoint['timestamp']
 
@@ -289,19 +289,19 @@ class StateSetProcessor(object):
                 try:
                     time_spent = t_state.do_computation(result_map)
                     time_spent_list.append((t_state.write_tsid.metric_id,
-                                            t_state.write_tsid.filters.get('state_label'), time_spent))
+                                            t_state.write_tsid.filters.get('state_label'), time_spent, t_state.write_tsid.filters))
                 except ValueError as e:
                     print(e)
                     print("ERROR: Processing Start:" + str(current_time) + " End:" + str(current_period_end_time))
                     error = True
                     self.__push_data(current_period_end_time, t_state.write_tsid.metric_id,
-                                   'SystemError', current_period_end_time - current_time)
+                                   'SystemError', current_period_end_time - current_time, t_state.write_tsid.filters)
                     break
 
             if not error:
                 total_time = current_period_end_time - current_time
                 for element in time_spent_list:
-                    self.__push_data(current_period_end_time, element[0], element[1], element[2])
+                    self.__push_data(current_period_end_time, element[0], element[1], element[2], element[3])
                     total_time -= (element[2])
                 if total_time != 0.0:
                     print("STATE ERROR: Time unaccounted for between Start:" + str(current_time) + " End:" + str(
