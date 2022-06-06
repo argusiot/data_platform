@@ -4,7 +4,7 @@
 #
 
 AI_HBASE_VERSION=1.4.14    # The Hbase version that works with OpenTSDB v2.4.0
-AI_OPENTSDB_VERSION=2.4.0   # last stable OpenTSDB release
+AI_OPENTSDB_VERSION=2.4.1   # last stable OpenTSDB release
 AI_GRAFANA_VERSION=8.3.4   # latest Grafana release
 
 HBASE_DIR='/usr/share/hbase'
@@ -23,28 +23,28 @@ done
 #=====================
 # Download and install Hbase
 
-cd ${BASE_DIR}
+# cd ${BASE_DIR}
 
-wget https://archive.apache.org/dist/hbase/${AI_HBASE_VERSION}/hbase-${AI_HBASE_VERSION}-bin.tar.gz ;
+#wget https://archive.apache.org/dist/hbase/${AI_HBASE_VERSION}/hbase-${AI_HBASE_VERSION}-bin.tar.gz ;
 
-echo "Creating ${HBASE_DIR} for HBase install"
-mkdir -p ${HBASE_DIR}
-cd ${HBASE_DIR}
-tar -xvf ${BASE_DIR}/hbase-${AI_HBASE_VERSION}-bin.tar.gz
-sudo apt-get --assume-yes update
-sudo apt-get --assume-yes install openjdk-8-jre-headless
-sudo apt-get --assume-yes install openjdk-8-jdk-headless # Optional - to get jps
+# echo "Creating ${HBASE_DIR} for HBase install"
+# mkdir -p ${HBASE_DIR}
+# cd ${HBASE_DIR}
+# tar -xvf ${BASE_DIR}/hbase-${AI_HBASE_VERSION}-bin.tar.gz
+#sudo apt-get --assume-yes update
+#sudo apt-get --assume-yes install openjdk-8-jre-headless
+#sudo apt-get --assume-yes install openjdk-8-jdk-headless # Optional - to get jps
 
 # export JAVA_HOME=/usr
-export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
+# export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 
-cp ${BASE_DIR}/hbase-env.sh-reference ${HBASE_DIR}/hbase-${AI_HBASE_VERSION}/conf/hbase-env.sh
+# cp ${BASE_DIR}/hbase-env.sh-reference ${HBASE_DIR}/hbase-${AI_HBASE_VERSION}/conf/hbase-env.sh
 
-mv ${HBASE_DIR}/hbase-${AI_HBASE_VERSION}/conf/hbase-site.xml ${HBASE_DIR}/hbase-${AI_HBASE_VERSION}/conf/hbase-site.xml-orig
-cp ${BASE_DIR}/hbase-site.xml-reference ${HBASE_DIR}/hbase-${AI_HBASE_VERSION}/conf/hbase-site.xml
+# mv ${HBASE_DIR}/hbase-${AI_HBASE_VERSION}/conf/hbase-site.xml ${HBASE_DIR}/hbase-${AI_HBASE_VERSION}/conf/hbase-site.xml-orig
+# cp ${BASE_DIR}/hbase-site.xml-reference ${HBASE_DIR}/hbase-${AI_HBASE_VERSION}/conf/hbase-site.xml
 
-cd ${HBASE_DIR}/hbase-${AI_HBASE_VERSION} ; bin/start-hbase.sh
-cd ${BASE_DIR}
+# cd ${HBASE_DIR}/hbase-${AI_HBASE_VERSION} ; bin/start-hbase.sh
+# cd ${BASE_DIR}
 
 #Verify zookeeper has started:
 # Expect to see: “Zookeeper version: 3.4.10 . . . . <more stuff>"
@@ -56,18 +56,18 @@ rm /tmp/zookeeper_foo
 #=====================
 # Download and install OpenTSDB
 
-cd ${BASE_DIR}
-sudo apt-get --assume-yes install gnuplot
-sudo apt-get --assume-yes install autoconf
-sudo apt-get --assume-yes install python
+# cd ${BASE_DIR}
+#sudo apt-get --assume-yes install gnuplot
+#sudo apt-get --assume-yes install autoconf
+#sudo apt-get --assume-yes install python
 
-wget https://github.com/OpenTSDB/opentsdb/releases/download/v${AI_OPENTSDB_VERSION}/opentsdb-${AI_OPENTSDB_VERSION}_all.deb
+#wget https://github.com/OpenTSDB/opentsdb/releases/download/v${AI_OPENTSDB_VERSION}/opentsdb-${AI_OPENTSDB_VERSION}_all.deb
 
-sudo dpkg -i ${BASE_DIR}/opentsdb-${AI_OPENTSDB_VERSION}_all.deb
+#sudo dpkg -i ${BASE_DIR}/opentsdb-${AI_OPENTSDB_VERSION}_all.deb
 
 # Copy OpenTSDB config
-mv /etc/opentsdb/opentsdb.conf /etc/opentsdb/opentsdb.conf-orig
-cp ${BASE_DIR}/opentsdb.conf-reference /etc/opentsdb/opentsdb.conf
+# mv /etc/opentsdb/opentsdb.conf /etc/opentsdb/opentsdb.conf-orig
+# cp ${BASE_DIR}/opentsdb.conf-reference /etc/opentsdb/opentsdb.conf
 
 # Run script to create OpenTSDB tables
 
@@ -75,18 +75,18 @@ cp ${BASE_DIR}/opentsdb.conf-reference /etc/opentsdb/opentsdb.conf
 # Current version of this script below ignores compression when creating tables.
 # Sort this out later.
 # ===========================================================================
-cd ${HBASE_DIR}/hbase-${AI_HBASE_VERSION}/
-export HBASE_HOME=`pwd`
-${BASE_DIR}/create_opentsdb_hbase_tables.sh
-${BASE_DIR}/enable_tsdb_table_compression.sh
+# cd ${HBASE_DIR}/hbase-${AI_HBASE_VERSION}/
+# export HBASE_HOME=`pwd`
+# ${BASE_DIR}/create_opentsdb_hbase_tables.sh
+# ${BASE_DIR}/enable_tsdb_table_compression.sh
 
-echo "Waiting... to ensure that OpenTSDB tables creation succeeds !"
-sleep 5
+# echo "Waiting... to ensure that OpenTSDB tables creation succeeds !"
+# sleep 5
 
-echo "Starting OpenTSDB..."
-sudo service opentsdb start
+# echo "Starting OpenTSDB..."
+# sudo service opentsdb start
 
-sleep 5
+# sleep 5
 
 # Verify OpenTSDB has started
 (echo "version" ; sleep 1 ; echo "exit") | telnet localhost 4242 > /tmp/opentsdb_foo
@@ -126,7 +126,7 @@ rm /tmp/opentsdb_foo
 #=====================
 # Download and install Wireguard
 
-sudo apt-get --assume-yes install wireguard
+#sudo apt-get --assume-yes install wireguard
 cd /etc/wireguard/
 umask 077
 

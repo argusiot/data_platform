@@ -31,29 +31,56 @@ via network bridge:
  
  make init_stack
 
-At this point, you will be inside of the OpenTSDB container running bash
-Open a new terminal window and type the following:
+This will build and run the Docker images, eventually resulting in a
+bash interface within the OpenTSDB container
+
+If you want to shut down the stack and remove all containers/images,
+type the following command in the bash terminal:
+
+ exit
+
+Then you will be returned to your OS terminal, where you will type
+the following:
+
+ make close_stack
+
+And the entire stack will be purged from Docker and system memory
+Do note that the installer bundle generated from the earlier
+make command will persist until its make command is invoked again
+
+To continue with the initialization of the stack,
+open a new terminal window and type the following:
  
  docker network inspect argus
  # expect to see 2 objects in the "Containers" field, one named
  # "grafana" and one named "opentsdb"
 
 Take note of the IP Address assigned to the container named "opentsdb"
-We will configure Grafana later to target this address for data ingest
+ending before the slash character, for example we might see
 
-Switch back to the bash terminal inside the OpenTSDB container, and type
-the following commands to run the installation script:
- 
- cd srv/installer
- tar -xvf ai_stack_installer.tar.gz
- sudo ./argusiot_service_stack_install.sh
+ "Name": "opentsdb",
+ "EndpointID": "662b1adaa32b8168dbff7e46feef1811cb5cc214e401239268be0347cd94b453",
+ "MacAddress": "02:42:ac:19:00:03",
+ "IPv4Address": "172.25.0.3/16",
+ "IPv6Address": ""
 
-After a couple of minutes, the script should finish and OpenTSDB is running at
-the host's 4242 port; Grafana is running at the host's 3000 port. On a personal
-machine you would point your browser to:
+And what we want to capture is "172.25.0.3"
+When we eventually want to point Grafana to our OpenTSDB container, 
+we give it that same IP address appended with ":4242"
+For example, this is what we would type into Grafana
+
+ 172.25.0.3:4242
+
+To inspect OpenTSDB or Grafana, point your browser to the following URLs:
 
  http://localhost:4242 to manage OpenTSDB
  http://localhost:3000 to manage Grafana
+
+If you want to see the stack working in action, you can run a test file
+by returning to the bash terminal within the OpenTSDB container
+and typing the following:
+
+ python3 http_post_using_json_simple_script.py
 
 That's it! For the purposes of working with Docker, you can ignore the rest of
 this README.
