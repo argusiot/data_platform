@@ -4,7 +4,7 @@
 #
 
 AI_HBASE_VERSION=1.4.14    # The Hbase version that works with OpenTSDB v2.4.0
-AI_OPENTSDB_VERSION=2.4.0   # last stable OpenTSDB release
+AI_OPENTSDB_VERSION=2.4.1   # last stable OpenTSDB release
 AI_GRAFANA_VERSION=8.3.4   # latest Grafana release
 
 HBASE_DIR='/usr/share/hbase'

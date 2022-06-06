@@ -20,7 +20,9 @@ class TestDataGenerator(object):
         datapoint['value'] = value
         datapoint['tags'] = {}
         datapoint['tags'][self.__tag_name] = self.__tag_value
+        print("posting" + url + json.dumps(datapoint) + str(headers))
         response = requests.post(url, data=json.dumps(datapoint), headers=headers)
+        print(response)
 
     def generate_slope(self, start_timestamp, frequency, total_data_points, init_value, final_value):
         print(start_timestamp, init_value)
@@ -44,7 +46,7 @@ class TestDataGenerator(object):
         current_timestamp = start_timestamp
         while total_data_points > 0:
             print(current_timestamp, value)
-            # self.push_data(current_timestamp, value)
+            self.push_data(current_timestamp, value)
             current_timestamp += frequency
             total_data_points -= 1
 
@@ -58,23 +60,21 @@ class TestDataGenerator(object):
 
 
 def main():
-    # data_generator = TestDataGenerator('http://34.221.154.248:4242/api/put', 'mock_data', 'input', 'Melt-Temp')
-    # data_generator.generate_slope(1616083200, 10, 3, 0, 110)
-    # data_generator.push_data(1616083230, 55)
-    # data_generator.push_data(1616083240, 110)
-    # data_generator.generate_tilda_straight_line(1616083250, 10, 4, 108, 115)
-    # data_generator.generate_tilda_straight_line(1616083290, 10, 4, 75, 85)
-    # data_generator.generate_tilda_straight_line(1616083330, 10, 4, 108, 115)
-    #
-    # data_generator = TestDataGenerator('http://34.221.154.248:4242/api/put', 'mock_data', 'input', 'Barrel-Temp')
-    # data_generator.generate_slope(1616083200, 10, 3, 0, 110)
-    # data_generator.push_data(1616083230, 55)
-    # data_generator.generate_slope(1616083240, 10, 3, 65, 110)
-    # data_generator.generate_tilda_straight_line(1616083270, 10, 4, 80, 90)
-    # data_generator.generate_slope(1616083310, 10, 3, 95, 110)
-    # data_generator.generate_tilda_straight_line(1616083330, 10, 4, 108, 115)
+    data_generator = TestDataGenerator('http://localhost:4242/api/put', 'mock_data', 'input', 'Melt-Temp')
+    data_generator.generate_slope(1616083200, 10, 3, 0, 110)
+    data_generator.push_data(1616083230, 55)
+    data_generator.push_data(1616083240, 110)
+    data_generator.generate_tilda_straight_line(1616083250, 10, 10, 90, 120)
+    data_generator.generate_tilda_straight_line(1616083350, 10, 10, 75, 85)
+    data_generator.generate_tilda_straight_line(1616083450, 10, 4, 90, 120)
+    
+    data_generator = TestDataGenerator('http://localhost:4242/api/put', 'mock_data', 'input', 'Barrel-Temp')
+    data_generator.generate_slope(1616083200, 10, 3, 0, 110)
+    data_generator.push_data(1616083230, 55)
+    data_generator.generate_slope(1616083240, 10, 3, 65, 110)
+    data_generator.generate_tilda_straight_line(1616083270, 10, 4, 80, 90)
+    data_generator.generate_slope(1616083310, 10, 3, 95, 110)
+    data_generator.generate_tilda_straight_line(1616083330, 10, 4, 108, 115)
 
-    data_generator = TestDataGenerator('http://34.221.154.248:4242/api/put', 'mock_data_output', 'state', 'TestState')
-    data_generator.push_data(1616073230, 55)
 
 main()

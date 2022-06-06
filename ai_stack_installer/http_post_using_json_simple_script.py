@@ -31,6 +31,6 @@ data_point_count = 100
 while(data_point_count > 0):
   response, data_time_stamp = push_data()
   print("%d Data point pushed. Result %s" % (data_time_stamp, str(response)))
-  sleep(randint(1,11))
+  sleep(randint(1,5))
   data_point_count = data_point_count - 1
 
