@@ -24,8 +24,8 @@ init_stack:
 	docker network create --driver bridge argus
 	docker pull grafana/grafana-oss\:8.3.4-ubuntu
 	docker build -f Dockerfile -t opentsdb .
-	docker run -ditp 3000:3000 --name grafana --network argus grafana/grafana-oss\:8.3.4-ubuntu
-	docker run -itp 4242:4242 --name opentsdb --network argus opentsdb
+	docker run -ditp 3000:3000 --name grafana --network argus --memory=2g grafana/grafana-oss\:8.3.4-ubuntu
+	docker run -itp 4242:4242 --name opentsdb --network argus --memory=8g --memory-swap=8g opentsdb
 
 close_stack:
 	docker stop opentsdb
