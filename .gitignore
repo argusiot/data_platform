@@ -3,3 +3,4 @@
 __pycache__/
 
 .coverage
+ai_stack_installer/output/ai_stack_installer.tar.gz
