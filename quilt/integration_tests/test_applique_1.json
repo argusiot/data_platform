@@ -1,0 +1,58 @@
+{
+        "name": "extruder_states",
+        "uuid": "xxxxxxxxxxxxxxx",
+        "state_definitions" : [
+            {
+               "label" : "Melt",
+               "expression" : [
+                 ["melt_timeseries", ">", 100],
+             ["barrel_timeseries", ">", 100]
+               ],
+               "expression_operator" : "AND"
+            },
+            {
+               "label" : "Setup",
+               "expression" : [
+                  ["melt_timeseries", "<=", 100],
+             ["barrel_timeseries", "<=", 100]
+               ],
+               "expression_operator" : "AND"
+            },
+          {
+               "label" : "Missing",
+               "expression" : [
+                 ["melt_timeseries", ">", 100],
+             ["barrel_timeseries", "<=", 100]
+               ],
+               "expression_operator" : "AND"
+            },
+          {
+               "label" : "Missing1",
+               "expression" : [
+                 ["melt_timeseries", "<=", 100],
+             ["barrel_timeseries", ">", 100]
+               ],
+               "expression_operator" : "AND"
+            }
+        ],
+        "input_timeseries" : [
+            {
+                "ts_name" : "melt_timeseries",
+                "ts_defn" : {
+                    "metric": "mock_data",
+                    "tags" : { "input" : "Melt-Temp" }
+                }
+            },
+                      {
+                "ts_name" : "barrel_timeseries",
+                "ts_defn" : {
+                    "metric": "mock_data",
+                    "tags" : { "input" : "Barrel-Temp" }
+                }
+            }
+        ],
+        "output_timeseries_template" : {
+            "metric" : "applique_infra_out",
+            "tags" : { "machine" : "xyz", "state_label" : "PLACEHOLDER" }
+        }
+}
