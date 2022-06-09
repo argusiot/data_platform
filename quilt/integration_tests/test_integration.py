@@ -216,15 +216,37 @@ class Integration_Tests(unittest.TestCase):
     #         filtered_result = FilteredTimeseries(test_timeseries, FilterQualifier.GREATERTHAN, 100)
     #         return Stepify(filtered_result)
 
-    def testIntegrationInit(self):
+    def testIntegrationCase1(self):
         tsid1 = TimeseriesID("mock_data", {"input":"Melt-Temp"})
         tsid2 = TimeseriesID("mock_data", {"input":"Barrel-Temp"})
-        self.mock_integration_helper(1616083200, 1616083360, [tsid1, tsid2], "sample_input.json")
+        self.mock_integration_helper(1616083200, 1616083360, [tsid1, tsid2], "test_appliques/test_applique_1.json")
         this_dir = os.path.dirname(os.path.realpath(__file__))
         file_path = os.path.join(this_dir, 'test_data/expected_output_case1.csv')
         print(pd.read_csv(file_path))
         pd.testing.assert_frame_equal(self.__test_output_df, pd.read_csv(file_path), check_dtype=False, check_exact=False)
         self.assertAlmostEqual(self.__test_output_df[self.__test_output_df['state_label'] == "Melt"]['value'].sum(), 46.56565618515015)
+    
+    def testIntegrationCase2(self):
+        tsid1 = TimeseriesID("mock_data", {"input":"Melt-Temp"})
+        tsid2 = TimeseriesID("mock_data", {"input":"Barrel-Temp"})
+        self.mock_integration_helper(1616083200, 1616083360, [tsid1, tsid2], "test_appliques/test_applique_1.json")
+        self.mock_integration_helper(1616083200, 1616083360, [tsid1, tsid2], "test_appliques/test_applique_2.json")
+        this_dir = os.path.dirname(os.path.realpath(__file__))
+        file_path = os.path.join(this_dir, 'test_data/expected_output_case2.csv')
+        # self.__test_output_df.to_csv(file_path, index=False)
+        print(pd.read_csv(file_path))
+        pd.testing.assert_frame_equal(self.__test_output_df, pd.read_csv(file_path), check_dtype=False, check_exact=False)
+        
+    def testIntegrationCase3(self):
+        tsid1 = TimeseriesID("mock_data", {"input":"Melt-Temp"})
+        tsid2 = TimeseriesID("mock_data", {"input":"Barrel-Temp"})
+        self.mock_integration_helper(1616083200, 1616083360, [tsid1, tsid2], "test_appliques/test_applique_1.json")
+        self.mock_integration_helper(1616083200, 1616083360, [tsid1, tsid2], "test_appliques/test_applique_2.json")
+        this_dir = os.path.dirname(os.path.realpath(__file__))
+        file_path = os.path.join(this_dir, 'test_data/expected_output_case2.csv')
+        # self.__test_output_df.to_csv(file_path, index=False)
+        print(pd.read_csv(file_path))
+        pd.testing.assert_frame_equal(self.__test_output_df, pd.read_csv(file_path), check_dtype=False, check_exact=False)
         
     # def testStepifyInit(self):
     #     stepified_result = self.mock_stepify_helper(1587949200, 1587949214)
