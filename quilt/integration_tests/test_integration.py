@@ -170,6 +170,7 @@ class Integration_Tests(unittest.TestCase):
         _data = json.loads(data)
         newdata = {**_data, **_data['tags']}
         del newdata['tags']
+        newdata['value'] = float(newdata['value'])
         newrow = pd.DataFrame.from_dict([newdata])
         self.__test_output_df = pd.concat([self.__test_output_df, newrow], ignore_index=True)
         assert url == 'http://%s:%d/api/put' % (self.__tsdb_ip,
@@ -219,7 +220,10 @@ class Integration_Tests(unittest.TestCase):
         tsid1 = TimeseriesID("mock_data", {"input":"Melt-Temp"})
         tsid2 = TimeseriesID("mock_data", {"input":"Barrel-Temp"})
         self.mock_integration_helper(1616083200, 1616083360, [tsid1, tsid2], "sample_input.json")
-        print(self.__test_output_df[self.__test_output_df['state_label'] == "Melt"]['value'].sum())
+        this_dir = os.path.dirname(os.path.realpath(__file__))
+        file_path = os.path.join(this_dir, 'test_data/expected_output_case1.csv')
+        print(pd.read_csv(file_path))
+        pd.testing.assert_frame_equal(self.__test_output_df, pd.read_csv(file_path), check_dtype=False, check_exact=False)
         self.assertAlmostEqual(self.__test_output_df[self.__test_output_df['state_label'] == "Melt"]['value'].sum(), 46.56565618515015)
         
     # def testStepifyInit(self):
