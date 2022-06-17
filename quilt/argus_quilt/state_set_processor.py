@@ -133,7 +133,6 @@ class StateSetProcessor(object):
         datapoint['timestamp'] = timestamp
         datapoint['value'] = value
         datapoint['tags'] = tags
-        datapoint['tags']['state_label'] = state
         response = requests.post(url, data=json.dumps(datapoint), headers=headers)
         return response, datapoint['timestamp']
 
