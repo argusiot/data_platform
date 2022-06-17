@@ -10,7 +10,7 @@
           }
         ],
         "output_timeseries_template" : {
-          "metric":"foo", "tags" : {}
+          "metric":"foo", "tags" : {"state_label" : "PLACEHOLDER"}
         }
     },
 

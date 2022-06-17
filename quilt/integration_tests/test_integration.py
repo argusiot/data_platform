@@ -48,14 +48,6 @@ import pandas as pd
 class Integration_Tests(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(Integration_Tests, self).__init__(*args, **kwargs)
-        self.__test_timeseries_ts_id1 = ts_id.TimeseriesID("machine.sensor.dummy_melt_temperature",
-                                                          {"machine_name": "90mm_extruder"})
-        self.__test_timeseries_ts_id2 = ts_id.TimeseriesID("machine.sensor.dummy_barrel_temperature",
-                                                          {"machine_name": "90mm_extruder"})
-        self.__test_timeseries_ts_id3 = ts_id.TimeseriesID("machine.sensor.dummy_melt_temperature",
-                                                          {"machine_name": "60mm_extruder"})
-        self.__test_timeseries_ts_id4 = ts_id.TimeseriesID("machine.sensor.dummy_barrel_temperature",
-                                                          {"machine_name": "60mm_extruder"})
         self.__tsdb_ip = "172.0.0.1"
         self.__tsdb_port = 4242
         self.__replace_new_vals = True #setting to remove duplicate entries from mock TSDB. True simulates real behavior

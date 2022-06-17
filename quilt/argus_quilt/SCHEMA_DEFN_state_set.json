@@ -6,6 +6,14 @@
     "schema_version" : 1.0,
 
     "definitions" : {
+        "quilt_ts_defn" : {
+            "type" : "object",
+             "properties" : {
+                 "metric" : { "type" : "string" },
+                 "tags" : { "type" : "object", "properties": {"state_label" : {"enum" : ["PLACEHOLDER"]}}, "required" : ["state_label"]}
+              },
+              "required" : ["metric", "tags"]
+        },
          "ts_leaf_defn" : {
              "type" : "object",
              "properties" : {
@@ -84,7 +92,7 @@
         },
         "output_timeseries_template" : {
             "type" : "object",
-            "$ref" : "#/definitions/ts_leaf_defn"
+            "$ref" : "#/definitions/quilt_ts_defn"
         }
     },
     "required" : ["name", "uuid", "state_definitions", "input_timeseries", "output_timeseries_template"]
