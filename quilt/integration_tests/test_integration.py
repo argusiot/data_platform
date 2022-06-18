@@ -1,18 +1,15 @@
 '''
-    This Spread Sheet contains the design cases(1-11) for the Stepify unit tests
-    https://docs.google.com/spreadsheets/d/1qenFE7QDa_4zUordDWembJJ6BMWZWDXJv_fveTm5y2s/edit#gid=0
+    This file contains integration tests for quilt. 
 
-    The test data is read from a resource file "test_data/quilt_core_testdata.json" which is shared with
+    The test data is read from a resource file "test_data/mock_data.json" which is shared with
     test_all_filter_primitive.py. All HTTP calls are hence mocked and data is in-turn retrieved
     from the json file.
 
-    The unit testing of Stepify assumes the following:
-        (a) Functionality of Filter Primitive in the expected way.
-        (b) TimeSeries Object maintains the existing properties.
-        (c) test_data/quilt_core_testdata.json file remains unmodified.
+    Expected output is stored in "test_data/expected_output_case1.csv" and "test_data/expected_output_case2.csv".
 
-    For better understanding of the Cases 1-11, the below spreadsheet allows one to visualize the transition points:
-    https://docs.google.com/spreadsheets/d/1x6eHR1LJ0XNgvyD3ytPKDwvZ9SkCTQMldJeSJHi52qo/edit#gid=2140809767
+    High level test strategy for test cases:
+        1. Test for trivial melt state computation
+        2. Tests to ensure 2 quilts preserve tags and do not overwrite each other
 '''
 import re
 import os
