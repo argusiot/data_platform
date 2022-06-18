@@ -5,6 +5,8 @@
     test_all_filter_primitive.py. All HTTP calls are hence mocked and data is in-turn retrieved
     from the json file.
 
+    Test appliques are stored in "test_appliques/".
+    
     Expected output is stored in "test_data/expected_output_case1.csv" and "test_data/expected_output_case2.csv".
 
     High level test strategy for test cases:
