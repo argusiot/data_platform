@@ -59,23 +59,6 @@ class Integration_Tests(unittest.TestCase):
         '''
         self.__test_result_dict = {}
 
-    # def __getTimeSeriesData(self, tsids, start_timestamp, end_timestamp):
-    #     foo = query_api.QueryApi(
-    #         self.__tsdb_ip, self.__tsdb_port,
-    #         start_timestamp, end_timestamp,
-    #         tsids,
-    #         bt.Aggregator.NONE,
-    #         False,
-    #     )
-
-    #     rv = foo.populate_ts_data()
-    #     assert rv == 0
-
-    #     result_list = foo.get_result_set()
-
-    #     return result_list
-
-    #change
     def __setup_testcase_data(self, start,
                               end,
                               server_ip,
@@ -111,25 +94,6 @@ class Integration_Tests(unittest.TestCase):
 
         self.__store_expected_result(url_to_expect, 200, output)
 
-    # def __build_opentsdb_json_response(self, tsids, timeseries_dict):
-    #     json_response = []
-    #     for tsid in tsids:
-    #         ts_response = {
-    #             "aggregateTags": [],
-    #             "dps": {
-    #                 # Fill in data from timeseries_dict.
-    #                 k: v for k, v in timeseries_dict.items()
-    #             },
-    #             # Fill in metric name from ts_id.
-    #             "metric": ts_id.metric_id,
-
-    #             # Fill in tag value pairs from the filters in ts_id.
-    #             "tags": {
-    #                 k: v for k, v in ts_id.filters.items()
-    #             }
-    #         }
-    #         json_response.append(ts_response)
-    #     return json_response
 
     def __store_expected_result(self, url, resp_code, timeseries_dict):
         if resp_code == 200:
@@ -152,13 +116,13 @@ class Integration_Tests(unittest.TestCase):
             tsid = TimeseriesID(metric, tag_dict)
             tsids.append(tsid)
         self.__setup_testcase_data(start, end, self.__tsdb_ip, self.__tsdb_port, tsids)
-    def mocked_requests_get(self, url):
+    def mocked_tsdb_read(self, url):
         resp_mock = Mock()
         self.fulfill_query(url)
         resp_mock.status_code, resp_mock.json.return_value = self.__test_result_dict[url]
         return resp_mock
     
-    def mocked_requests_post(self, url, data, headers):
+    def mocked_tsdb_write(self, url, data, headers):
         _data = json.loads(data)
         newdata = {**_data, **_data['tags']}
         del newdata['tags']
@@ -170,16 +134,18 @@ class Integration_Tests(unittest.TestCase):
         if(self.__replace_new_vals):
             self.__test_output_df = self.__test_output_df.drop_duplicates()
 
-    def mock_integration_helper(self, t1, t2, tsids, applique_file, output_granularity=30):
+    def common_test_driver(self, t1, t2, tsids, applique_file, output_granularity=30):
+        """
+        This method is a common test driver that is used by all tests. This method:
+        --- enables the mocking of TSDB read & write
+        --- constructs an applique using supplied file and runs it using one_shot
+        --- the result is pushed to self.__test_output_df
+        """
         with patch('argus_quilt.state_set_processor.requests') as mock_tsdb, patch('argus_tal.query_api.requests') as mock_tsdb2:
-            mock_tsdb.post.side_effect = self.mocked_requests_post
-            mock_tsdb2.get.side_effect = self.mocked_requests_get
+            mock_tsdb.post.side_effect = self.mocked_tsdb_write
+            mock_tsdb2.get.side_effect = self.mocked_tsdb_read
 
             self.__setup_testcase_data(t1, t2, self.__tsdb_ip, self.__tsdb_port, tsids)
-
-            # start_timestamp = ts.Timestamp(t1)
-            # end_timestamp = ts.Timestamp(t2)
-            # self.__getTimeSeriesData(tsids, start_timestamp, end_timestamp)
 
             with pkg_resources.path( \
                 "argus_quilt", "SCHEMA_DEFN_state_set.json") as schema_file:
@@ -192,26 +158,10 @@ class Integration_Tests(unittest.TestCase):
                     processor.one_shot(t1, t2, output_granularity)
 
 
-    # def mock_stepify_helper(self, t1, t2):
-    #     with patch('argus_tal.query_api.requests') as mock_tsdb:
-    #         mock_tsdb.get.side_effect = self.mocked_requests_get
-
-    #         self.__setup_testcase_data(
-    #             t1, t2,
-    #             self.__tsdb_ip,
-    #             self.__tsdb_port,
-    #             self.__test_timeseries_ts_id)
-
-    #         start_timestamp = ts.Timestamp(t1)
-    #         end_timestamp = ts.Timestamp(t2)
-    #         test_timeseries = getTimeSeriesData(self.__test_timeseries_ts_id, start_timestamp, end_timestamp)
-    #         filtered_result = FilteredTimeseries(test_timeseries, FilterQualifier.GREATERTHAN, 100)
-    #         return Stepify(filtered_result)
-
     def testIntegrationCase1(self):
         tsid1 = TimeseriesID("mock_data", {"input":"Melt-Temp"})
         tsid2 = TimeseriesID("mock_data", {"input":"Barrel-Temp"})
-        self.mock_integration_helper(1616083200, 1616083360, [tsid1, tsid2], "test_appliques/test_applique_1.json")
+        self.common_test_driver(1616083200, 1616083360, [tsid1, tsid2], "test_appliques/test_applique_1.json")
         this_dir = os.path.dirname(os.path.realpath(__file__))
         file_path = os.path.join(this_dir, 'test_data/expected_output_case1.csv')
         print(pd.read_csv(file_path))
@@ -221,37 +171,9 @@ class Integration_Tests(unittest.TestCase):
     def testIntegrationCase2(self):
         tsid1 = TimeseriesID("mock_data", {"input":"Melt-Temp"})
         tsid2 = TimeseriesID("mock_data", {"input":"Barrel-Temp"})
-        self.mock_integration_helper(1616083200, 1616083360, [tsid1, tsid2], "test_appliques/test_applique_1.json")
-        self.mock_integration_helper(1616083200, 1616083360, [tsid1, tsid2], "test_appliques/test_applique_2.json")
+        self.common_test_driver(1616083200, 1616083360, [tsid1, tsid2], "test_appliques/test_applique_1.json")
+        self.common_test_driver(1616083200, 1616083360, [tsid1, tsid2], "test_appliques/test_applique_2.json")
         this_dir = os.path.dirname(os.path.realpath(__file__))
         file_path = os.path.join(this_dir, 'test_data/expected_output_case2.csv')
-        # self.__test_output_df.to_csv(file_path, index=False)
         print(pd.read_csv(file_path))
         pd.testing.assert_frame_equal(self.__test_output_df, pd.read_csv(file_path), check_dtype=False, check_exact=False)
-        
-    def testIntegrationCase3(self):
-        tsid1 = TimeseriesID("mock_data", {"input":"Melt-Temp"})
-        tsid2 = TimeseriesID("mock_data", {"input":"Barrel-Temp"})
-        self.mock_integration_helper(1616083200, 1616083360, [tsid1, tsid2], "test_appliques/test_applique_1.json")
-        self.mock_integration_helper(1616083200, 1616083360, [tsid1, tsid2], "test_appliques/test_applique_2.json")
-        this_dir = os.path.dirname(os.path.realpath(__file__))
-        file_path = os.path.join(this_dir, 'test_data/expected_output_case2.csv')
-        # self.__test_output_df.to_csv(file_path, index=False)
-        print(pd.read_csv(file_path))
-        pd.testing.assert_frame_equal(self.__test_output_df, pd.read_csv(file_path), check_dtype=False, check_exact=False)
-        
-    # def testStepifyInit(self):
-    #     stepified_result = self.mock_stepify_helper(1587949200, 1587949214)
-    #     self.assertEqual(len(stepified_result.get_stepified_time_windows().get_time_windows()), 3)
-    #     self.assertEqual(stepified_result.get_stepified_time_windows().get_time_windows()[0],
-    #                      (1587949200.1666667, 1587949201.8333333))
-    #     self.assertEqual(stepified_result.get_stepified_time_windows().get_time_windows()[1],
-    #                      (1587949202.1666667, 1587949207.8333333))
-    #     self.assertEqual(stepified_result.get_stepified_time_windows().get_time_windows()[2],
-    #                      (1587949210.1666667, 1587949214))
-
-    # def testStepifyCase1(self):
-    #     stepified_result = self.mock_stepify_helper(1587947408, 1587948205)
-
-    #     self.assertEqual(stepified_result.get_stepified_time_windows().get_time_windows()[0],
-    #                      (1587947408, 1587948205))
