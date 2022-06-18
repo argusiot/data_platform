@@ -124,7 +124,7 @@ class StateSetProcessor(object):
 
         return result_map
 
-    def __push_data(self, timestamp, metric, state, value, tags):
+    def __push_data(self, timestamp, metric, value, tags):
         url = 'http://%s:%d/api/put' % (self.__tsdb_hostname_or_ip,
                                         self.__tsdb_port_num)
         headers = {'content-type': 'application/json'}
@@ -287,21 +287,21 @@ class StateSetProcessor(object):
             for t_state in self.__temporal_state_obj_list:
                 try:
                     time_spent = t_state.do_computation(result_map)
-                    time_spent_list.append((t_state.write_tsid.metric_id,
-                                            t_state.write_tsid.filters.get('state_label'), time_spent, t_state.write_tsid.filters))
+                    time_spent_list.append((t_state.write_tsid.metric_id, time_spent, t_state.write_tsid.filters))
                 except ValueError as e:
                     print(e)
                     print("ERROR: Processing Start:" + str(current_time) + " End:" + str(current_period_end_time))
                     error = True
-                    self.__push_data(current_period_end_time, t_state.write_tsid.metric_id,
-                                   'SystemError', current_period_end_time - current_time, t_state.write_tsid.filters)
+                    t_state.write_tsid.filters['state_label'] = "System Error"
+                    self.__push_data(current_period_end_time, t_state.write_tsid.metric_id, current_period_end_time - current_time, t_state.write_tsid.filters)
                     break
 
             if not error:
                 total_time = current_period_end_time - current_time
                 for element in time_spent_list:
-                    self.__push_data(current_period_end_time, element[0], element[1], element[2], element[3])
-                    total_time -= (element[2])
+                    metric_id, time_elapsed, tags = element
+                    self.__push_data(current_period_end_time, metric_id, time_elapsed, tags)
+                    total_time -= (element[1])
                 if total_time != 0.0:
                     print("STATE ERROR: Time unaccounted for between Start:" + str(current_time) + " End:" + str(
                         current_period_end_time))
