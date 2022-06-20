@@ -141,6 +141,9 @@ class StateSetProcessorBuilder(object):
             temporal_state_obj_list.append(TemporalState( \
                 state_label, state_expr_list, out_ts_id_obj))
 
+        error_tags = dict(output_tag_template)
+        error_tags['state_label'] = "SYSTEM ERROR"
+        error_tsid = TimeseriesID(output_metric, error_tags)
         '''
         3. Pull out any optional query parameters.
         '''
@@ -153,4 +156,5 @@ class StateSetProcessorBuilder(object):
                                  temporal_state_obj_list,
                                  self.__tsdb_hostname_or_ip,
                                  self.__tsdb_port_num,
-                                 flag_msec_query_resp)
+                                 flag_msec_query_resp,
+                                 error_tsid=error_tsid)

@@ -19,12 +19,15 @@ from argus_tal import timestamp as ts
 from argus_tal import basic_types as bt
 from argus_tal.timeseries_datadict import LookupQualifier, TimeseriesDataDict
 
+from tsdb_abstraction_layer.argus_tal.timeseries_id import TimeseriesID
+
 
 class StateSetProcessor(object):
     def __init__(self, name, temporal_state_obj_list,
                  tsdb_hostname_or_ip, tsdb_port, flag_msec_query_response,
                  flag_interpolation_needed=True,
-                 additional_query_window=30):
+                 additional_query_window=30,
+                 error_tsid=None):
 
         self.__name = str(name)
 
@@ -84,6 +87,13 @@ class StateSetProcessor(object):
         for t_state in temporal_state_obj_list:
             for ts_id in t_state.read_tsid_list:
                 self.__read_tsids.add(ts_id)
+        
+        if(error_tsid == None):
+            temp_tsid = self.__temporal_state_obj_list[0].write_tsid
+            temp_tsid.filters['state_label'] = "SYSTEM ERROR"
+            self.__error_tsid = TimeseriesID(temp_tsid.metric_id, temp_tsid.filters)
+        else:
+            self.__error_tsid = error_tsid
 
     '''
     As the name suggests, this is intended to be used for "one shot" state
@@ -292,12 +302,12 @@ class StateSetProcessor(object):
                     print(e)
                     print("ERROR: Processing Start:" + str(current_time) + " End:" + str(current_period_end_time))
                     error = True
-                    t_state.write_tsid.filters['state_label'] = "System Error"
-                    self.__push_data(current_period_end_time, t_state.write_tsid.metric_id, current_period_end_time - current_time, t_state.write_tsid.filters)
+                    self.__push_data(current_period_end_time, self.__error_tsid.metric_id, current_period_end_time - current_time, self.__error_tsid.filters)
                     break
 
             if not error:
                 total_time = current_period_end_time - current_time
+                time_spent_list.append((self.__error_tsid.metric_id, 0, self.__error_tsid.filters))
                 for element in time_spent_list:
                     metric_id, time_elapsed, tags = element
                     self.__push_data(current_period_end_time, metric_id, time_elapsed, tags)
