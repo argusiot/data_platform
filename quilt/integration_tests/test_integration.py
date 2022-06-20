@@ -12,7 +12,9 @@
     High level test strategy for test cases:
         1. Test for trivial melt state computation
         2. Tests to ensure 2 quilts preserve tags and do not overwrite each other
+        3. Tests system error state
 '''
+from multiprocessing.sharedctypes import Value
 import re
 import os
 import sys
@@ -115,6 +117,7 @@ class Integration_Tests(unittest.TestCase):
             tsid = TimeseriesID(metric, tag_dict)
             tsids.append(tsid)
         self.__setup_testcase_data(start, end, self.__tsdb_ip, self.__tsdb_port, tsids)
+
     def mocked_tsdb_read(self, url):
         resp_mock = Mock()
         self.fulfill_query(url)
@@ -132,6 +135,9 @@ class Integration_Tests(unittest.TestCase):
                                     self.__tsdb_port)
         if(self.__replace_new_vals):
             self.__test_output_df = self.__test_output_df.drop_duplicates()
+
+    def mocked_docomputation(result_map):
+        raise ValueError
 
     def common_test_driver(self, t1, t2, tsids, applique_file, output_granularity=30):
         """
@@ -156,7 +162,6 @@ class Integration_Tests(unittest.TestCase):
                     processor = builder.build(state_set_json_schema)
                     processor.one_shot(t1, t2, output_granularity)
 
-
     def testIntegrationCase1(self):
         tsid1 = TimeseriesID("mock_data", {"input":"Melt-Temp"})
         tsid2 = TimeseriesID("mock_data", {"input":"Barrel-Temp"})
@@ -166,7 +171,9 @@ class Integration_Tests(unittest.TestCase):
         print(pd.read_csv(file_path))
         pd.testing.assert_frame_equal(self.__test_output_df, pd.read_csv(file_path), check_dtype=False, check_exact=False)
         self.assertAlmostEqual(self.__test_output_df[self.__test_output_df['state_label'] == "Melt"]['value'].sum(), 46.56565618515015)
-    
+
+#self.__test_output_df.to_csv(file_path, index=False)
+
     def testIntegrationCase2(self):
         tsid1 = TimeseriesID("mock_data", {"input":"Melt-Temp"})
         tsid2 = TimeseriesID("mock_data", {"input":"Barrel-Temp"})
@@ -174,5 +181,17 @@ class Integration_Tests(unittest.TestCase):
         self.common_test_driver(1616083200, 1616083360, [tsid1, tsid2], "test_appliques/test_applique_2.json")
         this_dir = os.path.dirname(os.path.realpath(__file__))
         file_path = os.path.join(this_dir, 'test_data/expected_output_case2.csv')
+        print(pd.read_csv(file_path))
+        pd.testing.assert_frame_equal(self.__test_output_df, pd.read_csv(file_path), check_dtype=False, check_exact=False)
+
+
+    @patch("argus_quilt.temporal_state.TemporalState.do_computation")
+    def testIntegrationCase3(self, comp_patch):
+        tsid1 = TimeseriesID("mock_data", {"input":"Melt-Temp"})
+        tsid2 = TimeseriesID("mock_data", {"input":"Barrel-Temp"})
+        comp_patch.side_effect = ValueError("mocked error")
+        self.common_test_driver(1616083200, 1616083360, [tsid1, tsid2], "test_appliques/test_applique_1.json")
+        this_dir = os.path.dirname(os.path.realpath(__file__))
+        file_path = os.path.join(this_dir, 'test_data/expected_output_case3.csv')
         print(pd.read_csv(file_path))
         pd.testing.assert_frame_equal(self.__test_output_df, pd.read_csv(file_path), check_dtype=False, check_exact=False)

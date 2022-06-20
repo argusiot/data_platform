@@ -19,7 +19,6 @@ from argus_tal import timestamp as ts
 from argus_tal import basic_types as bt
 from argus_tal.timeseries_datadict import LookupQualifier, TimeseriesDataDict
 
-from tsdb_abstraction_layer.argus_tal.timeseries_id import TimeseriesID
 
 
 class StateSetProcessor(object):
@@ -89,9 +88,7 @@ class StateSetProcessor(object):
                 self.__read_tsids.add(ts_id)
         
         if(error_tsid == None):
-            temp_tsid = self.__temporal_state_obj_list[0].write_tsid
-            temp_tsid.filters['state_label'] = "SYSTEM ERROR"
-            self.__error_tsid = TimeseriesID(temp_tsid.metric_id, temp_tsid.filters)
+            self.__error_tsid = None
         else:
             self.__error_tsid = error_tsid
 
