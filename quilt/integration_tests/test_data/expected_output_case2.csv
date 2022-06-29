@@ -1,4 +1,4 @@
-metric,timestamp,value,machine,state_label
+metric,timestamp,value,machine,state
 applique_infra_out,1616083230,3.6363635063171387,xyz,Melt
 applique_infra_out,1616083230,26.36363649368286,xyz,Setup
 applique_infra_out,1616083230,0.0,xyz,Missing

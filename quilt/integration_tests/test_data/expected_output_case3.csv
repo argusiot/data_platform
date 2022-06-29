@@ -1,4 +1,4 @@
-metric,timestamp,value,machine,state_label
+metric,timestamp,value,machine,state
 applique_infra_out,1616083230,30.0,xyz,SYSTEM ERROR
 applique_infra_out,1616083260,30.0,xyz,SYSTEM ERROR
 applique_infra_out,1616083290,30.0,xyz,SYSTEM ERROR

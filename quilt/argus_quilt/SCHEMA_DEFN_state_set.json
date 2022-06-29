@@ -10,7 +10,7 @@
             "type" : "object",
              "properties" : {
                  "metric" : { "type" : "string" },
-                 "tags" : { "type" : "object", "properties": {"state_label" : {"enum" : ["PLACEHOLDER"]}}, "required" : ["state_label"]}
+                 "tags" : { "type" : "object", "properties": {"state" : {"enum" : ["PLACEHOLDER"]}}, "required" : ["state"]}
               },
               "required" : ["metric", "tags"]
         },

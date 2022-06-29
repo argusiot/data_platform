@@ -170,7 +170,6 @@ class Integration_Tests(unittest.TestCase):
         file_path = os.path.join(this_dir, 'test_data/expected_output_case1.csv')
         print(pd.read_csv(file_path))
         pd.testing.assert_frame_equal(self.__test_output_df, pd.read_csv(file_path), check_dtype=False, check_exact=False)
-        self.assertAlmostEqual(self.__test_output_df[self.__test_output_df['state_label'] == "Melt"]['value'].sum(), 46.56565618515015)
 
 #self.__test_output_df.to_csv(file_path, index=False)
 

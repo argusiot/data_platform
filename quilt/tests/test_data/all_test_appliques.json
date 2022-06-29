@@ -10,7 +10,7 @@
           }
         ],
         "output_timeseries_template" : {
-          "metric":"foo", "tags" : {"state_label" : "PLACEHOLDER"}
+          "metric":"foo", "tags" : {"state" : "PLACEHOLDER"}
         }
     },
 
@@ -44,7 +44,7 @@
         ],
         "output_timeseries_template" : {
             "metric" : "foobar",
-            "tags" : { "machine" : "xyz", "state_label" : "PLACEHOLDER" }
+            "tags" : { "machine" : "xyz", "state" : "PLACEHOLDER" }
         }
     },
 
@@ -81,7 +81,7 @@
         ],
         "output_timeseries_template" : {
             "metric" : "foobar",
-            "tags" : { "machine" : "xyz", "state_label" : "PLACEHOLDER" }
+            "tags" : { "machine" : "xyz", "state" : "PLACEHOLDER" }
         }
     },
 
@@ -117,7 +117,7 @@
         ],
         "output_timeseries_template" : {
             "metric" : "foobar",
-            "tags" : { "machine" : "xyz", "state_label" : "PLACEHOLDER" }
+            "tags" : { "machine" : "xyz", "state" : "PLACEHOLDER" }
         }
     }
 }

@@ -100,7 +100,7 @@ class SetProcessorBuilder_Tests(unittest.TestCase):
       write_tsid = state_defns[0].write_tsid  # Now verify output ts_id parts.
       self.assertEqual(write_tsid.metric_id, output_metric_id)
       self.assertEqual(write_tsid.filters["machine"], output_tags["machine"])
-      self.assertEqual(write_tsid.filters["state_label"],
+      self.assertEqual(write_tsid.filters["state"],
                        state_defns[0].state_label) # Verify PLACEHOLDER fix-up
 
       # Verify "opposite_of_state1" by unpacking the expression for the 2nd
@@ -116,7 +116,7 @@ class SetProcessorBuilder_Tests(unittest.TestCase):
       write_tsid = state_defns[1].write_tsid  # Now verify output ts_id parts.
       self.assertEqual(write_tsid.metric_id, output_metric_id)
       self.assertEqual(write_tsid.filters["machine"], output_tags["machine"])
-      self.assertEqual(write_tsid.filters["state_label"],
+      self.assertEqual(write_tsid.filters["state"],
                        state_defns[1].state_label) # Verify PLACEHOLDER fix-up
 
 
