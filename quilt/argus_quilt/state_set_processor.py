@@ -87,6 +87,8 @@ class StateSetProcessor(object):
             for ts_id in t_state.read_tsid_list:
                 self.__read_tsids.add(ts_id)
         
+        #Used for flagging system errors within quilt calculation
+        #Determines what is pushed to OpenTSDB after an error
         if(error_tsid == None):
             self.__error_tsid = None
         else:

@@ -103,7 +103,8 @@ class Integration_Tests(unittest.TestCase):
             json_resp = None
         self.__test_result_dict[url] = (resp_code, json_resp)
 
-    def fulfill_query(self, url):
+    def __fulfill_query(self, url):
+        # Extract metrics & tags from the URL and construct TimeseriesID objects
         query = parse.parse_qs(parse.urlparse(url).query)
         start = int(query['start'][0])
         end = int(query['end'][0])
@@ -118,13 +119,13 @@ class Integration_Tests(unittest.TestCase):
             tsids.append(tsid)
         self.__setup_testcase_data(start, end, self.__tsdb_ip, self.__tsdb_port, tsids)
 
-    def mocked_tsdb_read(self, url):
+    def __mocked_tsdb_read(self, url):
         resp_mock = Mock()
-        self.fulfill_query(url)
+        self.__fulfill_query(url)
         resp_mock.status_code, resp_mock.json.return_value = self.__test_result_dict[url]
         return resp_mock
     
-    def mocked_tsdb_write(self, url, data, headers):
+    def __mocked_tsdb_write(self, url, data, headers):
         _data = json.loads(data)
         newdata = {**_data, **_data['tags']}
         del newdata['tags']
@@ -136,10 +137,7 @@ class Integration_Tests(unittest.TestCase):
         if(self.__replace_new_vals):
             self.__test_output_df = self.__test_output_df.drop_duplicates()
 
-    def mocked_docomputation(result_map):
-        raise ValueError
-
-    def common_test_driver(self, t1, t2, tsids, applique_file, output_granularity=30):
+    def __common_test_driver(self, t1, t2, tsids, applique_file, output_granularity=30):
         """
         This method is a common test driver that is used by all tests. This method:
         --- enables the mocking of TSDB read & write
@@ -147,8 +145,8 @@ class Integration_Tests(unittest.TestCase):
         --- the result is pushed to self.__test_output_df
         """
         with patch('argus_quilt.state_set_processor.requests') as mock_tsdb, patch('argus_tal.query_api.requests') as mock_tsdb2:
-            mock_tsdb.post.side_effect = self.mocked_tsdb_write
-            mock_tsdb2.get.side_effect = self.mocked_tsdb_read
+            mock_tsdb.post.side_effect = self.__mocked_tsdb_write
+            mock_tsdb2.get.side_effect = self.__mocked_tsdb_read
 
             self.__setup_testcase_data(t1, t2, self.__tsdb_ip, self.__tsdb_port, tsids)
 
@@ -162,22 +160,21 @@ class Integration_Tests(unittest.TestCase):
                     processor = builder.build(state_set_json_schema)
                     processor.one_shot(t1, t2, output_granularity)
 
-    def testIntegrationCase1(self):
+    def testSimpleQuilt(self):
         tsid1 = TimeseriesID("mock_data", {"input":"Melt-Temp"})
         tsid2 = TimeseriesID("mock_data", {"input":"Barrel-Temp"})
-        self.common_test_driver(1616083200, 1616083360, [tsid1, tsid2], "test_appliques/test_applique_1.json")
+        self.__common_test_driver(1616083200, 1616083360, [tsid1, tsid2], "test_appliques/test_applique_1.json")
         this_dir = os.path.dirname(os.path.realpath(__file__))
         file_path = os.path.join(this_dir, 'test_data/expected_output_case1.csv')
         print(pd.read_csv(file_path))
         pd.testing.assert_frame_equal(self.__test_output_df, pd.read_csv(file_path), check_dtype=False, check_exact=False)
 
-#self.__test_output_df.to_csv(file_path, index=False)
 
-    def testIntegrationCase2(self):
+    def test2QuiltsNoOverwrite(self):
         tsid1 = TimeseriesID("mock_data", {"input":"Melt-Temp"})
         tsid2 = TimeseriesID("mock_data", {"input":"Barrel-Temp"})
-        self.common_test_driver(1616083200, 1616083360, [tsid1, tsid2], "test_appliques/test_applique_1.json")
-        self.common_test_driver(1616083200, 1616083360, [tsid1, tsid2], "test_appliques/test_applique_2.json")
+        self.__common_test_driver(1616083200, 1616083360, [tsid1, tsid2], "test_appliques/test_applique_1.json")
+        self.__common_test_driver(1616083200, 1616083360, [tsid1, tsid2], "test_appliques/test_applique_2.json")
         this_dir = os.path.dirname(os.path.realpath(__file__))
         file_path = os.path.join(this_dir, 'test_data/expected_output_case2.csv')
         print(pd.read_csv(file_path))
@@ -185,11 +182,11 @@ class Integration_Tests(unittest.TestCase):
 
 
     @patch("argus_quilt.temporal_state.TemporalState.do_computation")
-    def testIntegrationCase3(self, comp_patch):
+    def testSystemError(self, comp_patch):
         tsid1 = TimeseriesID("mock_data", {"input":"Melt-Temp"})
         tsid2 = TimeseriesID("mock_data", {"input":"Barrel-Temp"})
         comp_patch.side_effect = ValueError("mocked error")
-        self.common_test_driver(1616083200, 1616083360, [tsid1, tsid2], "test_appliques/test_applique_1.json")
+        self.__common_test_driver(1616083200, 1616083360, [tsid1, tsid2], "test_appliques/test_applique_1.json")
         this_dir = os.path.dirname(os.path.realpath(__file__))
         file_path = os.path.join(this_dir, 'test_data/expected_output_case3.csv')
         print(pd.read_csv(file_path))
