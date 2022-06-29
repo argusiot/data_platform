@@ -14,7 +14,6 @@
         2. Tests to ensure 2 quilts preserve tags and do not overwrite each other
         3. Tests system error state
 '''
-from multiprocessing.sharedctypes import Value
 import re
 import os
 import sys
@@ -22,8 +21,6 @@ import unittest
 from collections import OrderedDict
 from json import loads
 from unittest.mock import Mock, patch
-import responses
-from responses import matchers
 import json
 import importlib.resources as pkg_resources
 sys.path.append("..")
