@@ -141,11 +141,11 @@ class StateSetProcessorBuilder(object):
             temporal_state_obj_list.append(TemporalState( \
                 state_label, state_expr_list, out_ts_id_obj))
 
-         # Per the schema file we should expect to find a 'state' metric. We set that metric to be
+         # Per the schema file we should expect to find a 'state' tag. We set that tag to be
         # "system_error".
         error_tags = dict(output_tag_template)
         assert error_tags.get("state") != None
-        error_tags['state'] = "SYSTEM ERROR"
+        error_tags['state'] = "system_error"
         error_tsid = TimeseriesID(output_metric, error_tags)
         '''
         3. Pull out any optional query parameters.
