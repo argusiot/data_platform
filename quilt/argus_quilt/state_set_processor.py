@@ -20,11 +20,13 @@ from argus_tal import basic_types as bt
 from argus_tal.timeseries_datadict import LookupQualifier, TimeseriesDataDict
 
 
+
 class StateSetProcessor(object):
     def __init__(self, name, temporal_state_obj_list,
                  tsdb_hostname_or_ip, tsdb_port, flag_msec_query_response,
                  flag_interpolation_needed=True,
-                 additional_query_window=30):
+                 additional_query_window=30,
+                 error_tsid=None):
 
         self.__name = str(name)
 
@@ -84,6 +86,13 @@ class StateSetProcessor(object):
         for t_state in temporal_state_obj_list:
             for ts_id in t_state.read_tsid_list:
                 self.__read_tsids.add(ts_id)
+        
+        #Used for flagging system errors within quilt calculation
+        #Determines what is pushed to OpenTSDB after an error
+        if(error_tsid == None):
+            self.__error_tsid = None
+        else:
+            self.__error_tsid = error_tsid
 
     '''
     As the name suggests, this is intended to be used for "one shot" state
@@ -124,7 +133,7 @@ class StateSetProcessor(object):
 
         return result_map
 
-    def __push_data(self, timestamp, metric, state, value):
+    def __push_data(self, timestamp, metric, value, tags):
         url = 'http://%s:%d/api/put' % (self.__tsdb_hostname_or_ip,
                                         self.__tsdb_port_num)
         headers = {'content-type': 'application/json'}
@@ -132,8 +141,7 @@ class StateSetProcessor(object):
         datapoint['metric'] = metric
         datapoint['timestamp'] = timestamp
         datapoint['value'] = value
-        datapoint['tags'] = {}
-        datapoint['tags']['state'] = state
+        datapoint['tags'] = tags
         response = requests.post(url, data=json.dumps(datapoint), headers=headers)
         return response, datapoint['timestamp']
 
@@ -288,21 +296,21 @@ class StateSetProcessor(object):
             for t_state in self.__temporal_state_obj_list:
                 try:
                     time_spent = t_state.do_computation(result_map)
-                    time_spent_list.append((t_state.write_tsid.metric_id,
-                                            t_state.write_tsid.filters.get('state_label'), time_spent))
+                    time_spent_list.append((t_state.write_tsid.metric_id, time_spent, t_state.write_tsid.filters))
                 except ValueError as e:
                     print(e)
                     print("ERROR: Processing Start:" + str(current_time) + " End:" + str(current_period_end_time))
                     error = True
-                    self.__push_data(current_period_end_time, t_state.write_tsid.metric_id,
-                                   'SystemError', current_period_end_time - current_time)
+                    self.__push_data(current_period_end_time, self.__error_tsid.metric_id, current_period_end_time - current_time, self.__error_tsid.filters)
                     break
 
             if not error:
                 total_time = current_period_end_time - current_time
+                time_spent_list.append((self.__error_tsid.metric_id, 0, self.__error_tsid.filters))
                 for element in time_spent_list:
-                    self.__push_data(current_period_end_time, element[0], element[1], element[2])
-                    total_time -= (element[2])
+                    metric_id, time_elapsed, tags = element
+                    self.__push_data(current_period_end_time, metric_id, time_elapsed, tags)
+                    total_time -= (element[1])
                 if total_time != 0.0:
                     print("STATE ERROR: Time unaccounted for between Start:" + str(current_time) + " End:" + str(
                         current_period_end_time))

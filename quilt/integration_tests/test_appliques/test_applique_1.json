@@ -53,6 +53,6 @@
         ],
         "output_timeseries_template" : {
             "metric" : "applique_infra_out",
-            "tags" : { "machine" : "xyz", "state_label" : "PLACEHOLDER" }
+            "tags" : { "machine" : "xyz", "state" : "PLACEHOLDER"}
         }
 }

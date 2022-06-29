@@ -3,3 +3,7 @@
 __pycache__/
 
 .coverage
+
+.vscode/
+
+ai_stack_installer/output

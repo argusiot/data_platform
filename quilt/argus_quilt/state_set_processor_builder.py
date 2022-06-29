@@ -134,13 +134,19 @@ class StateSetProcessorBuilder(object):
             # Create the output timeseries id object. Fixup the state label
             # before creating the ts_id object.
             temp_tags = dict(output_tag_template)
-            temp_tags["state_label"] = state_label
+            temp_tags["state"] = state_label
             out_ts_id_obj = TimeseriesID(output_metric, temp_tags)
 
             # We have everything needed to initiaize the TemporalState object.
             temporal_state_obj_list.append(TemporalState( \
                 state_label, state_expr_list, out_ts_id_obj))
 
+         # Per the schema file we should expect to find a 'state' tag. We set that tag to be
+        # "system_error".
+        error_tags = dict(output_tag_template)
+        assert error_tags.get("state") != None
+        error_tags['state'] = "system_error"
+        error_tsid = TimeseriesID(output_metric, error_tags)
         '''
         3. Pull out any optional query parameters.
         '''
@@ -153,4 +159,5 @@ class StateSetProcessorBuilder(object):
                                  temporal_state_obj_list,
                                  self.__tsdb_hostname_or_ip,
                                  self.__tsdb_port_num,
-                                 flag_msec_query_resp)
+                                 flag_msec_query_resp,
+                                 error_tsid=error_tsid)

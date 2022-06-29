@@ -1,5 +1,6 @@
 code_coverage:
 	python3 -m coverage run -m --branch --source=. pytest -v tests && \
+	python3 -m coverage run -m --branch --source=. pytest -v integration_tests && \
 	python3 -m coverage report -m
 
 code_coverage_vagrant_friendly_html:
@@ -10,6 +11,7 @@ code_coverage_vagrant_friendly_html:
 	echo "Browser link: file:///Users/ppanse/my-Vagrant-VMs/<this_VM_dir>/htmlcov/index.html"
 test:
 	python3 -m pytest -s -v tests
+	python3 -m pytest -s -v integration_tests
 
 build_package:
 	python3 setup.py bdist_wheel
