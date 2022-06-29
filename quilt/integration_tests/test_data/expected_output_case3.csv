@@ -1,7 +1,7 @@
 metric,timestamp,value,machine,state
-applique_infra_out,1616083230,30.0,xyz,SYSTEM ERROR
-applique_infra_out,1616083260,30.0,xyz,SYSTEM ERROR
-applique_infra_out,1616083290,30.0,xyz,SYSTEM ERROR
-applique_infra_out,1616083320,30.0,xyz,SYSTEM ERROR
-applique_infra_out,1616083350,30.0,xyz,SYSTEM ERROR
-applique_infra_out,1616083380,30.0,xyz,SYSTEM ERROR
+applique_infra_out,1616083230,30.0,xyz,system_error
+applique_infra_out,1616083260,30.0,xyz,system_error
+applique_infra_out,1616083290,30.0,xyz,system_error
+applique_infra_out,1616083320,30.0,xyz,system_error
+applique_infra_out,1616083350,30.0,xyz,system_error
+applique_infra_out,1616083380,30.0,xyz,system_error
