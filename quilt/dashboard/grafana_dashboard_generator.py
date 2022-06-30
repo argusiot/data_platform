@@ -4,7 +4,6 @@ from grafanalib.core import (
 from grafanalib.opentsdb import OpenTSDBTarget, OpenTSDBFilter
 import json, requests
 
-from numpy import DataSource
 
 from grafanalib._gen import print_dashboard, DashboardEncoder
 
@@ -93,5 +92,5 @@ class AppliqueDashboard:
         headers = {'Content-Type': 'application/json'}
         r = requests.post(f"http://{username}:{password}@{server}/api/dashboards/db", data=dashboard_json, headers=headers, verify=verify)
         # TODO: add error handling
-        print(f"{r.status_code} - {r.content}")
+        return r.status_code
 

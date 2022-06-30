@@ -6,7 +6,7 @@ sys.path.append("..")
 sys.path.append("../../..")
 import importlib.resources as pkg_resources
 from test_data import test_data_generator
-from grafana_dashboard_generator import AppliqueDashboard
+from dashboard.grafana_dashboard_generator import AppliqueDashboard
 from argus_quilt.state_set_processor_builder import StateSetProcessorBuilder
 
 
@@ -24,6 +24,6 @@ def main():
         processor.one_shot(1616083200, 1616083360, 30)
     
     adash = AppliqueDashboard("test_appliques/test_applique_1.json")
-    adash.upload_to_grafana("2021-03-18T15:59:45.000Z", "2021-03-18T16:03:00.000Z", "localhost:3000")
-
+    resp = adash.upload_to_grafana("2021-03-18T15:59:45.000Z", "2021-03-18T16:03:00.000Z", "localhost:3000")
+    assert resp == 200
 main()
