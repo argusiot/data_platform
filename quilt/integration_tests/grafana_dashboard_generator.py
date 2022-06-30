@@ -39,7 +39,7 @@ class AppliqueDashboard:
         filtersets = []
         for state in self.state_set:
             state_filter = filter_tags
-            state_filter["state_label"] = state
+            state_filter["state"] = state
             filtersets.append(state_filter)
         
         targets = [OpenTSDBTarget(metric=self.output_ts["metric"], filters = st_filter) for st_filter in filtersets]
@@ -49,5 +49,3 @@ class AppliqueDashboard:
         dashboard = self.__createDashboard()
         print_dashboard(dashboard)
 
-adash = AppliqueDashboard("sample_input.json")
-adash.writeDashboard()
