@@ -32,6 +32,7 @@ class AppliqueDashboard:
         return dashboard
 
     def __createTimeSeries(self, name):
+        #displays all timeseries inputs on the same axes, which may or may not be meaningful
         targets = []
         for ts in self.input_ts_list:
             filters = []
@@ -46,12 +47,14 @@ class AppliqueDashboard:
         targets = []
         filtersets = []
         for state in self.state_set:
+            #construct filter from tags for each state
             state_filter = filter_tags
             state_filter["state"] = state
-            filtersets.append(state_filter)
+            filtersets.append(state_filter.copy())
         for filterset in filtersets:
+            #construct targets from filters and load into list
             filters = []
-            for k, v in filterset:
+            for k, v in filterset.items():
                 filters.append(OpenTSDBFilter(value=v, tag=k, type="literal_or"))
             targets.append(OpenTSDBTarget(metric=metric, aggregator=None, filters=filters))
         
