@@ -44,10 +44,16 @@ class AppliqueDashboard:
         filter_tags = self.output_ts['tags']
         metric = self.output_ts["metric"]
         targets = []
+        filtersets = []
         for state in self.state_set:
             state_filter = filter_tags
             state_filter["state"] = state
             filtersets.append(state_filter)
+        for filterset in filtersets:
+            filters = []
+            for k, v in filterset:
+                filters.append(OpenTSDBFilter(value=v, tag=k, type="literal_or"))
+            targets.append(OpenTSDBTarget(metric=metric, aggregator=None, filters=filters))
         
         return PieChartv2(title=name, dataSource="default", targets=targets, gridPos=GridPos(h=8, w=16, x=0, y=8), reduceOptionsCalcs=["sum"])
     
