@@ -24,8 +24,8 @@ Pre-req to use these instructions:
 ----------------------------------
 git clone git@github.com:argusiot/data_platform.git <your_dir>
 cd <your_dir>
-git switch dockerize_stack   (since dockerization is only supported in this branch)
-git submodule update --recursive --init.  # this populates ai_stack_installer/thirdparty
+git switch dockerize_stack
+git submodule update --recursive --init  # this populates ai_stack_installer/thirdparty
 
 Generate the service stack installer bundle:
  
