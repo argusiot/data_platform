@@ -20,6 +20,13 @@ Dockerized Stack Instructions:
 These are the steps required to stand up a stack using Docker as a "VM"
 Kiran wrote these steps on 5/16/22; they should be executed from this directory
 
+Pre-req to use these instructions:
+----------------------------------
+git clone git@github.com:argusiot/data_platform.git <your_dir>
+cd <your_dir>
+git switch dockerize_stack   (since dockerization is only supported in this branch)
+git submodule update --recursive --init.  # this populates ai_stack_installer/thirdparty
+
 Generate the service stack installer bundle:
  
  make installer_bundle
