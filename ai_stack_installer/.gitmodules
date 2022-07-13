@@ -1,4 +1,0 @@
-[submodule "thirdparty"]
-    path = ai_stack_installer/thirdparty
-    url = git@github.com:argusiot/thirdparty.git
-    ignore = dirty
