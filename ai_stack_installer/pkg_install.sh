@@ -42,7 +42,3 @@ ${BASE_DIR}/create_opentsdb_hbase_tables.sh
 ${BASE_DIR}/enable_tsdb_table_compression.sh
 
 sleep 5
-
-sudo service opentsdb start
-
-sleep 5

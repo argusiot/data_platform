@@ -38,15 +38,12 @@ clean_docker_stack:
 	docker rmi grafana/grafana-oss:8.3.4-ubuntu
 	docker network rm argus_nw_bridge
 
-# Start an EXISTING CONTAINER ... using 'run' as done below is wrong !
+# Start an existing container
 start_docker_stack:
-	docker run -ditp 3000:3000 --name grafana --network argus_nw_bridge grafana/grafana-oss\:8.3.4-ubuntu
-	docker run -itp 4242:4242 --name opentsdb --network argus_nw_bridge opentsdb
+	docker start opentsdb
+	docker start grafana
 
 # Stop an existing container
 stop_docker_stack:
 	docker stop opentsdb
 	docker stop grafana
-	docker container rm opentsdb
-	docker container rm grafana
-
