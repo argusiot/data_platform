@@ -12,6 +12,7 @@ RUN apt-get clean && \
 RUN mkdir /srv/installer
 COPY thirdparty/hbase* /srv/installer
 COPY thirdparty/opentsdb* /srv/installer
+COPY tsdb_in.txt /srv/installer
 
 COPY output/ai_stack_installer.tar.gz /srv/installer
 
