@@ -3,18 +3,20 @@
 # Installer script for ArgusIoT Service Stack aka ai_service_stack
 #
 
-AI_HBASE_VERSION=1.4.14    # The Hbase version that works with OpenTSDB v2.4.0
-AI_OPENTSDB_VERSION=2.4.0   # last stable OpenTSDB release
-AI_GRAFANA_VERSION=7.3.2   # latest Grafana release
+AI_HBASE_VERSION=1.4.14    # The Hbase version that works with OpenTSDB v2.4.0+
+AI_OPENTSDB_VERSION=2.4.1  # last stable OpenTSDB release
+AI_GRAFANA_VERSION=9.0.6   # latest Grafana release
 
 HBASE_DIR='/usr/share/hbase'
 
 # Assume that all the supporting files needed for the install are present in
 # current directory. User may override with a "-d <dir>".
 BASE_DIR=`pwd`
-while getopts ":d:h" opt; do
+while getopts "wd:h" opt; do
   case $opt in
     d) BASE_DIR="$OPTARG"
+    ;;
+    w) SKIP_WG="Y"
     ;;
     h) echo "$0 [-d <dir>]" ; echo ""; exit
   esac
@@ -25,7 +27,8 @@ done
 
 cd ${BASE_DIR}
 
-wget https://downloads.apache.org/hbase/${AI_HBASE_VERSION}/hbase-${AI_HBASE_VERSION}-bin.tar.gz ;
+# 1.4.14 must be loaded fom our thirdparty repo
+# wget https://downloads.apache.org/hbase/${AI_HBASE_VERSION}/hbase-${AI_HBASE_VERSION}-bin.tar.gz ;
 
 echo "Creating ${HBASE_DIR} for HBase install"
 mkdir -p ${HBASE_DIR}
@@ -120,32 +123,33 @@ sudo /bin/systemctl daemon-reload
 sudo /bin/systemctl enable grafana-server
 #=====================
 
+if [ "$SKIP_WG" != "Y" ] ; then
+    #=====================
+    # Download and install Wireguard
 
-#=====================
-# Download and install Wireguard
+    sudo apt-get --assume-yes install wireguard
+    cd /etc/wireguard/
+    umask 077
 
-sudo apt-get --assume-yes install wireguard
-cd /etc/wireguard/
-umask 077
+    # Generate public and private keys for the VPN interface
+    wg genkey | tee privatekey | wg pubkey > publickey
 
-# Generate public and private keys for the VPN interface
-wg genkey | tee privatekey | wg pubkey > publickey
+    # Generate the vpn_data interface config file from the config template (aka
+    # the reference file) by replacing the private key from the template with
+    # actual value.
+    placeholder_value="PrivateKey = PLACEHOLDER_REPLACE_WITH_GENERATED_KEY"
+    actual_value="PrivateKey = `cat privatekey`"
+    sed "s/$placeholder_value/$actual_value/g" ${BASE_DIR}/vpn_data.conf-server-reference > vpn_data.conf
 
-# Generate the vpn_data interface config file from the config template (aka
-# the reference file) by replacing the private key from the template with
-# actual value.
-placeholder_value="PrivateKey = PLACEHOLDER_REPLACE_WITH_GENERATED_KEY"
-actual_value="PrivateKey = `cat privatekey`"
-sed "s/$placeholder_value/$actual_value/g" ${BASE_DIR}/vpn_data.conf-server-reference > vpn_data.conf
+    sudo systemctl enable wg-quick@vpn_data   # to start Wireguard at boot time
+    sudo systemctl start wg-quick@vpn_data   # launch it now
 
-sudo systemctl enable wg-quick@vpn_data   # to start Wireguard at boot time
-sudo systemctl start wg-quick@vpn_data   # launch it now
+    # Show current status
+    sudo systemctl status wg-quick@vpn_data | cat
+    sudo wg
 
-# Show current status
-sudo systemctl status wg-quick@vpn_data | cat
-sudo wg
-
-#====================
+    #====================
+fi
 
 echo "!!!!!! Installation almost complete !!!!"
 echo ""
