@@ -6,7 +6,9 @@ Organization of code in this directory is as follows:
   tsdb_abstraction_layer (TAL): Contains implementation of the argus_tal package. This is the base Python package which abstracted read access from a TimeseriesDB. The current implementation of the argus_tal layer supports for the OpenTSDB 2.2 interface. 
   
   quilt: Holds implementation of the Quilt algorithm. The quilt layer runs on top of the TAL layer can be used to define temporal states.
+  
   Example of quit app: https://github.com/argusiot/data_platform/blob/master/quilt_demos/first_extruder_states_applique.py
+  
   Example of quilt state space definition: https://github.com/argusiot/data_platform/blob/master/quilt_demos/extruder_states_fine.json
 
   ai_stack_installer: Contains a bunch installer scripts to install the OpenTSDB+Grafana stack
