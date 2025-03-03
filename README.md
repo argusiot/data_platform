@@ -12,7 +12,7 @@ Organization of code in this directory is as follows:
    * [State space definition](https://github.com/argusiot/data_platform/blob/master/quilt_demos/extruder_states_fine.json)
    * [Quilt app defn](https://github.com/argusiot/data_platform/blob/master/quilt_demos/extruder_states_fine.json) </li>
 
-  *ai_stack_installer:* Contains a bunch installer scripts to install the OpenTSDB+Grafana stack
+  **ai_stack_installer:** Contains a bunch installer scripts to install the OpenTSDB+Grafana stack
 
   This full argus_tal & argus_quilt stack was deployed to monitor the machines in a cable and wire manufacturing plant for a year+.
   Later the argus_tal became the foundation for deploying an MLOps stack in a steel mill. The MLOps stack code has not been released as open source.
