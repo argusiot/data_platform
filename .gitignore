@@ -6,4 +6,7 @@ __pycache__/
 
 .vscode/
 
-ai_stack_installer/output
+argusquilt.egg-info/
+build/
+dist/
+ai_stack_installer/output/

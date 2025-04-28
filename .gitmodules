@@ -1,0 +1,3 @@
+[submodule "ai_stack_installer/thirdparty"] 
+	path = ai_stack_installer/thirdparty
+	url = https://github.com/argusiot/thirdparty.git

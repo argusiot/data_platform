@@ -28,10 +28,6 @@ uninstall:
 clean:
 	rm -rf argusquilt.egg-info build dist
 
-
-integration_test:
-	cd integration_tests ; python3 it_main.py
-
 release_for_parag_env:
 	# /quilt_deployment/ is a local directory mounted into Vagrant which
 	# stores released files. This becomes a 'poor man's artefactory'
