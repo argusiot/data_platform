@@ -1,0 +1,66 @@
+{
+    "name": "plate_thickness_states",
+    "uuid": "xxxxxxxxxxxxxxx",
+    "state_definitions" : [
+        {
+            "label" : "Excellent_Plate_Thick_All",
+            "expression" : [
+                ["NE_thickness", "<", 1.00005],
+                ["NE_thickness", ">", 0.99995],
+                ["SE_thickness", "<", 1.00005],
+                ["SE_thickness", ">", 0.99995],
+                ["NW_thickness", "<", 1.00005],
+                ["NW_thickness", ">", 0.99995],
+                ["SW_thickness", "<", 1.00005],
+                ["SW_thickness", ">", 0.99995]
+            ],
+            "expression_operator" : "AND"
+        }
+    ],
+    "input_timeseries" : [
+        {
+            "ts_name" : "NE_thickness",
+            "ts_defn" : {
+                "metric": "poc.v3.ne.plate.thickness.n9-5",
+                "tags" : {
+                    "machine_id": "106-5",
+                    "unit": "inch"
+                }
+            }
+        },
+        {
+            "ts_name" : "SE_thickness",
+            "ts_defn" : {
+                "metric": "poc.v3.se.plate.thickness.n9-9",
+                "tags" : {
+                    "machine_id": "106-9",
+                    "unit": "inch"
+                }
+            }
+        },
+        {
+            "ts_name" : "NW_thickness",
+            "ts_defn" : {
+                "metric": "poc.v3.nw.plate.thickness.n9-13",
+                "tags" : {
+                    "machine_id": "106-13",
+                    "unit": "inch"
+                }
+            }
+        },
+        {
+            "ts_name" : "SW_thickness",
+            "ts_defn" : {
+                "metric": "poc.v3.sw.plate.thickness.n9-17",
+                "tags" : {
+                    "machine_id": "106-17",
+                    "unit": "inch"
+                }
+            }
+        }
+    ],
+    "output_timeseries_template" : {
+        "metric" : "quilt.test_state_plate_spec",
+        "tags" : { "machine" : "106", "state_label" : "PLACEHOLDER" }
+    }
+}

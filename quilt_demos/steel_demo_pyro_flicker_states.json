@@ -1,0 +1,39 @@
+{
+    "name": "plate_pyro_states",
+    "uuid": "xxxxxxxxxxxxxxx",
+    "state_definitions" : [
+        {
+            "label" : "Plate_Pyro_Fluctuation",
+            "expression" : [
+                ["bank10E_pyro", "<", 1080],
+                ["bank10E_present", ">", 0.5]
+            ],
+            "expression_operator" : "AND"
+        }
+    ],
+    "input_timeseries" : [
+        {
+            "ts_name" : "bank10E_pyro",
+            "ts_defn" : {
+                "metric": "poc.v3.bank.10.east.pyro",
+                "tags" : {
+                    "machine_id": "107-64",
+                    "unit": "F"
+                }
+            }
+        },
+        {
+            "ts_name" : "bank10E_present",
+            "ts_defn" : {
+                "metric": "poc.v3.bank.10.east.pyro.metal.present",
+                "tags" : {
+                    "machine_id": "107.356"
+                }
+            }
+        }
+    ],
+    "output_timeseries_template" : {
+        "metric" : "quilt.test_state_plate_pyro_spec",
+        "tags" : { "machine" : "bank10E", "state_label" : "PLACEHOLDER" }
+    }
+}
